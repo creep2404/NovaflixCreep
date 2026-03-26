@@ -45,9 +45,20 @@ Thumbs.db
 # ======================
 # Prisma
 # ======================
+**/generated/prisma
+**/src/generated/prisma
+
+# ======================
+# Prisma migrations
+# ======================
 backend/prisma/migrations/
 
 # ======================
 # Docker (optional)
 # ======================
 docker/*.env
+
+# ======================
+# Coverage
+# ======================
+coverage/
