@@ -4,6 +4,7 @@ import {
   createMovieService,
   getAllMoviesService,
   getMovieByIdService,
+  getMoviesService,
 } from "./movie.service";
 import { successResponse } from "@/common/utils/successResponse";
 
@@ -13,10 +14,16 @@ export const createMovie = asyncHandler(async (req: Request, res: Response) => {
   return successResponse(res, movie, "Movie created successfully");
 });
 
-export const getMovies = asyncHandler(async (req: Request, res: Response) => {
-  const movies = await getAllMoviesService();
+// export const getMovies = asyncHandler(async (req: Request, res: Response) => {
+//   const movies = await getAllMoviesService();
 
-  return successResponse(res, movies, "Get movies successfully");
+//   return successResponse(res, movies, "Get movies successfully");
+// });
+
+export const getMovies = asyncHandler(async (req: Request, res: Response) => {
+  const result = await getMoviesService(req.validated!.query);
+  return successResponse(res, result, "Get movies successfully");
+  
 });
 
 export const getMovieById = asyncHandler(
@@ -26,3 +33,4 @@ export const getMovieById = asyncHandler(
     return successResponse(res, movie, "Get movie successfully");
   },
 );
+

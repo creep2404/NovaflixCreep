@@ -42,3 +42,77 @@ export const getMovieByIdRepo = async (id: string) => {
     where: { id },
   });
 };
+
+export const getMoviesRepo = async ({
+  skip,
+  take,
+  genre,
+  search,
+}: {
+  skip: number;
+  take: number;
+  genre?: string;
+  search?: string;
+}) => {
+  return prisma.movie.findMany({
+    where: {
+      title: search
+        ? {
+            contains: search,
+            mode: "insensitive",
+          }
+        : undefined,
+
+      genres: genre
+        ? {
+            some: {
+              genre: {
+                name: genre,
+              },
+            },
+          }
+        : undefined,
+    },
+    include: {
+      genres: {
+        include: {
+          genre: true,
+        },
+      },
+    },
+    skip,
+    take,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
+export const countMoviesRepo = async ({
+  genre,
+  search,
+}: {
+  genre?: string;
+  search?: string;
+}) => {
+  return prisma.movie.count({
+    where: {
+      title: search
+        ? {
+            contains: search,
+            mode: "insensitive",
+          }
+        : undefined,
+
+      genres: genre
+        ? {
+            some: {
+              genre: {
+                name: genre,
+              },
+            },
+          }
+        : undefined,
+    },
+  });
+};
