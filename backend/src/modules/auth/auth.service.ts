@@ -20,7 +20,7 @@ export const registerService = async (email: string, password: string) => {
     },
   });
 
-  // ❗ remove password
+  // remove password
   const { password: _, ...safeUser } = user;
 
   return safeUser;

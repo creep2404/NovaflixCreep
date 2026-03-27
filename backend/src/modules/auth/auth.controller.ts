@@ -23,3 +23,10 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     data,
   });
 });
+
+export const logout = (req: Request, res: Response) => {
+  res.json({
+    success: true,
+    message: "Logged out successfully",
+  });
+};

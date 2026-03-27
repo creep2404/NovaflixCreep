@@ -1,5 +1,6 @@
 import { Router } from "express";
-import authRoutes from "../modules/auth/auth.route";
+import authRoutes from "@/modules/auth/auth.route";
+import movieRoutes from "@/modules/movie/movie.route";
 
 const router = Router();
 
@@ -10,5 +11,6 @@ router.get("/health", (req, res) => {
 
 // mount module
 router.use("/auth", authRoutes);
+router.use("/movies", movieRoutes);
 
 export default router;
