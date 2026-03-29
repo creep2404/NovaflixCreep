@@ -1,3 +1,4 @@
+import { getSignedVideoUrl } from "@/common/utils/s3.util";
 import { CreateMovieDto } from "./dto/create-movie.dto";
 import { QueryMovieDto } from "./dto/query-movie.dto";
 import { formatMovie } from "./mappers/movie.mapper";
@@ -7,6 +8,7 @@ import {
   getAllMoviesRepo,
   getMovieByIdRepo,
   getMoviesRepo,
+  getMovieStreamRepo,
 } from "./movie.repository";
 
 export const createMovieService = async (data: CreateMovieDto) => {
@@ -49,5 +51,19 @@ export const getMoviesService = async (query: QueryMovieDto) => {
       total,
       totalPages: Math.ceil(total / limit),
     },
+  };
+};
+
+export const getMovieStreamService = async (movieId: string) => {
+  const movie = await getMovieStreamRepo(movieId);
+
+  if (!movie) {
+    throw new Error("Movie not found");
+  }
+
+  const signedUrl = await getSignedVideoUrl(movie.videoUrl);
+
+  return {
+    streamUrl: signedUrl,
   };
 };

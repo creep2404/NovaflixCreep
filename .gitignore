@@ -62,3 +62,9 @@ docker/*.env
 # Coverage
 # ======================
 coverage/
+
+# ======================
+# Other files
+# ======================
+**/samples/
+**/scripts/
