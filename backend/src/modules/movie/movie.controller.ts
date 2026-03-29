@@ -10,6 +10,7 @@ import {
 import { successResponse } from "@/common/utils/successResponse";
 import fs from "fs";
 import path from "path";
+import { uploadVideoToS3 } from "@/common/utils/s3-upload.util";
 
 export const createMovie = asyncHandler(async (req: Request, res: Response) => {
   const movie = await createMovieService(req.body);
@@ -80,5 +81,25 @@ export const getMovieStream = asyncHandler(async (req: Request, res: Response) =
   res.json({
     success: true,
     data,
+  });
+});
+
+export const uploadMovieVideo = asyncHandler(async (req: Request, res: Response) => {
+  const file = req.file;
+
+  if (!file) {
+    return res.status(400).json({
+      success: false,
+      message: "No file uploaded",
+    });
+  }
+
+  const key = await uploadVideoToS3(file);
+
+  res.json({
+    success: true,
+    data: {
+      videoKey: key,
+    },
   });
 });

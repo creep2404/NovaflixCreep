@@ -10,6 +10,7 @@ import {
   getMoviesRepo,
   getMovieStreamRepo,
 } from "./movie.repository";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
 
 export const createMovieService = async (data: CreateMovieDto) => {
   const movie = await createMovieRepo(data);

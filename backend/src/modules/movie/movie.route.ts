@@ -1,5 +1,12 @@
 import { Router } from "express";
-import { createMovie, getMovies, getMovieById, streamMovie, getMovieStream } from "./movie.controller";
+import {
+  createMovie,
+  getMovies,
+  getMovieById,
+  streamMovie,
+  getMovieStream,
+  uploadMovieVideo,
+} from "./movie.controller";
 import { authMiddleware } from "@/common/middleware/auth.middleware";
 import {
   validateRequestBody,
@@ -9,6 +16,7 @@ import {
 import { createMovieSchema } from "./schemas/create-movie.schema";
 import { queryMovieSchema } from "./schemas/query-movie.schema";
 import { paramIdSchema } from "./schemas/param-movie.schema";
+import { upload } from "@/config/multer";
 
 const router = Router();
 
@@ -17,7 +25,6 @@ const router = Router();
 router.get("/", validateRequestQuery(queryMovieSchema), getMovies);
 //Get by movie ID
 router.get("/:id", validateRequestParams(paramIdSchema), getMovieById);
-router.get("/:id/stream", authMiddleware, getMovieStream);
 
 //protected route
 router.post(
@@ -25,6 +32,15 @@ router.post(
   authMiddleware,
   validateRequestBody(createMovieSchema),
   createMovie,
+);
+
+router.get("/:id/stream", authMiddleware, getMovieStream);
+
+router.post(
+  "/upload",
+  authMiddleware,
+  upload.single("video"),
+  uploadMovieVideo,
 );
 
 export default router;
