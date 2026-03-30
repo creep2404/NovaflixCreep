@@ -10,7 +10,7 @@ import {
 import { successResponse } from "@/common/utils/successResponse";
 import fs from "fs";
 import path from "path";
-import { uploadVideoToS3 } from "@/common/utils/s3-upload.util";
+import { getPresignedUploadUrl, uploadVideoToS3 } from "@/common/utils/s3-upload.util";
 
 export const createMovie = asyncHandler(async (req: Request, res: Response) => {
   const movie = await createMovieService(req.body);
@@ -101,5 +101,24 @@ export const uploadMovieVideo = asyncHandler(async (req: Request, res: Response)
     data: {
       videoKey: key,
     },
+  });
+});
+
+//PRESIGNED UPLOAD
+export const getUploadUrl = asyncHandler(async (req: Request, res: Response) => {
+  const { filename, contentType } = req.body;
+
+  if (!filename || !contentType) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing filename or contentType",
+    });
+  }
+
+  const data = await getPresignedUploadUrl(filename, contentType);
+
+  res.json({
+    success: true,
+    data,
   });
 });

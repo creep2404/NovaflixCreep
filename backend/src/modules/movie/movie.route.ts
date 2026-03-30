@@ -6,6 +6,7 @@ import {
   streamMovie,
   getMovieStream,
   uploadMovieVideo,
+  getUploadUrl,
 } from "./movie.controller";
 import { authMiddleware } from "@/common/middleware/auth.middleware";
 import {
@@ -42,5 +43,7 @@ router.post(
   upload.single("video"),
   uploadMovieVideo,
 );
+
+router.post("/upload-url", authMiddleware, getUploadUrl);
 
 export default router;
