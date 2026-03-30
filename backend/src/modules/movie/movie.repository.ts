@@ -116,3 +116,9 @@ export const countMoviesRepo = async ({
     },
   });
 };
+
+export const getMovieStreamRepo = async (movieId: string) => {
+  return await prisma.movie.findUnique({
+    where: { id: movieId },
+  });
+};
