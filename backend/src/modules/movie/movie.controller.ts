@@ -10,7 +10,10 @@ import {
 import { successResponse } from "@/common/utils/successResponse";
 import fs from "fs";
 import path from "path";
-import { getPresignedUploadUrl, uploadVideoToS3 } from "@/common/utils/s3-upload.util";
+import {
+  getPresignedUploadUrl,
+  uploadVideoToS3,
+} from "@/common/utils/s3-upload.util";
 
 export const createMovie = asyncHandler(async (req: Request, res: Response) => {
   const movie = await createMovieService(req.body);
@@ -43,9 +46,9 @@ export const streamMovie = async (req: Request, res: Response) => {
   const range = req.headers.range || "bytes=0-";
   //const range = req.headers.range;
   // if (!range) {
-    //   return res.status(400).send("Requires Range header");
-    // }
-  
+  //   return res.status(400).send("Requires Range header");
+  // }
+
   //const videoPath = path.join(process.cwd(), "src/samples/stream-sample.mp4");
   const videoPath = path.join(process.cwd(), "src/samples/aemthsing.mp4");
   console.log("VIDEO PATH:", videoPath);
@@ -73,52 +76,66 @@ export const streamMovie = async (req: Request, res: Response) => {
   stream.pipe(res);
 };
 
-export const getMovieStream = asyncHandler(async (req: Request, res: Response) => {
-  const data = await getMovieStreamService(req.params.id);
-  // const { id } = req.validated!.params;
+export const getMovieStream = asyncHandler(
+  async (req: Request, res: Response) => {
+    const data = await getMovieStreamService(req.params.id);
+    // const { id } = req.validated!.params;
 
-  // const data = await getMovieStreamService(id);
-  res.json({
-    success: true,
-    data,
-  });
-});
-
-export const uploadMovieVideo = asyncHandler(async (req: Request, res: Response) => {
-  const file = req.file;
-
-  if (!file) {
-    return res.status(400).json({
-      success: false,
-      message: "No file uploaded",
+    // const data = await getMovieStreamService(id);
+    res.json({
+      success: true,
+      data,
     });
-  }
+  },
+);
 
-  const key = await uploadVideoToS3(file);
+export const uploadMovieVideo = asyncHandler(
+  async (req: Request, res: Response) => {
+    const file = req.file;
 
-  res.json({
-    success: true,
-    data: {
-      videoKey: key,
-    },
-  });
-});
+    if (!file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
+    }
+
+    const key = await uploadVideoToS3(file);
+
+    res.json({
+      success: true,
+      data: {
+        videoKey: key,
+      },
+    });
+  },
+);
 
 //PRESIGNED UPLOAD
-export const getUploadUrl = asyncHandler(async (req: Request, res: Response) => {
-  const { filename, contentType } = req.body;
+export const getUploadUrl = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { filename, contentType } = req.body;
 
-  if (!filename || !contentType) {
-    return res.status(400).json({
-      success: false,
-      message: "Missing filename or contentType",
+    if (!filename || !contentType) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing filename or contentType",
+      });
+    }
+
+    // validate file type
+    if (!contentType.startsWith("video/")) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid file type",
+      });
+    }
+
+    const data = await getPresignedUploadUrl(filename, contentType);
+
+    res.json({
+      success: true,
+      data,
     });
-  }
-
-  const data = await getPresignedUploadUrl(filename, contentType);
-
-  res.json({
-    success: true,
-    data,
-  });
-});
+  },
+);
