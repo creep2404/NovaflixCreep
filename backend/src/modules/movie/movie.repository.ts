@@ -1,5 +1,6 @@
 import { prisma } from "@/database/client";
 import { CreateMovieDto } from "./dto/create-movie.dto";
+import { UpdateMovieDto } from "./dto/update-movie.dto";
 
 export const createMovieRepo = async (data: CreateMovieDto) => {
   return prisma.movie.create({
@@ -28,6 +29,34 @@ export const createMovieRepo = async (data: CreateMovieDto) => {
         },
       },
     },
+  });
+};
+
+export const updateMovieRepo = async (id: string, data: UpdateMovieDto) => {
+  const { genres, ...rest } = data;
+
+  return await prisma.movie.update({
+    where: { id },
+    data: {
+      ...rest,
+
+      ...(genres && {
+        genres: {
+          deleteMany: {}, // delete old genre
+          create: genres.map((name) => ({
+            genre: {
+              connect: { name }, // unique name
+            },
+          })),
+        },
+      }),
+    },
+  });      
+};
+
+export const deleteMovieRepo = async (id: string) => {
+  return await prisma.movie.delete({
+    where: { id },
   });
 };
 

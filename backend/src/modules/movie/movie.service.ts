@@ -5,16 +5,42 @@ import { formatMovie } from "./mappers/movie.mapper";
 import {
   countMoviesRepo,
   createMovieRepo,
+  deleteMovieRepo,
   getAllMoviesRepo,
   getMovieByIdRepo,
   getMoviesRepo,
   getMovieStreamRepo,
+  updateMovieRepo,
 } from "./movie.repository";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { invalidateMovieCache, movieCacheKey } from "./movie.cache";
+import { deleteByPattern, getCache, setCache } from "@/common/utils/cache.util";
+import { UpdateMovieDto } from "./dto/update-movie.dto";
+
 
 export const createMovieService = async (data: CreateMovieDto) => {
   const movie = await createMovieRepo(data);
+
+  //Invalidate cache
+  await invalidateMovieCache();
+
   return formatMovie(movie);
+};
+
+export const updateMovieService = async (id: string, data: UpdateMovieDto) => {
+  const movie = await updateMovieRepo(id, data);
+
+  await invalidateMovieCache();
+
+  return formatMovie(movie);
+};
+
+export const deleteMovieService = async (id: string) => {
+  await deleteMovieRepo(id);
+
+  await invalidateMovieCache();
+
+  return { message: "Deleted" };
 };
 
 export const getAllMoviesService = async () => {
@@ -29,8 +55,25 @@ export const getMoviesService = async (query: QueryMovieDto) => {
   const page = query.page || 1;
   const limit = query.limit || 10;
 
+  const cacheKey = await movieCacheKey({
+    page,
+    limit,
+    genre: query.genre,
+    search: query.search,
+  });
+
+  //CHECK CACHE
+  const cached = await getCache(cacheKey);
+  if (cached) {
+    console.log("CACHE HIT ⚡");
+    return cached;
+  }
+
+  console.log("CACHE MISS ❌");
+
   const skip = (page - 1) * limit;
 
+  //QUERY DB
   const [movies, total] = await Promise.all([
     getMoviesRepo({
       skip,
@@ -44,7 +87,7 @@ export const getMoviesService = async (query: QueryMovieDto) => {
     }),
   ]);
 
-  return {
+  const result = {
     data: movies.map(formatMovie),
     meta: {
       page,
@@ -53,6 +96,11 @@ export const getMoviesService = async (query: QueryMovieDto) => {
       totalPages: Math.ceil(total / limit),
     },
   };
+
+  //3. SET CACHE
+  await setCache(cacheKey, result, 60);
+
+  return result;
 };
 
 export const getMovieStreamService = async (movieId: string) => {

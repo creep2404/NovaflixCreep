@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { prisma } from "../../database/client";
 import { createUser, findUserByEmail } from "../user/user.repository";
+import { AppError } from "@/common/utils/AppError";
 
 const SALT_ROUNDS = 10;
 
@@ -28,17 +29,24 @@ export const loginService = async (email: string, password: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
 
   if (!user) {
-    throw new Error("Invalid credentials");
+    throw new AppError("Invalid credentials", 401);
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
 
   if (!isMatch) {
-    throw new Error("Invalid credentials");
+    throw new AppError("Invalid credentials", 401);
+  }
+
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET not set");
   }
 
   const token = jwt.sign(
-    { userId: user.id },
+    {
+      sub: user.id,
+      role: user.role,
+    },
     process.env.JWT_SECRET as string,
     {
       expiresIn: process.env.JWT_EXPIRES_IN,

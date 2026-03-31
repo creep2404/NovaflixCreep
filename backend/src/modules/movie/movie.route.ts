@@ -18,6 +18,7 @@ import { createMovieSchema } from "./schemas/create-movie.schema";
 import { queryMovieSchema } from "./schemas/query-movie.schema";
 import { paramIdSchema } from "./schemas/param-movie.schema";
 import { upload } from "@/config/multer";
+import { uploadLimiter } from "@/common/middleware/rateLimit.middleware";
 
 const router = Router();
 
@@ -44,6 +45,6 @@ router.post(
   uploadMovieVideo,
 );
 
-router.post("/upload-url", authMiddleware, getUploadUrl);
+router.post("/upload-url", authMiddleware, uploadLimiter,getUploadUrl);
 
 export default router;
