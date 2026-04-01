@@ -3,10 +3,10 @@ name: Backend CI
 on:
   push:
     paths:
-      - "backend/**"
+      - "novaflix/backend/**"
   pull_request:
     paths:
-      - "backend/**"
+      - "novaflix/backend/**"
 
 jobs:
   build:
@@ -14,7 +14,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: backend
+        working-directory: novaflix/backend
 
     steps:
       - name: Checkout code
@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: 20
           cache: "npm"
-          cache-dependency-path: "**/package-lock.json"
+          cache-dependency-path: novaflix/backend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
