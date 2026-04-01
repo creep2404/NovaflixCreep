@@ -1,20 +1,20 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { prisma } from "../../database/client";
-import { createUser, findUserByEmail } from "../user/user.repository";
+import { prisma } from "@/database/client";
+import { createUserService, findUserByEmailService } from "@/modules/user/user.service";
 import { AppError } from "@/common/utils/AppError";
 
 const SALT_ROUNDS = 10;
 
 export const registerService = async (email: string, password: string) => {
-  const existingUser = await findUserByEmail(email);
+  const existingUser = await findUserByEmailService(email);
   if (existingUser) {
     throw new Error("Email already exists");
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const user = await createUser({
+  const user = await createUserService({
     email,
     password: hashedPassword,
   });

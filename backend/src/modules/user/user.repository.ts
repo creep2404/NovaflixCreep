@@ -1,16 +1,26 @@
 import { prisma } from "@/database/client";
 
-export const findUserByEmail = async (email: string) => {
-  return prisma.user.findUnique({
+export const findUserByEmailRepo = async (email: string) => {
+  return await prisma.user.findUnique({
     where: { email },
   });
 };
 
-export const createUser = async (data: {
+export const createUserRepo = async (data: {
   email: string;
   password: string;
 }) => {
-  return prisma.user.create({
+  return await prisma.user.create({
     data,
+  });
+};
+
+export const getUserByIdRepo = async (id: string) => {
+  return await prisma.user.findUnique({ where: { id } });
+};
+
+export const getAllUserRepo = async () => {
+  return await prisma.user.findMany({
+    select: { id: true },
   });
 };

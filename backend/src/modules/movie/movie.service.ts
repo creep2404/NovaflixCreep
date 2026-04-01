@@ -12,17 +12,18 @@ import {
   getMovieStreamRepo,
   updateMovieRepo,
 } from "./movie.repository";
-import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { invalidateMovieCache, movieCacheKey } from "./movie.cache";
 import { deleteByPattern, getCache, setCache } from "@/common/utils/cache.util";
 import { UpdateMovieDto } from "./dto/update-movie.dto";
-
+import { eventBus } from "@/events/eventBus";
+import { EVENTS } from "@/common/constants/events.constants";
 
 export const createMovieService = async (data: CreateMovieDto) => {
   const movie = await createMovieRepo(data);
 
   //Invalidate cache
   await invalidateMovieCache();
+  eventBus.emit(EVENTS.MOVIE_CREATED, movie);
 
   return formatMovie(movie);
 };

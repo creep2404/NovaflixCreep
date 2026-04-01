@@ -13,8 +13,8 @@ app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(globalLimiter);
-app.use("/api", routes);
 
+app.use("/api", routes);
 
 app.use(errorMiddleware); //LUÔN phải là middleware cuối cùng
 
