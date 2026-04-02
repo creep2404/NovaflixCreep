@@ -3,10 +3,10 @@ name: Frontend CI
 on:
   push:
     paths:
-      - "novaflix/frontend/**"
+      - "frontend/**"
   pull_request:
     paths:
-      - "novaflix/frontend/**"
+      - "frontend/**"
   workflow_dispatch: {}
 
 jobs:
@@ -15,7 +15,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: novaflix/frontend
+        working-directory: frontend
 
     steps:
       - name: Checkout code
@@ -26,13 +26,13 @@ jobs:
         with:
           node-version: 20
           cache: "npm"
-          cache-dependency-path: "**/package-lock.json" # 🔥 dùng wildcard cho chắc
+          cache-dependency-path: "**/package-lock.json" # 🔥 tránh lỗi path
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Check TypeScript version
-        run: npx tsc -v
+      - name: Lint
+        run: npm run lint
 
       - name: Type check
         run: npx tsc --noEmit
