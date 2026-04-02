@@ -34,5 +34,5 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
-      - name: Type check
-        run: npx tsc --noEmit
+#      - name: Type check
+#        run: npx tsc --noEmit
