@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, SlidersHorizontal, Star, Clock, Crown, Filter } from 'lucide-react';
-import { ScreenType } from '../types';
 import { MOCK_MOVIES } from '../data/mock';
 import { MovieCard } from '../components/ui/MovieCard';
 import { useSimulatedData } from '../hooks/useData';
 import { SkeletonCard, Skeleton } from '../components/ui/Skeleton';
 import { ErrorState, EmptyState } from '../components/ui/StateViews';
 
-interface SearchPageProps {
-  onNavigate: (screen: ScreenType, movieId?: string) => void;
-}
-
-export const SearchPage: React.FC<SearchPageProps> = ({ onNavigate }) => {
+export const SearchPage = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [simulateError, setSimulateError] = useState(false);
   const [simulateEmpty, setSimulateEmpty] = useState(false);
@@ -171,7 +168,7 @@ export const SearchPage: React.FC<SearchPageProps> = ({ onNavigate }) => {
                     <MovieCard 
                       key={movie.id} 
                       movie={movie} 
-                      onClick={() => onNavigate('player', movie.id)} 
+                      onClick={() => navigate(`/movie/${movie.id}`)} 
                       orientation="portrait" 
                     />
                   ))}
@@ -180,7 +177,7 @@ export const SearchPage: React.FC<SearchPageProps> = ({ onNavigate }) => {
                     <MovieCard 
                       key={movie.id + '-dup'} 
                       movie={movie} 
-                      onClick={() => onNavigate('player', movie.id)} 
+                      onClick={() => navigate(`/movie/${movie.id}`)} 
                       orientation="portrait" 
                     />
                   ))}

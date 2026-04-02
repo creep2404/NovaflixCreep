@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Play, Info, ChevronRight, MessageSquare } from 'lucide-react';
-import { Movie, ScreenType } from '../types';
+import { Movie } from '../types';
 import { MOCK_MOVIES } from '../data/mock';
 import { MovieCard } from '../components/ui/MovieCard';
 import { useSimulatedData } from '../hooks/useData';
 import { Skeleton, SkeletonCard } from '../components/ui/Skeleton';
 import { ErrorState, EmptyState } from '../components/ui/StateViews';
 
-interface BrowsePageProps {
-  onNavigate: (screen: ScreenType, movieId?: string) => void;
-}
-
-export const BrowsePage: React.FC<BrowsePageProps> = ({ onNavigate }) => {
+export const BrowsePage = () => {
+  const navigate = useNavigate();
   const [simulateError, setSimulateError] = useState(false);
   const [simulateEmpty, setSimulateEmpty] = useState(false);
 
@@ -132,7 +130,7 @@ export const BrowsePage: React.FC<BrowsePageProps> = ({ onNavigate }) => {
             
             <div className="flex items-center gap-4">
               <button 
-                onClick={() => onNavigate('player', heroMovie.id)}
+                onClick={() => navigate(`/movie/${heroMovie.id}`)}
                 className="flex items-center gap-2 bg-primary text-surface px-8 py-4 rounded-full font-bold text-lg hover:bg-primary-dim transition-all hover:scale-105"
               >
                 <Play className="fill-current" size={24} />
@@ -165,7 +163,7 @@ export const BrowsePage: React.FC<BrowsePageProps> = ({ onNavigate }) => {
           <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-8 -mx-6 px-6 lg:mx-0 lg:px-0">
             {movies.map(movie => (
               <div key={movie.id} className="w-[280px] flex-shrink-0">
-                <MovieCard movie={movie} onClick={() => onNavigate('player', movie.id)} orientation="landscape" />
+                <MovieCard movie={movie} onClick={() => navigate(`/movie/${movie.id}`)} orientation="landscape" />
               </div>
             ))}
           </div>
@@ -182,7 +180,7 @@ export const BrowsePage: React.FC<BrowsePageProps> = ({ onNavigate }) => {
           <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-8 -mx-6 px-6 lg:mx-0 lg:px-0">
             {movies.slice().reverse().map(movie => (
               <div key={movie.id} className="w-[200px] flex-shrink-0">
-                <MovieCard movie={movie} onClick={() => onNavigate('player', movie.id)} orientation="portrait" />
+                <MovieCard movie={movie} onClick={() => navigate(`/movie/${movie.id}`)} orientation="portrait" />
               </div>
             ))}
           </div>
