@@ -8,7 +8,10 @@ import { globalLimiter } from "./common/middleware/rateLimit.middleware";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL,
+  credentials: true
+}));
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());

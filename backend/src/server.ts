@@ -1,8 +1,10 @@
 import app from "@/app";
 import { env } from "@/config/env";
 import { initEventListeners } from "./events";
+import dotenv from "dotenv";
 
 initEventListeners();
+dotenv.config();
 
 app.listen(env.port, () => {
   console.log(`🚀 Server running on port ${env.port}`);
