@@ -3,10 +3,10 @@ name: Frontend CI
 on:
   push:
     paths:
-      - "frontend/**"
+      - "novaflix/frontend/**"
   pull_request:
     paths:
-      - "frontend/**"
+      - "novaflix/frontend/**"
 
 jobs:
   build:
@@ -14,7 +14,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: frontend
+        working-directory: novaflix/frontend
 
     steps:
       - name: Checkout code
@@ -25,6 +25,7 @@ jobs:
         with:
           node-version: 20
           cache: "npm"
+          cache-dependency-path: novaflix/frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -37,7 +38,3 @@ jobs:
 
       - name: Build
         run: npm run build
-
-      # Optional: nếu có test
-      # - name: Run tests
-      #   run: npm test
