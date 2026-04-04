@@ -17,4 +17,4 @@ router.use("/movies", movieRoutes);
 router.use("/watch-history", watchHistoryRoutes);
 router.use("/notifications", notificationRoutes);
 
-export default router;
+export default router; 
