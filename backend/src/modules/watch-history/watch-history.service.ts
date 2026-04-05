@@ -1,9 +1,8 @@
 import { UpdateProgressDto } from "./dto/update-progress.dto";
 import {
   upsertWatchHistoryRepo,
-  getWatchHistoryRepo,
+  getWatchHistoryByMovieRepo,
 } from "./watch-history.repository";
-import { formatWatchHistory } from "./mappers/watch-history.mapper";
 
 export const updateProgressService = async (
   userId: string,
@@ -18,8 +17,15 @@ export const updateProgressService = async (
   return record;
 };
 
-export const getWatchHistoryService = async (userId: string) => {
-  const history = await getWatchHistoryRepo(userId);
+export const getWatchHistoryByMovieService = async (
+  userId: string,
+  movieId: string
+) => {
+  const history = await getWatchHistoryByMovieRepo(userId, movieId);
 
-  return history.map(formatWatchHistory);
+  if (!history) return null;
+
+  return {
+    progress: history.progress,
+  };
 };

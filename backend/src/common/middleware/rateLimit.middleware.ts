@@ -13,7 +13,7 @@ const createRedisStore = (prefix: string) =>
 // 🌍 GLOBAL
 export const globalLimiter = rateLimit({
   store: createRedisStore("rl:global"),
-  windowMs: 15 * 60 * 1000,
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: (req: any) => {
     const role = req.user?.role;
 
@@ -31,7 +31,7 @@ export const globalLimiter = rateLimit({
 // 🔐 AUTH (login/register)
 export const authLimiter = rateLimit({
   store: createRedisStore("rl:auth"),
-  windowMs: 15 * 60 * 1000,
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10, // max 10 login times
   keyGenerator: (req) => {
     return req.user?.id ?? ipKeyGenerator(req);
@@ -45,7 +45,7 @@ export const authLimiter = rateLimit({
 // ☁️ UPLOAD (S3)
 export const uploadLimiter = rateLimit({
   store: createRedisStore("rl:upload"),
-  windowMs: 10 * 60 * 1000,
+  windowMs: 10 * 60 * 1000, // 10 minutes
   max: 20,
   keyGenerator: (req) => {
     return req.user?.id ?? ipKeyGenerator(req);

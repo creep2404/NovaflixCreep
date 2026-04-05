@@ -2,7 +2,7 @@ import { Router } from "express";
 import { authMiddleware } from "../../common/middleware/auth.middleware";
 import {
   updateProgress,
-  getWatchHistory,
+  getWatchHistoryByMovie,
 } from "./watch-history.controller";
 
 const router = Router();
@@ -48,34 +48,39 @@ router.post("/progress", authMiddleware, updateProgress);
 
 /**
  * @swagger
- * /watch-history:
+ * /watch-history/{movieId}:
  *   get:
- *     summary: Get watch history
- *     description: Retrieve the list of movies watched by the authenticated user
+ *     summary: Get watch history by movieId
+ *     description: Returns the watch progress of the current authenticated user for a specific movie.
  *     tags: [WatchHistory]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: movieId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the movie
  *     responses:
  *       200:
- *         description: Watch history retrieved successfully
+ *         description: Watch history retrieved successfully (can be null if no history exists)
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   movieId:
- *                     type: string
- *                   watchedAt:
- *                     type: string
- *                     format: date-time
- *                   progress:
- *                     type: number
- *                     description: Last watched progress in seconds
+ *               type: object
+ *               properties:
+ *                 userId:
+ *                   type: string
+ *                 movieId:
+ *                   type: string
+ *                 progress:
+ *                   type: number
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized (missing or invalid token)
+ *       404:
+ *         description: Watch history not found
  */
-router.get("/", authMiddleware, getWatchHistory);
+router.get("/:movieId", authMiddleware, getWatchHistoryByMovie);
 
 export default router;

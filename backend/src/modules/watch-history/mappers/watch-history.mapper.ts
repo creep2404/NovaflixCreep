@@ -11,3 +11,8 @@ export const formatWatchHistory = (item: any) => {
     },
   };
 };
+
+//not used for now, but can be used when we want to return the whole watch history list (with movie details) instead of single item
+export const formatWatchHistoryList = (list: any[]) => {
+  return list.map(formatWatchHistory);
+};

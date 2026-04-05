@@ -2,26 +2,29 @@ import { Response } from "express";
 import { asyncHandler } from "../../common/utils/asyncHandler";
 import {
   updateProgressService,
-  getWatchHistoryService,
+  getWatchHistoryByMovieService,
 } from "./watch-history.service";
 import { AuthRequest } from "../../common/middleware/auth.middleware";
 import { successResponse } from "@/common/utils/successResponse";
 
 export const updateProgress = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const userId = req.user!.userId;
-
+    //const userId = req.user!.userId;
+    const userId = 'b6d981b4-ca42-4997-a930-486203412cf1'
     const result = await updateProgressService(userId, req.body);
-
+    console.log("Updated watch history:", result);
     return successResponse(res, result, "Update progress successfully");
   },
 );
 
-export const getWatchHistory = asyncHandler(
+export const getWatchHistoryByMovie = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const userId = req.user!.userId;
-
-    const data = await getWatchHistoryService(userId);
+    // const userId = req.user.id;
+    const { movieId } = req.params;
+    console.log("Received request for watch history of movieId:", movieId);
+    const userId = 'b6d981b4-ca42-4997-a930-486203412cf1'
+    const data = await getWatchHistoryByMovieService(userId, movieId);
+    console.log("Fetched watch history data:", data);
 
     return successResponse(res, data, "Get watch history successfully");
   },

@@ -19,14 +19,16 @@ export const upsertWatchHistoryRepo = async (data: {
   });
 };
 
-export const getWatchHistoryRepo = async (userId: string) => {
-  return prisma.watchHistory.findMany({
-    where: { userId },
-    include: {
-      movie: true,
-    },
-    orderBy: {
-      updatedAt: "desc",
+export const getWatchHistoryByMovieRepo = async (
+  userId: string,
+  movieId: string
+) => {
+  return prisma.watchHistory.findUnique({
+    where: {
+      userId_movieId: {
+        userId,
+        movieId,
+      },
     },
   });
 };
