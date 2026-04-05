@@ -19,11 +19,83 @@ import { MovieCard } from "../components/ui/MovieCard";
 //import { useSimulatedData } from '../hooks/useData';
 import { Skeleton, SkeletonCard } from "../components/ui/Skeleton";
 import { ErrorState, EmptyState } from "../components/ui/StateViews";
-import { getMovieById } from "../apis/movie.api";
+import { getMovieById, getMoviePlaybackData } from "../apis/movie.api";
+import { getWatchHistory } from "../apis/watchHistory.api";
+import { useVideoPlayer } from "../hooks/useVideoPlayer";
+import VideoPlayer from "../components/ui/VideoPlayer";
 
 export const PlayerPage = () => {
   const { id: movieId } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  
+  const [movie, setMovie] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  const [videoSource, setVideoSource] = useState<{
+    type: "mp4" | "hls";
+    url: string;
+  } | null>(null);
+
+  const {
+    videoRef,
+    isPlaying,
+    setIsPlaying,
+    currentTime,
+    duration,
+    volume,
+    setVolume,
+    isBuffering,
+    seek,
+    toggleFullscreen,
+  } = useVideoPlayer(movieId!);
+
+  // FETCH MOVIE DETAILS + VIDEO
+  useEffect(() => {
+    if (!movieId) return;
+    const fetchMovie = async () => {
+      try {
+        setIsLoading(true);
+
+        const movieData = await getMovieById(movieId);
+        setMovie(movieData);
+        
+        const res = await getMoviePlaybackData(movieId);
+        
+        const playbackData = await res.data;
+        
+        setVideoSource(playbackData);
+      } catch (err) {
+        setError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMovie();
+  }, [movieId]);
+
+  // RESUME WATCH HISTORY
+  //Khi load page -> resume
+  useEffect(() => {
+    if (!movieId) return;
+
+    const fetchProgress = async () => {
+      try {
+        const data = await getWatchHistory(movieId);
+
+        if (videoRef.current && data?.progress) {
+          videoRef.current.currentTime = data.progress;
+        }
+      } catch (err) {
+        console.error("Fetch RESUME WATCH HISTORY error", err);
+      }
+    };
+
+    fetchProgress();
+  }, [movieId]);
+
+  // UI STATES
   if (!movieId) {
     return (
       <div className="min-h-screen bg-surface pt-24">
@@ -35,132 +107,97 @@ export const PlayerPage = () => {
       </div>
     );
   }
-  const [isPlaying, setIsPlaying] = useState(false);
-  // const [simulateError, setSimulateError] = useState(false);
-  // const [simulateEmpty, setSimulateEmpty] = useState(false);
 
-  // const { data: movies, isLoading, error, refetch } = useSimulatedData(MOCK_MOVIES, {
-  //   delay: 1200,
-  //   simulateError,
-  //   simulateEmpty
-  // });
+  // if (isLoading) {
+  //   return (
+  //     <div className="min-h-screen bg-surface animate-in fade-in duration-500">
+  //       <nav className="fixed top-0 w-full z-50 p-6 flex items-center justify-between bg-gradient-to-b from-surface/80 to-transparent">
+  //         <Skeleton className="h-10 w-32 rounded-full" />
+  //         <div className="flex gap-4">
+  //           <Skeleton className="h-10 w-10 rounded-full" />
+  //           <Skeleton className="h-10 w-10 rounded-full" />
+  //         </div>
+  //       </nav>
 
-  const [movie, setMovie] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  //       <div className="relative w-full aspect-video max-h-[70vh] bg-black">
+  //         <Skeleton className="w-full h-full rounded-none" />
+  //       </div>
 
-  useEffect(() => {
-    if (!movieId) return;
+  //       <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
+  //         <div className="lg:col-span-2 space-y-10">
+  //           <div>
+  //             <Skeleton className="h-12 w-3/4 mb-4" />
+  //             <div className="flex gap-4 mb-6">
+  //               <Skeleton className="h-6 w-20" />
+  //               <Skeleton className="h-6 w-16" />
+  //               <Skeleton className="h-6 w-16" />
+  //             </div>
+  //             <Skeleton className="h-24 w-full" />
+  //           </div>
 
-    const fetchMovie = async () => {
-      try {
-        setIsLoading(true);
-        const data = await getMovieById(movieId);
-        setMovie(data);
-      } catch (err) {
-        setError(true);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  //           <div className="space-y-6">
+  //             <Skeleton className="h-8 w-48 mb-6" />
+  //             {Array.from({ length: 3 }).map((_, i) => (
+  //               <div key={i} className="flex gap-6 p-4">
+  //                 <Skeleton className="w-8 h-8 rounded-full" />
+  //                 <Skeleton className="w-40 aspect-video rounded-lg" />
+  //                 <div className="flex-1">
+  //                   <Skeleton className="h-6 w-3/4 mb-2" />
+  //                   <Skeleton className="h-10 w-full" />
+  //                 </div>
+  //               </div>
+  //             ))}
+  //           </div>
+  //         </div>
 
-    fetchMovie();
-  }, [movieId]);
-
-  useEffect(() => {
-    const fetchVideo = async () => {
-      const res = await fetch(`/api/movies/${movieId}/stream`);
-      const data = await res.json();
-      setVideoUrl(data.url);
-    };
-
-    if (movieId) fetchVideo();
-  }, [movieId]);
-
-  useEffect(() => {
-  if (!videoRef.current) return;
-
-  if (isPlaying) {
-    videoRef.current.play();
-  } else {
-    videoRef.current.pause();
-  }
-}, [isPlaying]);
+  //         <div className="space-y-8">
+  //           <Skeleton className="h-8 w-48 mb-6" />
+  //           <div className="grid grid-cols-2 gap-4">
+  //             {Array.from({ length: 4 }).map((_, i) => (
+  //               <SkeletonCard key={i} />
+  //             ))}
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-surface animate-in fade-in duration-500">
-        <nav className="fixed top-0 w-full z-50 p-6 flex items-center justify-between bg-gradient-to-b from-surface/80 to-transparent">
-          <Skeleton className="h-10 w-32 rounded-full" />
-          <div className="flex gap-4">
-            <Skeleton className="h-10 w-10 rounded-full" />
-            <Skeleton className="h-10 w-10 rounded-full" />
-          </div>
-        </nav>
-
-        <div className="relative w-full aspect-video max-h-[70vh] bg-black">
-          <Skeleton className="w-full h-full rounded-none" />
-        </div>
-
-        <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
-          <div className="lg:col-span-2 space-y-10">
-            <div>
-              <Skeleton className="h-12 w-3/4 mb-4" />
-              <div className="flex gap-4 mb-6">
-                <Skeleton className="h-6 w-20" />
-                <Skeleton className="h-6 w-16" />
-                <Skeleton className="h-6 w-16" />
-              </div>
-              <Skeleton className="h-24 w-full" />
-            </div>
-
-            <div className="space-y-6">
-              <Skeleton className="h-8 w-48 mb-6" />
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex gap-6 p-4">
-                  <Skeleton className="w-8 h-8 rounded-full" />
-                  <Skeleton className="w-40 aspect-video rounded-lg" />
-                  <div className="flex-1">
-                    <Skeleton className="h-6 w-3/4 mb-2" />
-                    <Skeleton className="h-10 w-full" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-8">
-            <Skeleton className="h-8 w-48 mb-6" />
-            <div className="grid grid-cols-2 gap-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <SkeletonCard key={i} />
-              ))}
-            </div>
-          </div>
-        </div>
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <Skeleton className="w-1/2 h-64" />
       </div>
     );
   }
 
+  // if (error) {
+  //   return (
+  //     <div className="min-h-screen bg-surface pt-24">
+  //       <nav className="fixed top-0 w-full z-50 p-6 flex items-center justify-between bg-gradient-to-b from-surface/80 to-transparent">
+  //         <button
+  //           onClick={() => navigate("/")}
+  //           className="flex items-center gap-2 text-white hover:text-primary transition-colors bg-surface-highest/50 backdrop-blur-md px-4 py-2 rounded-full"
+  //         >
+  //           <ChevronLeft size={20} /> Back to Browse
+  //         </button>
+  //       </nav>
+  //       <ErrorState
+  //         title="Failed to load movie"
+  //         message="We couldn't load the movie details right now. Please check your connection and try again."
+  //         action={{ label: "Retry", onClick: () => window.location.reload() }}
+  //       />
+  //     </div>
+  //   );
+  // }
+
   if (error) {
     return (
-      <div className="min-h-screen bg-surface pt-24">
-        <nav className="fixed top-0 w-full z-50 p-6 flex items-center justify-between bg-gradient-to-b from-surface/80 to-transparent">
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 text-white hover:text-primary transition-colors bg-surface-highest/50 backdrop-blur-md px-4 py-2 rounded-full"
-          >
-            <ChevronLeft size={20} /> Back to Browse
-          </button>
-        </nav>
-        <ErrorState
-          title="Failed to load movie"
-          message="We couldn't load the movie details right now. Please check your connection and try again."
-          action={{ label: "Retry", onClick: () => window.location.reload() }}
-        />
-      </div>
+      <ErrorState
+        title="Failed to load movie"
+        message="Please try again later."
+        action={{ label: "Retry", onClick: () => window.location.reload() }}
+      />
     );
   }
 
@@ -184,6 +221,25 @@ export const PlayerPage = () => {
     );
   }
 
+  // if (!movie) {
+  //   return (
+  //     <EmptyState
+  //       title="Movie not found"
+  //       message="The movie you are looking for does not exist or has been removed."
+  //       action={{ label: "Browse Movies", onClick: () => navigate("/") }}
+  //     />
+  //   );
+  // }
+
+  const formatTime = (time: number) => {
+    if (!time) return "0:00";
+    const m = Math.floor(time / 60);
+    const s = Math.floor(time % 60);
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
+  };
+
+  const progressPercent = duration ? (currentTime / duration) * 100 : 0;
+
   return (
     <div className="min-h-screen bg-surface animate-in fade-in duration-500">
       {/* Top Nav Minimal */}
@@ -204,74 +260,117 @@ export const PlayerPage = () => {
         </div>
       </nav>
 
-      {/* Video Player Area (Mocked) */}
+      {/* Video Player Area */}
       <div className="relative w-full aspect-video max-h-[70vh] bg-black group">
-        <video
+        {/* Mocked Video */}
+        {/* <video
           ref={videoRef}
           className={`w-full h-full object-cover transition-opacity duration-500 ${
             isPlaying ? "opacity-30" : "opacity-100"
           }`}
           muted
         >
-          {videoUrl && <source src={videoUrl} type="video/mp4" />}
-        </video>
+          <source src={movie.videoUrl} type="video/mp4" />
+        </video> */}
+        <VideoPlayer
+          source={videoSource}
+          ref={videoRef}
+          className="w-full h-full object-cover"
+        />
 
-        {/* Big Play Button Overlay */}
-        {!isPlaying && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-            <button
-              onClick={() => setIsPlaying(true)}
-              className="w-24 h-24 bg-primary/90 text-surface rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-2xl shadow-primary/30"
-            >
-              <Play size={40} className="fill-current ml-2" />
-            </button>
+        {/* <video src={videoSource.url} className="w-full h-full object-cover" controls /> */}
+
+        {isBuffering && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="animate-spin w-10 h-10 border-4 border-white border-t-transparent rounded-full" />
           </div>
+        )}
+        {/* Big Play Button Overlay */}
+
+        {/* Mocked play button, only shows when paused */}
+        {/* {!isPlaying && (
+          <button
+            onClick={() => setIsPlaying(true)}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <Play size={60} />
+          </button>
+        )} */}
+
+        {!isPlaying && (
+          <button
+            onClick={() => setIsPlaying(true)}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <Play size={60} />
+          </button>
         )}
 
         {/* Controls Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          {/* Progress Bar */}
-          <div className="w-full h-1.5 bg-white/20 rounded-full mb-4 cursor-pointer relative group/progress">
-            <div className="absolute top-0 left-0 h-full bg-primary rounded-full w-1/3" />
-            <div className="absolute top-1/2 -translate-y-1/2 left-1/3 w-3 h-3 bg-white rounded-full shadow-lg opacity-0 group-hover/progress:opacity-100 transition-opacity" />
+        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+          {/* (F) PROGRESS BAR */}
+          <div
+            className="w-full h-1.5 bg-white/20 rounded-full mb-4 cursor-pointer"
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const percent = ((e.clientX - rect.left) / rect.width) * 100;
+              seek(percent);
+            }}
+          >
+            <div
+              className="h-full bg-primary rounded-full"
+              style={{ width: `${(currentTime / duration) * 100}%` }}
+            />
           </div>
 
+          {/* CONTROL ROW */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <button
-                onClick={() => setIsPlaying(!isPlaying)}
-                className="hover:text-primary transition-colors"
-              >
-                {isPlaying ? (
-                  <Pause size={24} className="fill-current" />
-                ) : (
-                  <Play size={24} className="fill-current" />
-                )}
+            {/* LEFT SIDE */}
+            <div className="flex items-center gap-4">
+              {/* PLAY / PAUSE */}
+              <button onClick={() => setIsPlaying(!isPlaying)}>
+                {isPlaying ? <Pause size={24} /> : <Play size={24} />}
               </button>
-              <div className="flex items-center gap-2 group/volume">
-                <Volume2
-                  size={20}
-                  className="hover:text-primary transition-colors cursor-pointer"
+
+              {/* (H) VOLUME */}
+
+              <div className="flex items-center gap-2">
+                <Volume2 size={18} />
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={volume}
+                  onChange={(e) => setVolume(Number(e.target.value))}
                 />
-                <div className="w-0 overflow-hidden group-hover/volume:w-24 transition-all duration-300">
-                  <div className="w-20 h-1 bg-white/20 rounded-full ml-2">
-                    <div className="w-2/3 h-full bg-primary rounded-full" />
-                  </div>
-                </div>
               </div>
-              <span className="text-sm font-medium text-white/80">
-                24:15 / 1:45:00
+
+              {/* (G) TIME */}
+              <span className="text-sm text-white">
+                {Math.floor(currentTime / 60)}:
+                {Math.floor(currentTime % 60)
+                  .toString()
+                  .padStart(2, "0")}{" "}
+                / {Math.floor(duration / 60)}:
+                {Math.floor(duration % 60)
+                  .toString()
+                  .padStart(2, "0")}
               </span>
             </div>
 
-            <div className="flex items-center gap-6">
-              <button className="hover:text-primary transition-colors">
+            {/* RIGHT SIDE */}
+            <div className="flex items-center gap-4">
+              <button>
                 <Subtitles size={20} />
               </button>
-              <button className="hover:text-primary transition-colors">
+
+              <button>
                 <Settings size={20} />
               </button>
-              <button className="hover:text-primary transition-colors">
+
+              {/* (I) FULLSCREEN */}
+              <button onClick={toggleFullscreen}>
                 <Maximize size={20} />
               </button>
             </div>
@@ -312,7 +411,7 @@ export const PlayerPage = () => {
               </div>
             </div>
             <p className="text-lg text-on-surface-variant leading-relaxed">
-              {movie.description}
+              {movie.data.description}
             </p>
           </div>
 

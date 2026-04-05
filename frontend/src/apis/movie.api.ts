@@ -9,3 +9,8 @@ export const getMovieById = async (id: string) => {
   const res = await api.get(`/movies/${id}`);
   return res.data;
 };
+
+export const getMoviePlaybackData = async (movieId: string) => {
+  const res = await api.get(`/movies/${movieId}/play`);
+  return res.data;
+};
