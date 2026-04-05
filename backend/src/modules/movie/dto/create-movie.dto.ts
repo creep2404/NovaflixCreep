@@ -5,4 +5,5 @@ export interface CreateMovieDto {
   thumbnailUrl?: string;
   duration: number;
   genres?: string[];
+  videoId: string; //add videoId field
 }

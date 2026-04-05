@@ -3,10 +3,10 @@ import {
   createMovie,
   getMovies,
   getMovieById,
-  streamMovie,
-  getMovieStream,
   uploadMovieVideo,
   getUploadUrl,
+  downloadUrl,
+  getMoviePlayback,
 } from "./movie.controller";
 import { authMiddleware } from "@/common/middleware/auth.middleware";
 import {
@@ -55,28 +55,6 @@ router.get("/", validateRequestQuery(queryMovieSchema), getMovies);
 
 /**
  * @swagger
- * /movies/{id}:
- *   get:
- *     summary: Get movie by ID
- *     description: Retrieve details of a specific movie
- *     tags: [Movies]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         example: "123"
- *     responses:
- *       200:
- *         description: Movie details retrieved successfully
- *       404:
- *         description: Movie not found
- */
-router.get("/:id", validateRequestParams(paramIdSchema), getMovieById);
-
-/**
- * @swagger
  * /movies:
  *   post:
  *     summary: Create a new movie
@@ -113,29 +91,6 @@ router.post(
 
 /**
  * @swagger
- * /movies/{id}/stream:
- *   get:
- *     summary: Stream movie video
- *     description: Stream video content of a movie (requires authentication)
- *     tags: [Movies]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Video stream started
- *       401:
- *         description: Unauthorized
- */
-router.get("/:id/stream", authMiddleware, getMovieStream);
-
-/**
- * @swagger
  * /movies/upload:
  *   post:
  *     summary: Upload movie video
@@ -166,6 +121,28 @@ router.post(
 
 /**
  * @swagger
+ * /movies/download-url:
+ *   get:
+ *     summary: Generate download URL
+ *     description: Generate a presigned URL for downloading a movie video (requires authentication)
+ *     tags: [Movies]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: key
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The S3 object key of the movie video
+ *     responses:
+ *       200:
+ *         description: Download URL generated successfully
+ */
+router.get("/download-url", authMiddleware, downloadUrl);
+
+/**
+ * @swagger
  * /movies/upload-url:
  *   post:
  *     summary: Generate upload URL
@@ -178,5 +155,29 @@ router.post(
  *         description: Upload URL generated successfully
  */
 router.post("/upload-url", authMiddleware, uploadLimiter, getUploadUrl);
+
+router.get("/:id/play", authMiddleware, getMoviePlayback);
+
+/**
+ * @swagger
+ * /movies/{id}:
+ *   get:
+ *     summary: Get movie by ID
+ *     description: Retrieve details of a specific movie
+ *     tags: [Movies]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "123"
+ *     responses:
+ *       200:
+ *         description: Movie details retrieved successfully
+ *       404:
+ *         description: Movie not found
+ */
+router.get("/:id", validateRequestParams(paramIdSchema), getMovieById);
 
 export default router;

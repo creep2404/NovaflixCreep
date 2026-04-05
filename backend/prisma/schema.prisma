@@ -36,6 +36,7 @@ model Movie {
   genres         MovieGenre[]
   watchHistories WatchHistory[]
   favorites      Favorite[]
+  videoId        String
 }
 
 model Genre {

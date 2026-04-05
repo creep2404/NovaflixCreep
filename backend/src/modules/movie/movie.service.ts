@@ -1,4 +1,3 @@
-import { getSignedVideoUrl } from "@/common/utils/s3.util";
 import { CreateMovieDto } from "./dto/create-movie.dto";
 import { QueryMovieDto } from "./dto/query-movie.dto";
 import { formatMovie } from "./mappers/movie.mapper";
@@ -9,7 +8,6 @@ import {
   getAllMoviesRepo,
   getMovieByIdRepo,
   getMoviesRepo,
-  getMovieStreamRepo,
   updateMovieRepo,
 } from "./movie.repository";
 import { invalidateMovieCache, movieCacheKey } from "./movie.cache";
@@ -17,6 +15,7 @@ import { deleteByPattern, getCache, setCache } from "@/common/utils/cache.util";
 import { UpdateMovieDto } from "./dto/update-movie.dto";
 import { eventBus } from "@/events/eventBus";
 import { EVENTS } from "@/common/constants/events.constants";
+import { getPresignedDownloadUrl } from "@/common/utils/s3-upload.util";
 
 export const createMovieService = async (data: CreateMovieDto) => {
   const movie = await createMovieRepo(data);
@@ -104,16 +103,23 @@ export const getMoviesService = async (query: QueryMovieDto) => {
   return result;
 };
 
-export const getMovieStreamService = async (movieId: string) => {
-  const movie = await getMovieStreamRepo(movieId);
+export const getVideoPlaybackSource = async (movieId: string) => {
+  const movie = await getMovieByIdRepo(movieId);
 
   if (!movie) {
     throw new Error("Movie not found");
   }
 
-  const signedUrl = await getSignedVideoUrl(movie.videoUrl);
+  const key = `movies/${movie.videoId}/source.mp4`;
+
+  if (!key) {
+    throw new Error("Video not found");
+  }
+
+  const url = await getPresignedDownloadUrl(key);
 
   return {
-    streamUrl: signedUrl,
+    type: "mp4" as const,
+    url,
   };
 };

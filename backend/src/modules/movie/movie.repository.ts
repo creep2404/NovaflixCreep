@@ -10,7 +10,7 @@ export const createMovieRepo = async (data: CreateMovieDto) => {
       videoUrl: data.videoUrl,
       thumbnailUrl: data.thumbnailUrl,
       duration: data.duration,
-
+      videoId: data.videoId,
       genres: {
         create: data.genres?.map((name) => ({
           genre: {
@@ -143,11 +143,5 @@ export const countMoviesRepo = async ({
           }
         : undefined,
     },
-  });
-};
-
-export const getMovieStreamRepo = async (movieId: string) => {
-  return await prisma.movie.findUnique({
-    where: { id: movieId },
   });
 };
