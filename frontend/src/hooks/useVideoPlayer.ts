@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { saveWatchHistory } from "../apis/watchHistory.api";
+import { getWatchHistory, saveWatchHistory } from "../apis/watchHistory.api";
 
 export const useVideoPlayer = (movieId: string) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -14,39 +14,37 @@ export const useVideoPlayer = (movieId: string) => {
   // VIDEO EVENTS
   // ========================
   useEffect(() => {
-  let interval: any;
+    let interval: any;
 
-  const setup = () => {
-    const video = videoRef.current;
+    const setup = () => {
+      const video = videoRef.current;
 
-    if (!video) return;
+      if (!video) return;
 
-    console.log("✅ Video element found, adding event listeners.");
+      const onTimeUpdate = () => setCurrentTime(video.currentTime);
+      const onLoaded = () => setDuration(video.duration);
+      const onWaiting = () => setIsBuffering(true);
+      const onPlaying = () => setIsBuffering(false);
 
-    const onTimeUpdate = () => setCurrentTime(video.currentTime);
-    const onLoaded = () => setDuration(video.duration);
-    const onWaiting = () => setIsBuffering(true);
-    const onPlaying = () => setIsBuffering(false);
+      video.addEventListener("timeupdate", onTimeUpdate);
+      video.addEventListener("loadedmetadata", onLoaded);
+      video.addEventListener("waiting", onWaiting);
+      video.addEventListener("playing", onPlaying);
 
-    video.addEventListener("timeupdate", onTimeUpdate);
-    video.addEventListener("loadedmetadata", onLoaded);
-    video.addEventListener("waiting", onWaiting);
-    video.addEventListener("playing", onPlaying);
+      clearInterval(interval); // 🔥 dừng polling
 
-    clearInterval(interval); // 🔥 dừng polling
-
-    return () => {
-      video.removeEventListener("timeupdate", onTimeUpdate);
-      video.removeEventListener("loadedmetadata", onLoaded);
-      video.removeEventListener("waiting", onWaiting);
-      video.removeEventListener("playing", onPlaying);
+      return () => {
+        video.removeEventListener("timeupdate", onTimeUpdate);
+        video.removeEventListener("loadedmetadata", onLoaded);
+        video.removeEventListener("waiting", onWaiting);
+        video.removeEventListener("playing", onPlaying);
+      };
     };
-  };
 
-  interval = setInterval(setup, 100); // 🔥 chờ video mount
+    interval = setInterval(setup, 100); // 🔥 chờ video mount
 
-  return () => clearInterval(interval);
-}, []);
+    return () => clearInterval(interval);
+  }, []);
 
   // ========================
   // PLAY / PAUSE
@@ -68,24 +66,6 @@ export const useVideoPlayer = (movieId: string) => {
   }, [volume]);
 
   // ========================
-  // SAVE HISTORY (DEBOUNCE)
-  // ========================
-  useEffect(() => {
-    if (!movieId) return;
-
-    const handler = setTimeout(() => {
-      if (!videoRef.current) return;
-
-      saveWatchHistory({
-        movieId,
-        progress: videoRef.current.currentTime,
-      });
-    }, 3000); // debounce 3s
-
-    return () => clearTimeout(handler);
-  }, [currentTime, movieId]);
-
-  // ========================
   // SEEK
   // ========================
   const seek = (percent: number) => {
@@ -96,6 +76,88 @@ export const useVideoPlayer = (movieId: string) => {
     const percentClamped = Math.min(100, Math.max(0, percent));
     video.currentTime = (percentClamped / 100) * video.duration;
   };
+
+  // ========================
+  // SAVE HISTORY (DEBOUNCE)
+  // ========================
+  useEffect(() => {
+    if (!movieId) return;
+
+    const handler = setTimeout(() => {
+      if (!videoRef.current) return;
+
+      const progress = videoRef.current.currentTime;
+
+      if (progress < 1) return;
+
+      saveWatchHistory({
+        movieId,
+        progress,
+      });
+
+      console.log("Saving watch history:", {
+        movieId,
+        progress: videoRef.current.currentTime,
+      });
+    }, 3000); // debounce 3s
+
+    return () => clearTimeout(handler);
+  }, [currentTime, movieId]);
+
+  // ========================
+  // LOAD HISTORY ON MOUNT
+  // ========================
+  useEffect(() => {
+     console.log("EFFECT RUN: movieId =", movieId); 
+
+    if (!movieId) return;
+
+    let cancelled = false;
+
+    const init = async () => {
+      try {
+        // 🔥 CALL API 1 LẦN
+        const res = await getWatchHistory(movieId);
+        const progress = res.data?.progress;
+
+        console.log("Loaded watch history:", progress);
+
+        if (!progress) return;
+
+        // chỉ polling video, KHÔNG polling API
+        const waitForVideo = () => {
+          const video = videoRef.current;
+
+          if (!video) {
+            requestAnimationFrame(waitForVideo);
+            return;
+          }
+
+          const seek = () => {
+            if (cancelled) return;
+            console.log("SEEK TO:", progress);
+            video.currentTime = progress;
+          };
+
+          if (video.readyState >= 2) {
+            seek();
+          } else {
+            video.addEventListener("loadeddata", seek, { once: true });
+          }
+        };
+
+        waitForVideo();
+      } catch (err) {
+        console.error("Failed to load watch history");
+      }
+    };
+
+    init();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [movieId]);
 
   // ========================
   // FULLSCREEN

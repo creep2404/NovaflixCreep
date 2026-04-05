@@ -88,6 +88,7 @@ export const PlayerPage = () => {
           videoRef.current.currentTime = data.progress;
         }
       } catch (err) {
+        console.error(err);
         console.error("Fetch RESUME WATCH HISTORY error", err);
       }
     };
