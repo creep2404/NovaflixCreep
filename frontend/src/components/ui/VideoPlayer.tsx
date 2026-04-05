@@ -8,14 +8,16 @@ type VideoSource = {
 
 type Props = {
   source: VideoSource;
+  isPlaying: boolean;
+  setIsPlaying: (v: boolean) => void;
 } & React.VideoHTMLAttributes<HTMLVideoElement>;
 
 const VideoPlayer = forwardRef<HTMLVideoElement, Props>(
-  ({ source, className, ...rest }, ref) => {
+  ({ source, className, isPlaying, setIsPlaying, ...rest }, ref) => {
     useEffect(() => {
       const video = (ref as React.RefObject<HTMLVideoElement>)?.current;
       if (!video) return;
-      
+
       // reset
       video.pause();
       video.removeAttribute("src");
@@ -23,7 +25,7 @@ const VideoPlayer = forwardRef<HTMLVideoElement, Props>(
 
       if (source.type === "mp4") {
         video.src = source.url;
-        video.load(); 
+        video.load();
       } else if (source.type === "hls") {
         if (Hls.isSupported()) {
           const hls = new Hls();
@@ -42,10 +44,13 @@ const VideoPlayer = forwardRef<HTMLVideoElement, Props>(
       <video
         ref={ref}
         className={className}
+        onClick={() => {
+          setIsPlaying((prev) => !prev);
+        }}
         {...rest}
       />
     );
-  }
+  },
 );
 
 export default VideoPlayer;

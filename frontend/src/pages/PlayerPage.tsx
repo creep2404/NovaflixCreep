@@ -13,6 +13,7 @@ import {
   Flag,
   ThumbsUp,
   MessageSquare,
+  VolumeX,
 } from "lucide-react";
 import { MOCK_MOVIES, MOCK_EPISODES, MOCK_COMMENTS } from "../data/mock";
 import { MovieCard } from "../components/ui/MovieCard";
@@ -27,7 +28,7 @@ import VideoPlayer from "../components/ui/VideoPlayer";
 export const PlayerPage = () => {
   const { id: movieId } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const [movie, setMovie] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -48,6 +49,11 @@ export const PlayerPage = () => {
     isBuffering,
     seek,
     toggleFullscreen,
+    isMuted,
+    setIsMuted,
+    showControls,
+    timeoutRef,
+    resetHideTimer,
   } = useVideoPlayer(movieId!);
 
   // FETCH MOVIE DETAILS + VIDEO
@@ -59,11 +65,11 @@ export const PlayerPage = () => {
 
         const movieData = await getMovieById(movieId);
         setMovie(movieData);
-        
+
         const res = await getMoviePlaybackData(movieId);
-        
+
         const playbackData = await res.data;
-        
+
         setVideoSource(playbackData);
       } catch (err) {
         setError(true);
@@ -232,15 +238,6 @@ export const PlayerPage = () => {
   //   );
   // }
 
-  const formatTime = (time: number) => {
-    if (!time) return "0:00";
-    const m = Math.floor(time / 60);
-    const s = Math.floor(time % 60);
-    return `${m}:${s < 10 ? "0" : ""}${s}`;
-  };
-
-  const progressPercent = duration ? (currentTime / duration) * 100 : 0;
-
   return (
     <div className="min-h-screen bg-surface animate-in fade-in duration-500">
       {/* Top Nav Minimal */}
@@ -262,7 +259,11 @@ export const PlayerPage = () => {
       </nav>
 
       {/* Video Player Area */}
-      <div className="relative w-full aspect-video max-h-[70vh] bg-black group">
+      <div
+        onMouseMove={resetHideTimer}
+        onClick={resetHideTimer}
+        className="relative w-full aspect-video max-h-[70vh] bg-black group"
+      >
         {/* Mocked Video */}
         {/* <video
           ref={videoRef}
@@ -276,6 +277,8 @@ export const PlayerPage = () => {
         <VideoPlayer
           source={videoSource}
           ref={videoRef}
+          isPlaying={isPlaying}
+          setIsPlaying={setIsPlaying}
           className="w-full h-full object-cover"
         />
 
@@ -308,7 +311,19 @@ export const PlayerPage = () => {
         )}
 
         {/* Controls Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+        <div
+          onMouseEnter={() => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+          }}
+          onMouseLeave={resetHideTimer}
+          className={`absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent 
+        ${
+          showControls
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-5 pointer-events-none"
+        }
+  `}
+        >
           {/* (F) PROGRESS BAR */}
           <div
             className="w-full h-1.5 bg-white/20 rounded-full mb-4 cursor-pointer"
@@ -336,7 +351,23 @@ export const PlayerPage = () => {
               {/* (H) VOLUME */}
 
               <div className="flex items-center gap-2">
-                <Volume2 size={18} />
+                <button
+                  onClick={() => {
+                    const video = videoRef.current;
+                    if (!video) return;
+
+                    const newMuted = !video.muted;
+                    video.muted = newMuted;
+                    setIsMuted(newMuted);
+                  }}
+                >
+                  {isMuted || volume === 0 ? (
+                    <VolumeX size={18} />
+                  ) : (
+                    <Volume2 size={18} />
+                  )}
+                </button>
+
                 <input
                   type="range"
                   min={0}

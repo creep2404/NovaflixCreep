@@ -9,6 +9,41 @@ export const useVideoPlayer = (movieId: string) => {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isBuffering, setIsBuffering] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+
+  const [showControls, setShowControls] = useState(true);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // ========================
+  // SHOW CONTROLS ON PAUSE, HIDE ON PLAY
+  // ========================
+  const resetHideTimer = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+    setShowControls(true);
+
+    timeoutRef.current = setTimeout(() => {
+      if (videoRef.current && !videoRef.current.paused) {
+        setShowControls(false);
+      }
+    }, 3000); // 3s auto hide
+  };
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handlePause = () => setShowControls(true);
+    const handlePlay = resetHideTimer;
+
+    video.addEventListener("pause", handlePause);
+    video.addEventListener("play", handlePlay);
+
+    return () => {
+      video.removeEventListener("pause", handlePause);
+      video.removeEventListener("play", handlePlay);
+    };
+  }, []);
 
   // ========================
   // VIDEO EVENTS
@@ -108,7 +143,7 @@ export const useVideoPlayer = (movieId: string) => {
   // LOAD HISTORY ON MOUNT
   // ========================
   useEffect(() => {
-     console.log("EFFECT RUN: movieId =", movieId); 
+    console.log("EFFECT RUN: movieId =", movieId);
 
     if (!movieId) return;
 
@@ -173,6 +208,97 @@ export const useVideoPlayer = (movieId: string) => {
     }
   };
 
+  // ========================
+  // KEYBOARD SHORTCUTS
+  // ========================
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (["INPUT", "TEXTAREA"].includes((e.target as HTMLElement).tagName)) {
+        return;
+      }
+
+      const video = videoRef.current;
+      if (!video) return;
+
+      switch (e.key) {
+        case " ":
+          e.preventDefault();
+          setIsPlaying((prev) => !prev);
+          break;
+
+        case "ArrowRight":
+          video.currentTime += 10;
+          break;
+
+        case "ArrowLeft":
+          video.currentTime -= 10;
+          break;
+
+        case "ArrowUp":
+          e.preventDefault();
+          setVolume((prev) => Math.min(1, prev + 0.1));
+          break;
+
+        case "ArrowDown":
+          e.preventDefault();
+          setVolume((prev) => Math.max(0, prev - 0.1));
+          break;
+
+        case "m":
+        case "M":
+          const newMuted = !video.muted;
+          video.muted = newMuted;
+          setIsMuted(newMuted);
+          break;
+
+        case "f":
+        case "F":
+          if (!document.fullscreenElement) {
+            video.requestFullscreen();
+          } else {
+            document.exitFullscreen();
+          }
+          break;
+
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  // ========================
+  // MUTE
+  // ========================
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.volume = volume;
+
+    if (volume === 0) {
+      video.muted = true;
+      setIsMuted(true);
+    } else {
+      video.muted = false;
+      setIsMuted(false);
+    }
+  }, [volume]);
+
+  // ========================
+  // CLEANUP ON UNMOUNT
+  // ========================
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
   return {
     videoRef,
     isPlaying,
@@ -184,5 +310,10 @@ export const useVideoPlayer = (movieId: string) => {
     isBuffering,
     seek,
     toggleFullscreen,
+    isMuted,
+    setIsMuted,
+    showControls,
+    timeoutRef,
+    resetHideTimer,
   };
 };
