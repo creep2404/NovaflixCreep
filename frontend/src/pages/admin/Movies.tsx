@@ -99,7 +99,7 @@ export const AdminMovies = () => {
                 <tr key={movie.id} className="group hover:bg-white/[0.02] transition-colors cursor-default">
                   <td className="px-8 py-5">
                     <div className="flex items-center gap-4">
-                      <img src={movie.imageUrl} alt={movie.title} className="w-12 h-16 rounded-md object-cover" />
+                      <img src={movie.thumbnailUrl} alt={movie.title} className="w-12 h-16 rounded-md object-cover" />
                       <div className="flex flex-col">
                         <span className="font-semibold text-on-surface text-sm">{movie.title}</span>
                         <span className="text-xs text-on-surface-variant">{movie.genres.join(', ')}</span>

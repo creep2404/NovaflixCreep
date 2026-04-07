@@ -8,7 +8,7 @@ export interface Movie {
   duration: string;
   rating: string;
   genres: string[];
-  imageUrl: string;
+  thumbnailUrl: string;
   isPremium?: boolean;
   isOriginal?: boolean;
   quality?: string;
@@ -21,7 +21,7 @@ export interface Episode {
   title: string;
   duration: string;
   description: string;
-  imageUrl: string;
+  thumbnailUrl: string;
 }
 
 export interface Comment {

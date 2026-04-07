@@ -17,7 +17,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, orientatio
       onClick={onClick}
     >
       <img 
-        src={movie.imageUrl} 
+        src={movie.thumbnailUrl} 
         alt={movie.title} 
         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         loading="lazy"

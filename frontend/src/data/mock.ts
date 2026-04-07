@@ -9,7 +9,7 @@ export const MOCK_MOVIES: Movie[] = [
     duration: '2h 15m',
     rating: '18+',
     genres: ['Sci-Fi', 'Action', 'Thriller'],
-    imageUrl: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?auto=format&fit=crop&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?auto=format&fit=crop&q=80',
     isOriginal: true,
     quality: '4K HDR',
     matchPercentage: 98,
@@ -22,7 +22,7 @@ export const MOCK_MOVIES: Movie[] = [
     duration: '1h 50m',
     rating: '16+',
     genres: ['Cyberpunk', 'Mystery'],
-    imageUrl: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&q=80',
     isPremium: true,
   },
   {
@@ -33,7 +33,7 @@ export const MOCK_MOVIES: Movie[] = [
     duration: '2h 05m',
     rating: '18+',
     genres: ['Thriller', 'Horror'],
-    imageUrl: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&q=80',
   },
   {
     id: '4',
@@ -43,7 +43,7 @@ export const MOCK_MOVIES: Movie[] = [
     duration: '2h 30m',
     rating: '13+',
     genres: ['Sci-Fi', 'Drama'],
-    imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80',
     isOriginal: true,
   },
   {
@@ -54,7 +54,7 @@ export const MOCK_MOVIES: Movie[] = [
     duration: '1h 45m',
     rating: '16+',
     genres: ['Action', 'Crime'],
-    imageUrl: 'https://images.unsplash.com/photo-1533134486753-c833f0ed4866?auto=format&fit=crop&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1533134486753-c833f0ed4866?auto=format&fit=crop&q=80',
   },
   {
     id: '6',
@@ -64,7 +64,7 @@ export const MOCK_MOVIES: Movie[] = [
     duration: '2h 10m',
     rating: '13+',
     genres: ['Sci-Fi', 'Mind-Bender'],
-    imageUrl: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80',
     isPremium: true,
   }
 ];
@@ -76,7 +76,7 @@ export const MOCK_EPISODES: Episode[] = [
     title: 'The Awakening',
     duration: '45m',
     description: 'The crew discovers a strange anomaly on the edge of the sector.',
-    imageUrl: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?auto=format&fit=crop&q=80&w=300',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?auto=format&fit=crop&q=80&w=300',
   },
   {
     id: 'e2',
@@ -84,7 +84,7 @@ export const MOCK_EPISODES: Episode[] = [
     title: 'Betrayal',
     duration: '52m',
     description: 'Tensions rise as a traitor is suspected among the ranks.',
-    imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=300',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=300',
   },
   {
     id: 'e3',
@@ -92,7 +92,7 @@ export const MOCK_EPISODES: Episode[] = [
     title: 'Into the Void',
     duration: '48m',
     description: 'They must navigate through a dangerous asteroid field to escape pursuit.',
-    imageUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&q=80&w=300',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&q=80&w=300',
   }
 ];
 

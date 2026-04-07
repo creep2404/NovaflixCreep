@@ -1,5 +1,5 @@
 import Hls from "hls.js";
-import { useEffect, forwardRef } from "react";
+import { useEffect, forwardRef, useRef } from "react";
 
 type VideoSource = {
   type: "mp4" | "hls";
@@ -14,11 +14,12 @@ type Props = {
 
 const VideoPlayer = forwardRef<HTMLVideoElement, Props>(
   ({ source, className, isPlaying, setIsPlaying, ...rest }, ref) => {
+    const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
     useEffect(() => {
       const video = (ref as React.RefObject<HTMLVideoElement>)?.current;
       if (!video) return;
 
-      // reset
       video.pause();
       video.removeAttribute("src");
       video.load();
@@ -45,7 +46,47 @@ const VideoPlayer = forwardRef<HTMLVideoElement, Props>(
         ref={ref}
         className={className}
         onClick={() => {
-          setIsPlaying((prev) => !prev);
+          if (clickTimeoutRef.current) {
+            clearTimeout(clickTimeoutRef.current);
+          }
+
+          clickTimeoutRef.current = setTimeout(() => {
+            setIsPlaying((prev) => !prev);
+          }, 200);
+        }}
+        onDoubleClick={(e) => {
+          if (clickTimeoutRef.current) {
+            clearTimeout(clickTimeoutRef.current);
+          }
+
+          const video = (ref as React.RefObject<HTMLVideoElement>)?.current;
+          if (!video) return;
+
+          const rect = video.getBoundingClientRect();
+          const clickX = e.clientX - rect.left;
+          const width = rect.width;
+
+          // 🔥 LEFT ZONE
+          if (clickX < width * 0.4) {
+            video.currentTime = Math.max(0, video.currentTime - 10);
+            return;
+          }
+
+          // 🔥 RIGHT ZONE
+          if (clickX > width * 0.6) {
+            video.currentTime = Math.min(
+              video.duration,
+              video.currentTime + 10,
+            );
+            return;
+          }
+
+          // 🔥 CENTER → fullscreen
+          if (!document.fullscreenElement) {
+            video.requestFullscreen();
+          } else {
+            document.exitFullscreen();
+          }
         }}
         {...rest}
       />

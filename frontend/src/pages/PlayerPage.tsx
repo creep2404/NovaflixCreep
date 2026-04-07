@@ -115,61 +115,6 @@ export const PlayerPage = () => {
     );
   }
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="min-h-screen bg-surface animate-in fade-in duration-500">
-  //       <nav className="fixed top-0 w-full z-50 p-6 flex items-center justify-between bg-gradient-to-b from-surface/80 to-transparent">
-  //         <Skeleton className="h-10 w-32 rounded-full" />
-  //         <div className="flex gap-4">
-  //           <Skeleton className="h-10 w-10 rounded-full" />
-  //           <Skeleton className="h-10 w-10 rounded-full" />
-  //         </div>
-  //       </nav>
-
-  //       <div className="relative w-full aspect-video max-h-[70vh] bg-black">
-  //         <Skeleton className="w-full h-full rounded-none" />
-  //       </div>
-
-  //       <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
-  //         <div className="lg:col-span-2 space-y-10">
-  //           <div>
-  //             <Skeleton className="h-12 w-3/4 mb-4" />
-  //             <div className="flex gap-4 mb-6">
-  //               <Skeleton className="h-6 w-20" />
-  //               <Skeleton className="h-6 w-16" />
-  //               <Skeleton className="h-6 w-16" />
-  //             </div>
-  //             <Skeleton className="h-24 w-full" />
-  //           </div>
-
-  //           <div className="space-y-6">
-  //             <Skeleton className="h-8 w-48 mb-6" />
-  //             {Array.from({ length: 3 }).map((_, i) => (
-  //               <div key={i} className="flex gap-6 p-4">
-  //                 <Skeleton className="w-8 h-8 rounded-full" />
-  //                 <Skeleton className="w-40 aspect-video rounded-lg" />
-  //                 <div className="flex-1">
-  //                   <Skeleton className="h-6 w-3/4 mb-2" />
-  //                   <Skeleton className="h-10 w-full" />
-  //                 </div>
-  //               </div>
-  //             ))}
-  //           </div>
-  //         </div>
-
-  //         <div className="space-y-8">
-  //           <Skeleton className="h-8 w-48 mb-6" />
-  //           <div className="grid grid-cols-2 gap-4">
-  //             {Array.from({ length: 4 }).map((_, i) => (
-  //               <SkeletonCard key={i} />
-  //             ))}
-  //           </div>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
@@ -178,25 +123,6 @@ export const PlayerPage = () => {
     );
   }
 
-  // if (error) {
-  //   return (
-  //     <div className="min-h-screen bg-surface pt-24">
-  //       <nav className="fixed top-0 w-full z-50 p-6 flex items-center justify-between bg-gradient-to-b from-surface/80 to-transparent">
-  //         <button
-  //           onClick={() => navigate("/")}
-  //           className="flex items-center gap-2 text-white hover:text-primary transition-colors bg-surface-highest/50 backdrop-blur-md px-4 py-2 rounded-full"
-  //         >
-  //           <ChevronLeft size={20} /> Back to Browse
-  //         </button>
-  //       </nav>
-  //       <ErrorState
-  //         title="Failed to load movie"
-  //         message="We couldn't load the movie details right now. Please check your connection and try again."
-  //         action={{ label: "Retry", onClick: () => window.location.reload() }}
-  //       />
-  //     </div>
-  //   );
-  // }
 
   if (error) {
     return (
@@ -228,16 +154,6 @@ export const PlayerPage = () => {
     );
   }
 
-  // if (!movie) {
-  //   return (
-  //     <EmptyState
-  //       title="Movie not found"
-  //       message="The movie you are looking for does not exist or has been removed."
-  //       action={{ label: "Browse Movies", onClick: () => navigate("/") }}
-  //     />
-  //   );
-  // }
-
   return (
     <div className="min-h-screen bg-surface animate-in fade-in duration-500">
       {/* Top Nav Minimal */}
@@ -262,27 +178,15 @@ export const PlayerPage = () => {
       <div
         onMouseMove={resetHideTimer}
         onClick={resetHideTimer}
-        className="relative w-full aspect-video max-h-[70vh] bg-black group"
+        className="relative w-full max-w-6xl mx-auto aspect-video bg-black"
       >
-        {/* Mocked Video */}
-        {/* <video
-          ref={videoRef}
-          className={`w-full h-full object-cover transition-opacity duration-500 ${
-            isPlaying ? "opacity-30" : "opacity-100"
-          }`}
-          muted
-        >
-          <source src={movie.videoUrl} type="video/mp4" />
-        </video> */}
         <VideoPlayer
           source={videoSource}
           ref={videoRef}
           isPlaying={isPlaying}
           setIsPlaying={setIsPlaying}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
         />
-
-        {/* <video src={videoSource.url} className="w-full h-full object-cover" controls /> */}
 
         {isBuffering && (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -290,16 +194,6 @@ export const PlayerPage = () => {
           </div>
         )}
         {/* Big Play Button Overlay */}
-
-        {/* Mocked play button, only shows when paused */}
-        {/* {!isPlaying && (
-          <button
-            onClick={() => setIsPlaying(true)}
-            className="absolute inset-0 flex items-center justify-center"
-          >
-            <Play size={60} />
-          </button>
-        )} */}
 
         {!isPlaying && (
           <button
@@ -468,7 +362,7 @@ export const PlayerPage = () => {
                   </div>
                   <div className="relative w-40 aspect-video rounded-lg overflow-hidden flex-shrink-0 group">
                     <img
-                      src={ep.imageUrl}
+                      src={ep.thumbnailUrl}
                       alt={ep.title}
                       className="w-full h-full object-cover"
                     />
