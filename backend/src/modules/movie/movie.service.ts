@@ -6,6 +6,7 @@ import {
   createMovieRepo,
   deleteMovieRepo,
   getAllMoviesRepo,
+  getContinueWatchingRepo,
   getMovieByIdRepo,
   getMoviesRepo,
   updateMovieRepo,
@@ -122,4 +123,44 @@ export const getVideoPlaybackSource = async (movieId: string) => {
     type: "mp4" as const,
     url,
   };
+};
+
+export const getTrendingMoviesService = async () => {
+  const cacheKey = "movies:trending";
+
+  const cached = await getCache(cacheKey);
+  if (cached) {
+    console.log("CACHE HIT ⚡");
+    return cached;
+  }
+
+  console.log("CACHE MISS ❌");
+
+  const movies = await getMoviesRepo({
+    take: 10,
+    orderByTrending: true, 
+  });
+
+  console.log("Fetched movies from DB:", movies);
+
+  const result = movies.map(formatMovie);
+
+  await setCache(cacheKey, result, 60);
+
+  return result;
+};
+
+
+export const getContinueWatchingService = async (userId: string) => {
+  // NO CACHE (user-specific data)
+  const histories = await getContinueWatchingRepo(userId);
+
+  const result = {
+    data: histories.map((item) => ({
+      ...formatMovie(item.movie),
+      progress: item.progress,
+    })),
+  };
+
+  return result;
 };

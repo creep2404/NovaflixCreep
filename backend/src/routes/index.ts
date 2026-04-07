@@ -1,5 +1,6 @@
 import { Router } from "express";
 import authRoutes from "@/modules/auth/auth.route";
+import userRoutes from "@/modules/user/user.route";
 import movieRoutes from "@/modules/movie/movie.route";
 import watchHistoryRoutes from "@/modules/watch-history/watch-history.route";
 import notificationRoutes from "@/modules/notification/notification.route";
@@ -13,6 +14,7 @@ router.get("/health", (req, res) => {
 
 // mount module
 router.use("/auth", authRoutes);
+router.use("/users", userRoutes);
 router.use("/movies", movieRoutes);
 router.use("/watch-history", watchHistoryRoutes);
 router.use("/notifications", notificationRoutes);

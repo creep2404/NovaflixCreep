@@ -1,12 +1,13 @@
 import { Router } from "express";
 import {
-  createMovie,
   getMovies,
+  createMovie,
   getMovieById,
   uploadMovieVideo,
   getUploadUrl,
   downloadUrl,
   getMoviePlayback,
+  getTrendingMovies,
 } from "./movie.controller";
 import { authMiddleware } from "@/common/middleware/auth.middleware";
 import {
@@ -119,6 +120,8 @@ router.post(
   uploadMovieVideo,
 );
 
+router.get("/trending", getTrendingMovies);
+
 /**
  * @swagger
  * /movies/download-url:
@@ -156,7 +159,7 @@ router.get("/download-url", authMiddleware, downloadUrl);
  */
 router.post("/upload-url", authMiddleware, uploadLimiter, getUploadUrl);
 
-router.get("/:id/play", authMiddleware, getMoviePlayback);
+router.get("/:id/play", validateRequestParams(paramIdSchema), getMoviePlayback);
 
 /**
  * @swagger

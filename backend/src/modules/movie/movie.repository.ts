@@ -51,7 +51,7 @@ export const updateMovieRepo = async (id: string, data: UpdateMovieDto) => {
         },
       }),
     },
-  });      
+  });
 };
 
 export const deleteMovieRepo = async (id: string) => {
@@ -77,13 +77,17 @@ export const getMoviesRepo = async ({
   take,
   genre,
   search,
+  orderByTrending,
 }: {
-  skip: number;
-  take: number;
+  skip?: number;
+  take?: number;
   genre?: string;
   search?: string;
+  orderByTrending?: boolean;
 }) => {
   return prisma.movie.findMany({
+    skip,
+    take,
     where: {
       title: search
         ? {
@@ -109,11 +113,16 @@ export const getMoviesRepo = async ({
         },
       },
     },
-    skip,
-    take,
-    orderBy: {
-      createdAt: "desc",
-    },
+
+    orderBy: orderByTrending
+      ? {
+          watchHistories: {
+            _count: "desc",
+          },
+        }
+      : {
+          createdAt: "desc",
+        },
   });
 };
 
@@ -143,5 +152,24 @@ export const countMoviesRepo = async ({
           }
         : undefined,
     },
+  });
+};
+
+export const getContinueWatchingRepo = async (userId: string) => {
+  return prisma.watchHistory.findMany({
+    where: {
+      userId,
+      progress: {
+        gt: 0,
+        lt: 0.9,
+      },
+    },
+    include: {
+      movie: true,
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+    take: 10,
   });
 };

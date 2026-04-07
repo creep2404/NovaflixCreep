@@ -3,8 +3,10 @@ import { asyncHandler } from "@/common/utils/asyncHandler";
 import {
   createMovieService,
   getAllMoviesService,
+  getContinueWatchingService,
   getMovieByIdService,
   getMoviesService,
+  getTrendingMoviesService,
   getVideoPlaybackSource
 } from "./movie.service";
 import { successResponse } from "@/common/utils/successResponse";
@@ -86,7 +88,7 @@ export const getUploadUrl = asyncHandler(
   },
 );
 
-export const downloadUrl = async (req: Request, res: Response) => {
+export const downloadUrl = asyncHandler(async (req: Request, res: Response) => {
   try {
     const { key } = req.query;
 
@@ -108,14 +110,40 @@ export const downloadUrl = async (req: Request, res: Response) => {
       message: "Failed to generate download URL",
     });
   }
-};
+});
 
 export const getMoviePlayback = asyncHandler(
   async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const { id } = req.validated!.params;
 
     const data = await getVideoPlaybackSource(id);
 
     return successResponse(res, data, "Get video playback source successfully");
+  },
+);
+
+export const getTrendingMovies = asyncHandler(
+  async (req: Request, res: Response) => {
+    const result = await getTrendingMoviesService();
+
+    return successResponse(
+      res,
+      result,
+      "Get trending movies successfully",
+    );
+  },
+);
+
+export const getContinueWatching = asyncHandler(
+  async (req: any, res: Response) => {
+    const userId = req.user.id;
+
+    const result = await getContinueWatchingService(userId);
+
+    return successResponse(
+      res,
+      result,
+      "Get continue watching successfully",
+    );
   },
 );

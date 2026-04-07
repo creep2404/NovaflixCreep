@@ -6,7 +6,7 @@ export const errorMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error("🔥 Error:", err);
+  console.error("Something went wrong:", err.message, "Error:", err);
 
   res.status(err.status || 500).json({
     success: false,
