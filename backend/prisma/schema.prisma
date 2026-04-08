@@ -37,6 +37,8 @@ model Movie {
   watchHistories WatchHistory[]
   favorites      Favorite[]
   videoId        String
+  rating         Float   @default(0)
+  ratingCount    Int     @default(0)
 }
 
 model Genre {

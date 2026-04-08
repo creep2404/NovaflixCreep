@@ -75,37 +75,86 @@ export const getMovieByIdRepo = async (id: string) => {
 export const getMoviesRepo = async ({
   skip,
   take,
-  genre,
+  genres,
   search,
+  rating,
+  duration,
+  //premium,
   orderByTrending,
 }: {
   skip?: number;
   take?: number;
-  genre?: string;
+  genres?: string[];
   search?: string;
+  rating?: number;
+  duration?: "short" | "medium" | "long";
+  //premium?: boolean;
   orderByTrending?: boolean;
 }) => {
   return prisma.movie.findMany({
     skip,
     take,
-    where: {
-      title: search
-        ? {
-            contains: search,
-            mode: "insensitive",
-          }
-        : undefined,
 
-      genres: genre
-        ? {
-            some: {
-              genre: {
-                name: genre,
+    where: {
+      AND: [
+        // SEARCH
+        search
+          ? {
+              title: {
+                contains: search,
+                mode: "insensitive",
               },
-            },
-          }
-        : undefined,
+            }
+          : {},
+
+        // GENRES (OR)
+        genres && genres.length > 0
+          ? {
+              genres: {
+                some: {
+                  genre: {
+                    name: {
+                      in: genres, 
+                    },
+                  },
+                },
+              },
+            }
+          : {},
+
+        // RATING (>=)
+        rating
+          ? {
+              rating: {
+                gte: rating,
+              },
+            }
+          : {},
+
+        // DURATION
+        duration === "short"
+          ? {
+              duration: { lt: 3600 },
+            }
+          : duration === "medium"
+            ? {
+                duration: { gte: 3600, lte: 7200 },
+              }
+            : duration === "long"
+              ? {
+                  duration: { gt: 7200 },
+                }
+              : {},
+
+        // PREMIUM (future)
+        // premium !== undefined
+        //   ? {
+        //       isPremium: premium,
+        //     }
+        //   : {},
+      ],
     },
+
     include: {
       genres: {
         include: {
@@ -114,6 +163,7 @@ export const getMoviesRepo = async ({
       },
     },
 
+    // SORT
     orderBy: orderByTrending
       ? {
           watchHistories: {
@@ -127,30 +177,66 @@ export const getMoviesRepo = async ({
 };
 
 export const countMoviesRepo = async ({
-  genre,
+  skip,
+  take,
+  genres,
   search,
+  rating,
+  duration,
+  //premium,
 }: {
-  genre?: string;
+  skip?: number;
+  take?: number;
+  genres?: string[]; 
   search?: string;
+  rating?: number;
+  duration?: "short" | "medium" | "long";
+  //premium?: boolean;
 }) => {
   return prisma.movie.count({
+    skip,
+    take,
     where: {
-      title: search
-        ? {
-            contains: search,
-            mode: "insensitive",
-          }
-        : undefined,
-
-      genres: genre
-        ? {
-            some: {
-              genre: {
-                name: genre,
+      AND: [
+        search
+          ? {
+              title: {
+                contains: search,
+                mode: "insensitive",
               },
-            },
-          }
-        : undefined,
+            }
+          : {},
+
+        genres && genres.length > 0
+          ? {
+              genres: {
+                some: {
+                  genre: {
+                    name: {
+                      in: genres,
+                    },
+                  },
+                },
+              },
+            }
+          : {},
+
+        rating !== undefined
+          ? {
+              rating: {
+                gte: rating,
+              },
+            }
+          : {},
+
+        duration === "short"
+          ? { duration: { lt: 3600 } }
+          : duration === "medium"
+            ? { duration: { gte: 3600, lte: 7200 } }
+            : duration === "long"
+              ? { duration: { gt: 7200 } }
+              : {},
+      ],
     },
   });
 };

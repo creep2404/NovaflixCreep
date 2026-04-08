@@ -56,11 +56,26 @@ export const getMoviesService = async (query: QueryMovieDto) => {
   const page = query.page || 1;
   const limit = query.limit || 10;
 
+  // ===============================
+  // NORMALIZE INPUT
+  // ===============================
+  const genres = Array.isArray(query.genres)
+    ? query.genres
+    : query.genres
+      ? [query.genres]
+      : [];
+  const rating = query.rating ? Number(query.rating) : undefined;
+  const duration = query.duration;
+  //const premium =
+
   const cacheKey = await movieCacheKey({
     page,
     limit,
-    genre: query.genre,
     search: query.search,
+    genres: genres.join(","), 
+    rating,
+    duration,
+    //premium,
   });
 
   //CHECK CACHE
@@ -79,14 +94,21 @@ export const getMoviesService = async (query: QueryMovieDto) => {
     getMoviesRepo({
       skip,
       take: limit,
-      genre: query.genre,
       search: query.search,
+      genres,
+      rating,
+      duration,
+      //premium,
     }),
     countMoviesRepo({
-      genre: query.genre,
+      genres,
       search: query.search,
+      rating,
+      duration,
+      //premium,
     }),
   ]);
+  console.log("Fetched movies from DB:", total, movies.length, movies);
 
   const result = {
     data: movies.map(formatMovie),
@@ -97,6 +119,7 @@ export const getMoviesService = async (query: QueryMovieDto) => {
       totalPages: Math.ceil(total / limit),
     },
   };
+  console.log("Fetched movies from DB:", movies);
 
   //3. SET CACHE
   await setCache(cacheKey, result, 60);
@@ -138,7 +161,7 @@ export const getTrendingMoviesService = async () => {
 
   const movies = await getMoviesRepo({
     take: 10,
-    orderByTrending: true, 
+    orderByTrending: true,
   });
 
   console.log("Fetched movies from DB:", movies);
@@ -149,7 +172,6 @@ export const getTrendingMoviesService = async () => {
 
   return result;
 };
-
 
 export const getContinueWatchingService = async (userId: string) => {
   // NO CACHE (user-specific data)

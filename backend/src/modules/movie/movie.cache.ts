@@ -17,11 +17,13 @@ export const invalidateMovieCache = async () => {
 export const movieCacheKey = async (params: {
   page: number;
   limit: number;
-  genre?: string;
   search?: string;
+  genres?: string;
+  rating?: number;
+  duration?: "short" | "medium" | "long";
 }) => {
   const version = await getMovieCacheVersion();
 
-  return `movies:v${version}:${params.page}:${params.limit}:${params.genre || ""}:${params.search || ""}`;
+  return `movies:v${version}:${params.page}:${params.limit}:${params.genres || ""}:${params.search || ""}`;
 };
 //ex: movies:v1:1:10:action:batman

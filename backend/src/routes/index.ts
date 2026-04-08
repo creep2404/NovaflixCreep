@@ -4,6 +4,7 @@ import userRoutes from "@/modules/user/user.route";
 import movieRoutes from "@/modules/movie/movie.route";
 import watchHistoryRoutes from "@/modules/watch-history/watch-history.route";
 import notificationRoutes from "@/modules/notification/notification.route";
+import genreRouters from "@/modules/genre/genre.route";
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.use("/users", userRoutes);
 router.use("/movies", movieRoutes);
 router.use("/watch-history", watchHistoryRoutes);
 router.use("/notifications", notificationRoutes);
+router.use("/genres", genreRouters);
 
 export default router; 

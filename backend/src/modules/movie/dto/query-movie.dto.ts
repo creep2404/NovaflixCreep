@@ -1,6 +1,8 @@
-export interface QueryMovieDto {
-  page?: number;
-  limit?: number;
-  genre?: string;
-  search?: string;
+import { QueryDto } from "@/common/dto/common.dto";
+
+export interface QueryMovieDto extends QueryDto {
+  genres?: string[]; 
+  rating?: number;
+  duration?: "short" | "medium" | "long";
+  premium?: boolean;
 }
