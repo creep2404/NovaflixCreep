@@ -1,7 +1,8 @@
+import { QueryMovie } from "../types";
 import { api } from "./axios";
 
-export const getMovies = async () => {
-  const res = await api.get("/movies");
+export const getMovies = async (params: QueryMovie) => {
+  const res = await api.get("/movies", { params });
   return res.data;
 };
 

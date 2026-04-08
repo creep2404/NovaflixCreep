@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import { BrowsePage } from "../pages/BrowsePage";
+import { BrowsePage } from "../pages/HomePage";
 import { SearchPage } from "../pages/SearchPage";
 import { PlayerPage } from "../pages/PlayerPage";
 import { AdminLayout } from "../components/layouts/AdminLayout";

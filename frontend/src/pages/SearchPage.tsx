@@ -1,191 +1,324 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, SlidersHorizontal, Star, Clock, Crown, Filter } from 'lucide-react';
-import { MOCK_MOVIES } from '../data/mock';
-import { MovieCard } from '../components/ui/MovieCard';
-import { useSimulatedData } from '../hooks/useData';
-import { SkeletonCard, Skeleton } from '../components/ui/Skeleton';
-import { ErrorState, EmptyState } from '../components/ui/StateViews';
+import React, { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Search } from "lucide-react";
+import { MovieCard } from "../components/ui/MovieCard";
+import { SkeletonCard } from "../components/ui/Skeleton";
+import { ErrorState, EmptyState } from "../components/ui/StateViews";
+import { useDebounce } from "../hooks/useDebounce";
+import { useMovies } from "../hooks/useMovies";
+import FiltersSection from "../components/ui/FiltersSection";
+import { getSearchHistory, saveSearchHistory } from "../utils/searchHistory";
+import { useTrending } from "../hooks/useTrending";
+import { useSuggest } from "../hooks/useSuggest";
 
 export const SearchPage = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [simulateError, setSimulateError] = useState(false);
-  const [simulateEmpty, setSimulateEmpty] = useState(false);
+  const [params, setParams] = useSearchParams();
 
-  const { data: movies, isLoading, error, refetch } = useSimulatedData(MOCK_MOVIES, {
-    delay: 1000,
-    simulateError,
-    simulateEmpty
+  // ===============================
+  // STATE
+  // ===============================
+  const [search, setSearch] = useState(params.get("search") || "");
+  const [searched, setSearched] = useState("");
+  const [page, setPage] = useState(Number(params.get("page")) || 1);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // debounce input
+  const debouncedSearch = useDebounce(search, 500);
+
+  const [draftFilters, setDraftFilters] = useState({
+    genres: [] as string[],
+    rating: null as number | null,
+    duration: null as string | null,
   });
+
+  const [appliedFilters, setAppliedFilters] = useState(draftFilters);
+  // ===============================
+  // REACT QUERY
+  // ===============================
+  const filters = {
+    search: debouncedSearch,
+    page,
+    ...appliedFilters,
+  };
+
+  const { data, isLoading, isError, isFetching } = useMovies(filters);
+  const movies = data?.data?.data || [];
+  const meta = data?.data?.meta;
+  console.log("🔥 check meta:", meta);
+
+  // ===============================
+  // OTHER STATES (Inprogress)
+  // ===============================
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [history, setHistory] = useState<string[]>([]);
+
+  // Lấy lịch sử search từ localStorage khi component mount và lưu vào state `history` để hiển thị trong dropdown
+  useEffect(() => {
+    setHistory(getSearchHistory());
+  }, []);
+
+  // SUGGEST & TRENDING (Inprogress)
+  const { data: suggestData } = useSuggest(debouncedSearch);
+  const { data: trendingData } = useTrending();
+
+  // ===============================
+  // HANDLERS
+  // ===============================
+  const handleSelect = (value: string) => {
+    setSearch(value);
+    saveSearchHistory(value);
+    setShowDropdown(false);
+  };
+  // RESET PAGE KHI SEARCH THAY ĐỔI
+  // ===============================
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
+  // SCROLL TOP KHI ĐỔI PAGE
+  // ===============================
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page]);
+
+  // ===============================
+  // SYNC FILTERS
+  // ===============================
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    const paramsObj: any = {};
+
+    if (searched) paramsObj.search = search;
+    if (page > 1) paramsObj.page = String(page); // page=1 không cần
+
+    if (appliedFilters.genres?.length > 0) {
+      paramsObj.genres = appliedFilters.genres.join(",");
+    }
+
+    if (appliedFilters.rating !== null) {
+      paramsObj.rating = appliedFilters.rating.toString();
+    }
+
+    if (appliedFilters.duration) {
+      paramsObj.duration = appliedFilters.duration;
+    }
+
+    setParams(paramsObj, { replace: true });
+  }, [searched, page, appliedFilters, isInitialized]);
+
+  // Khi mount, đọc filters từ URL để set state
+  useEffect(() => {
+    const urlSearch = params.get("search") || "";
+    const urlPage = Number(params.get("page")) || 1;
+
+    const urlGenres = params.get("genres");
+    const urlRating = params.get("rating");
+    const urlDuration = params.get("duration");
+
+    const parsedFilters = {
+      genres: urlGenres ? urlGenres.split(",") : [],
+      rating: urlRating ? Number(urlRating) : null,
+      duration: urlDuration || null,
+    };
+
+    setSearch(urlSearch);
+    setPage(urlPage);
+
+    setDraftFilters(parsedFilters);
+    setAppliedFilters(parsedFilters);
+
+    setIsInitialized(true); // 🔥 quan trọng
+  }, []);
 
   return (
     <div className="min-h-screen bg-surface pt-24 pb-12 flex animate-in fade-in duration-500">
-      {/* Sidebar Filters */}
-      <aside className="w-72 fixed left-0 top-20 bottom-0 overflow-y-auto custom-scrollbar border-r border-white/5 bg-surface-low/30 backdrop-blur-xl p-6 hidden lg:block">
-        <div className="flex items-center gap-2 mb-8 text-white font-headline font-semibold text-lg">
-          <SlidersHorizontal size={20} className="text-primary" />
-          Filters
-        </div>
+      {/* ===============================
+          SIDEBAR
+      =============================== */}
+      <FiltersSection
+        selectedGenres={draftFilters.genres}
+        onChangeGenres={(genres) =>
+          setDraftFilters((prev) => ({ ...prev, genres }))
+        }
+        rating={draftFilters.rating}
+        onChangeRating={(rating) =>
+          setDraftFilters((prev) => ({ ...prev, rating }))
+        }
+        duration={draftFilters.duration}
+        onChangeDuration={(duration) =>
+          setDraftFilters((prev) => ({ ...prev, duration }))
+        }
+      />
 
-        <div className="space-y-8">
-          {/* Test Controls */}
-          <div className="flex gap-4 mb-4">
-            <button onClick={() => setSimulateError(true)} className="text-xs text-red-500 hover:underline">Test Error</button>
-            <button onClick={() => setSimulateEmpty(true)} className="text-xs text-on-surface-variant hover:underline">Test Empty</button>
-          </div>
+      {/* ===============================
+          MAIN CONTENT
+      =============================== */}
 
-          {/* Genres */}
-          <div>
-            <h3 className="text-sm font-medium text-on-surface-variant mb-4 uppercase tracking-wider">Genres</h3>
-            <div className="space-y-3">
-              {['Action', 'Sci-Fi', 'Thriller', 'Drama', 'Horror', 'Comedy'].map(genre => (
-                <label key={genre} className="flex items-center gap-3 cursor-pointer group">
-                  <div className="w-5 h-5 rounded border border-white/20 flex items-center justify-center group-hover:border-primary transition-colors">
-                    <div className="w-3 h-3 rounded-sm bg-primary opacity-0 group-hover:opacity-50 transition-opacity" />
-                  </div>
-                  <span className="text-sm text-on-surface-variant group-hover:text-white transition-colors">{genre}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* User Rating */}
-          <div>
-            <h3 className="text-sm font-medium text-on-surface-variant mb-4 uppercase tracking-wider">User Rating</h3>
-            <div className="space-y-3">
-              {[4, 3, 2, 1].map(stars => (
-                <label key={stars} className="flex items-center gap-3 cursor-pointer group">
-                  <div className="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center group-hover:border-primary transition-colors">
-                    <div className="w-3 h-3 rounded-full bg-primary opacity-0 group-hover:opacity-50 transition-opacity" />
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} size={14} className={i < stars ? 'text-yellow-500 fill-yellow-500' : 'text-white/20'} />
-                    ))}
-                    <span className="text-xs text-on-surface-variant ml-1">& Up</span>
-                  </div>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Duration */}
-          <div>
-            <h3 className="text-sm font-medium text-on-surface-variant mb-4 uppercase tracking-wider">Duration</h3>
-            <div className="space-y-3">
-              {['Under 1h', '1h - 2h', 'Over 2h'].map(dur => (
-                <label key={dur} className="flex items-center gap-3 cursor-pointer group">
-                  <div className="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center group-hover:border-primary transition-colors">
-                    <div className="w-3 h-3 rounded-full bg-primary opacity-0 group-hover:opacity-50 transition-opacity" />
-                  </div>
-                  <span className="text-sm text-on-surface-variant group-hover:text-white transition-colors flex items-center gap-2">
-                    <Clock size={14} /> {dur}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Premium Toggle */}
-          <div className="pt-4 border-t border-white/5">
-            <label className="flex items-center justify-between cursor-pointer group">
-              <span className="text-sm font-medium text-white flex items-center gap-2">
-                <Crown size={16} className="text-yellow-500" /> Premium Only
-              </span>
-              <div className="w-10 h-5 bg-surface-highest rounded-full relative transition-colors group-hover:bg-white/10">
-                <div className="w-4 h-4 bg-on-surface-variant rounded-full absolute left-0.5 top-0.5 transition-transform" />
-              </div>
-            </label>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Content */}
       <main className="flex-1 lg:ml-72 px-6 lg:px-12">
-        {/* Search Header */}
+        {/* SEARCH BAR */}
         <div className="max-w-4xl mx-auto mb-12">
           <div className="relative group">
             <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-              <Search className="text-on-surface-variant group-focus-within:text-primary transition-colors" size={24} />
+              <Search
+                className="text-on-surface-variant group-focus-within:text-primary transition-colors"
+                size={24}
+              />
             </div>
             <input
-              type="text"
-              className="w-full bg-surface-high border-2 border-transparent focus:border-primary/50 rounded-full py-5 pl-16 pr-6 text-lg text-white placeholder-on-surface-variant/50 outline-none transition-all shadow-xl shadow-black/20"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onFocus={() => setShowDropdown(true)}
+              onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
               placeholder="Search movies, series, genres, or directors..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              // className="w-full pl-14 pr-4 py-4 rounded-full bg-surface-high text-white outline-none"
+              className="w-full bg-surface-high border-2 border-transparent focus:border-primary/50 rounded-full py-5 pl-16 pr-6 text-lg text-white placeholder-on-surface-variant/50 outline-none transition-all shadow-xl shadow-black/20"
             />
-            <button className="absolute inset-y-2 right-2 bg-primary text-surface px-6 rounded-full font-bold hover:bg-primary-dim transition-colors">
+            {showDropdown && (
+              <div className="absolute w-full mt-2 bg-surface-high rounded-xl shadow-lg p-4 z-50">
+                {/* ===============================
+        SUGGEST
+    =============================== */}
+                {search && suggestData?.data?.length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-xs text-white/50 mb-2">Suggestions</p>
+                    {suggestData.data.map((movie: any) => (
+                      <div
+                        key={movie.id}
+                        onClick={() => handleSelect(movie.title)}
+                        className="p-2 hover:bg-white/10 rounded cursor-pointer"
+                      >
+                        {movie.title}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* ===============================
+                 TRENDING
+                =============================== */}
+                {!search && trendingData?.data?.length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-xs text-white/50 mb-2">Trending</p>
+                    {trendingData.data.map((movie: any) => (
+                      <div
+                        key={movie.id}
+                        onClick={() => handleSelect(movie.title)}
+                        className="p-2 hover:bg-white/10 rounded cursor-pointer"
+                      >
+                        🔥 {movie.title}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* ===============================
+                HISTORY
+                =============================== */}
+                {!search && history.length > 0 && (
+                  <div>
+                    <p className="text-xs text-white/50 mb-2">
+                      Recent Searches
+                    </p>
+                    {history.map((item, i) => (
+                      <div
+                        key={i}
+                        onClick={() => handleSelect(item)}
+                        className="p-2 hover:bg-white/10 rounded cursor-pointer"
+                      >
+                        🕘 {item}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            <button
+              onClick={() => {
+                setAppliedFilters(draftFilters);
+                setSearched(search);
+              }}
+              className="absolute inset-y-2 right-2 bg-primary text-surface px-6 rounded-full font-bold hover:bg-primary-dim transition-colors hover:scale-105 cursor-pointer"
+            >
               Search
             </button>
-          </div>
+            <button
+              onClick={() => {
+                const empty = {
+                  genres: [],
+                  rating: null,
+                  duration: null,
+                };
 
-          {/* Quick Picks */}
-          <div className="flex items-center gap-3 mt-6 overflow-x-auto hide-scrollbar">
-            <span className="text-sm text-on-surface-variant whitespace-nowrap">Quick Picks:</span>
-            {['Cyberpunk', 'Space Exploration', 'Mind-Bending', 'Award Winners', 'New Releases'].map(tag => (
-              <button key={tag} className="px-4 py-1.5 rounded-full bg-surface-high border border-white/5 text-sm hover:border-primary/50 hover:text-primary transition-colors whitespace-nowrap">
-                {tag}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Results Grid */}
-        <div>
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-headline font-bold">
-              Discovery Results 
-              {!isLoading && !error && movies && <span className="text-on-surface-variant text-lg font-normal ml-2">({movies.length ? movies.length * 2 : 0} found)</span>}
-            </h2>
-            <button className="lg:hidden flex items-center gap-2 text-sm bg-surface-high px-4 py-2 rounded-lg border border-white/10">
-              <Filter size={16} /> Filters
+                setDraftFilters(empty);
+                setAppliedFilters(empty);
+                setPage(1);
+                setSearch("");
+                setSearched("");
+              }}
+              className="absolute inset-y-2  bg-primary text-surface px-6 rounded-full font-bold hover:bg-primary-dim transition-colors hover:scale-105 cursor-pointer"
+            >
+              Reset
             </button>
           </div>
-          
-          {error ? (
-            <ErrorState 
-              title="Search failed" 
-              message="We encountered an error while searching. Please try again."
-              action={{ label: "Retry", onClick: refetch }}
-            />
-          ) : !isLoading && (!movies || movies.length === 0) ? (
-            <EmptyState 
-              title="No results found" 
-              message="We couldn't find any movies matching your search criteria."
-              action={{ label: "Clear Filters", onClick: () => setSimulateEmpty(false) }}
-            />
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {isLoading || !movies ? (
+        </div>
+
+        {/* ===============================
+            STATES
+        =============================== */}
+        {isError ? (
+          <ErrorState title="Search failed" message="Something went wrong" />
+        ) : !isLoading && movies.length === 0 ? (
+          <EmptyState title="No results" message="Try another keyword" />
+        ) : (
+          <>
+            {/* ===============================
+                GRID
+            =============================== */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+              {movies.map((movie: any) => (
+                <MovieCard
+                  key={movie.id}
+                  movie={movie}
+                  onClick={() => navigate(`/movie/${movie.id}`)}
+                />
+              ))}
+
+              {/* skeleton khi fetch page mới */}
+              {(isLoading || isFetching) &&
                 Array.from({ length: 10 }).map((_, i) => (
                   <SkeletonCard key={i} />
-                ))
-              ) : (
-                <>
-                  {movies.map(movie => (
-                    <MovieCard 
-                      key={movie.id} 
-                      movie={movie} 
-                      onClick={() => navigate(`/movie/${movie.id}`)} 
-                      orientation="portrait" 
-                    />
-                  ))}
-                  {/* Duplicate for demo grid filling */}
-                  {movies.map(movie => (
-                    <MovieCard 
-                      key={movie.id + '-dup'} 
-                      movie={movie} 
-                      onClick={() => navigate(`/movie/${movie.id}`)} 
-                      orientation="portrait" 
-                    />
-                  ))}
-                </>
-              )}
+                ))}
             </div>
-          )}
-        </div>
+
+            {/* ===============================
+                PAGINATION
+            =============================== */}
+            {meta && meta.totalPages > 1 && (
+              <div className="flex justify-center mt-10 gap-2 flex-wrap">
+                {Array.from({ length: meta.totalPages }).map((_, i) => {
+                  const p = i + 1;
+
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => setPage(p)}
+                      disabled={isFetching}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition hover:scale-105 cursor-pointer ${
+                        page === p
+                          ? "bg-primary text-black"
+                          : "bg-surface-high text-white hover:bg-white/10"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
       </main>
     </div>
   );
