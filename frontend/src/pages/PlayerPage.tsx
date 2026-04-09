@@ -62,13 +62,12 @@ export const PlayerPage = () => {
     const fetchMovie = async () => {
       try {
         setIsLoading(true);
-
         const movieData = await getMovieById(movieId);
         setMovie(movieData);
-
         const res = await getMoviePlaybackData(movieId);
 
         const playbackData = await res.data;
+        console.log("🚀 playbackData:", playbackData);
 
         setVideoSource(playbackData);
       } catch (err) {

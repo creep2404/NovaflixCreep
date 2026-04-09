@@ -17,7 +17,6 @@ export const saveWatchHistory = async (data: {
   
   // return new Promise((resolve) => {
   //   setTimeout(() => {
-  //     console.log("Simulated API call to save watch history:", data);
   //     resolve({ success: true });
   //   }, 500);
   // });

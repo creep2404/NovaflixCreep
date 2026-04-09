@@ -11,9 +11,9 @@ export const BrowsePage = () => {
   const navigate = useNavigate();
 
   const { trending, thrillers, continueWatching } = useHomepageData();
-  // console.log("🔥 trending:", trending);
-  // console.log("🔥 thrillers:", thrillers);
-  // console.log("🔥 continueWatching:", continueWatching);
+  // console.log("trending:", trending);
+  // console.log("thrillers:", thrillers);
+  // console.log("continueWatching:", continueWatching);
 
   const heroMovie =
     trending.data && trending.data.length > 0 ? trending.data[0] : null;

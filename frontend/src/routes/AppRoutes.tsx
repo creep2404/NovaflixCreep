@@ -7,6 +7,7 @@ import { AdminDashboard } from "../pages/admin/Dashboard";
 import { AdminMovies } from "../pages/admin/Movies";
 import { AdminUsers } from "../pages/admin/Users";
 import { AdminAnalytics } from "../pages/admin/Analytics";
+import { AdminUpload } from "../pages/admin/Upload";
 
 export default function AppRoutes() {
   return (
@@ -22,6 +23,7 @@ export default function AppRoutes() {
         <Route path="movies" element={<AdminMovies />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="analytics" element={<AdminAnalytics />} />
+        <Route path="upload" element={<AdminUpload />} />
       </Route>
     </Routes>
   );

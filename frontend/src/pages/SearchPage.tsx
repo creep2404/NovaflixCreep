@@ -45,7 +45,6 @@ export const SearchPage = () => {
   const { data, isLoading, isError, isFetching } = useMovies(filters);
   const movies = data?.data?.data || [];
   const meta = data?.data?.meta;
-  console.log("🔥 check meta:", meta);
 
   // ===============================
   // OTHER STATES (Inprogress)

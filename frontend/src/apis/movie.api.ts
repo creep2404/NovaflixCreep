@@ -11,25 +11,47 @@ export const getMovieById = async (id: string) => {
   return res.data;
 };
 
-export const getMoviePlaybackData = async (movieId: string) => {
-  const res = await api.get(`/movies/${movieId}/play`);
+export const getMoviePlaybackData = async (id: string) => {
+  const res = await api.get(`/movies/${id}/play`);
   return res.data;
 };
 ///
 export const getTrendingMovies = async () => {
-  const res = await api.get('/movies/trending');
+  const res = await api.get("/movies/trending");
   return res.data;
 };
 
 export const getMoviesByGenre = async (genre: string) => {
-  const res = await api.get('/movies', {
-    params: { genre }
+  const res = await api.get("/movies", {
+    params: { genre },
   });
   return res.data;
 };
 
 export const getContinueWatching = async () => {
-  const res = await api.get('/users/me/continue-watching');
+  const res = await api.get("/users/me/continue-watching");
   return res.data;
 };
 
+export const createUploadUrl = async (payload: {
+  videoId: string;
+  fileType?: 'thumbnail';
+}) => {
+  const res = await api.post("/movies/upload-url", payload);
+  return res.data.data; 
+};
+
+export const createMovieApi = async (payload: {
+  title: string;
+  description: string;
+  videoUrl: string;
+  thumbnailUrl: string;
+  duration: number;
+  videoId: string;
+  genres: string[];
+  releaseYear: string;
+  rating: string;
+}) => {
+  const res = await api.post("/movies", payload);
+  return res.data.data;
+};
