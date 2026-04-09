@@ -3,7 +3,7 @@ import { CreateMovieDto } from "./dto/create-movie.dto";
 import { UpdateMovieDto } from "./dto/update-movie.dto";
 
 export const createMovieRepo = async (data: CreateMovieDto) => {
-  return prisma.movie.create({
+  const movie = await prisma.movie.create({
     data: {
       title: data.title,
       description: data.description,
@@ -11,23 +11,24 @@ export const createMovieRepo = async (data: CreateMovieDto) => {
       thumbnailUrl: data.thumbnailUrl,
       duration: data.duration,
       videoId: data.videoId,
-      genres: {
-        create: data.genres?.map((name) => ({
-          genre: {
-            connectOrCreate: {
-              where: { name },
-              create: { name },
-            },
-          },
-        })),
-      },
+      releaseYear: data.releaseYear ? new Date(data.releaseYear) : undefined,
     },
+  });
+
+  if (data.genres?.length) {
+    await prisma.movieGenre.createMany({
+      data: data.genres.map((genreId) => ({
+        movieId: movie.id,
+        genreId,
+      })),
+      skipDuplicates: true,
+    });
+  }
+
+  return prisma.movie.findUnique({
+    where: { id: movie.id },
     include: {
-      genres: {
-        include: {
-          genre: true,
-        },
-      },
+      genres: { include: { genre: true } },
     },
   });
 };
@@ -114,7 +115,7 @@ export const getMoviesRepo = async ({
                 some: {
                   genre: {
                     name: {
-                      in: genres, 
+                      in: genres,
                     },
                   },
                 },
@@ -187,7 +188,7 @@ export const countMoviesRepo = async ({
 }: {
   skip?: number;
   take?: number;
-  genres?: string[]; 
+  genres?: string[];
   search?: string;
   rating?: number;
   duration?: "short" | "medium" | "long";

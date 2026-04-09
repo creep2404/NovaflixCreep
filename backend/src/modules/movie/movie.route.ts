@@ -5,7 +5,6 @@ import {
   getMovieById,
   uploadMovieVideo,
   getUploadUrl,
-  downloadUrl,
   getMoviePlayback,
   getTrendingMovies,
 } from "./movie.controller";
@@ -121,28 +120,6 @@ router.post(
 );
 
 router.get("/trending", getTrendingMovies);
-
-/**
- * @swagger
- * /movies/download-url:
- *   get:
- *     summary: Generate download URL
- *     description: Generate a presigned URL for downloading a movie video (requires authentication)
- *     tags: [Movies]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: key
- *         schema:
- *           type: string
- *         required: true
- *         description: The S3 object key of the movie video
- *     responses:
- *       200:
- *         description: Download URL generated successfully
- */
-router.get("/download-url", authMiddleware, downloadUrl);
 
 /**
  * @swagger

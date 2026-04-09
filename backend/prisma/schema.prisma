@@ -32,6 +32,7 @@ model Movie {
   videoUrl     String
   duration     Int
   createdAt    DateTime @default(now())
+  releaseYear  DateTime?
 
   genres         MovieGenre[]
   watchHistories WatchHistory[]

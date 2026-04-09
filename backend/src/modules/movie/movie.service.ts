@@ -17,6 +17,7 @@ import { UpdateMovieDto } from "./dto/update-movie.dto";
 import { eventBus } from "@/events/eventBus";
 import { EVENTS } from "@/common/constants/events.constants";
 import { getPresignedDownloadUrl } from "@/common/utils/s3-upload.util";
+import { FILE_PATHS } from "@/common/constants/file-path.constants";
 
 export const createMovieService = async (data: CreateMovieDto) => {
   const movie = await createMovieRepo(data);
@@ -72,7 +73,7 @@ export const getMoviesService = async (query: QueryMovieDto) => {
     page,
     limit,
     search: query.search,
-    genres: genres.join(","), 
+    genres: genres.join(","),
     rating,
     duration,
     //premium,
@@ -108,10 +109,26 @@ export const getMoviesService = async (query: QueryMovieDto) => {
       //premium,
     }),
   ]);
-  console.log("Fetched movies from DB:", total, movies.length, movies);
+
+  //ADD PRE-SIGNED URL
+  const batchSize = 50;
+  const moviesWithUrl: typeof movies = [];
+
+  for (let i = 0; i < movies.length; i += batchSize) {
+    const batch = movies.slice(i, i + batchSize);
+    const batchResult = await Promise.all(
+      batch.map(async (movie) => ({
+        ...movie,
+        thumbnailUrl: movie.thumbnailUrl
+          ? await getPresignedDownloadUrl(movie.thumbnailUrl)
+          : null,
+      })),
+    );
+    moviesWithUrl.push(...batchResult);
+  }
 
   const result = {
-    data: movies.map(formatMovie),
+    data: moviesWithUrl.map(formatMovie),
     meta: {
       page,
       limit,
@@ -119,7 +136,6 @@ export const getMoviesService = async (query: QueryMovieDto) => {
       totalPages: Math.ceil(total / limit),
     },
   };
-  console.log("Fetched movies from DB:", movies);
 
   //3. SET CACHE
   await setCache(cacheKey, result, 60);
@@ -127,23 +143,22 @@ export const getMoviesService = async (query: QueryMovieDto) => {
   return result;
 };
 
-export const getVideoPlaybackSource = async (movieId: string) => {
+export const getUrlPresignedByMovieId = async (
+  movieId: string,
+  fileType: keyof typeof FILE_PATHS = "video",
+) => {
   const movie = await getMovieByIdRepo(movieId);
 
   if (!movie) {
     throw new Error("Movie not found");
   }
 
-  const key = `movies/${movie.videoId}/source.mp4`;
-
-  if (!key) {
-    throw new Error("Video not found");
-  }
+  const key = FILE_PATHS[fileType](movie.videoId);
 
   const url = await getPresignedDownloadUrl(key);
 
   return {
-    type: "mp4" as const,
+    type: fileType === "thumbnail" ? "image" : "mp4",
     url,
   };
 };
@@ -164,9 +179,21 @@ export const getTrendingMoviesService = async () => {
     orderByTrending: true,
   });
 
-  console.log("Fetched movies from DB:", movies);
-
-  const result = movies.map(formatMovie);
+  const batchSize = 50;
+  const moviesWithUrl: typeof movies = [];
+  for (let i = 0; i < movies.length; i += batchSize) {
+    const batch = movies.slice(i, i + batchSize);
+    const batchResult = await Promise.all(
+      batch.map(async (movie) => ({
+        ...movie,
+        thumbnailUrl: movie.thumbnailUrl
+          ? await getPresignedDownloadUrl(movie.thumbnailUrl)
+          : null,
+      })),
+    );
+    moviesWithUrl.push(...batchResult);
+  }
+  const result = moviesWithUrl.map(formatMovie);
 
   await setCache(cacheKey, result, 60);
 

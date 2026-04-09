@@ -7,15 +7,13 @@ import {
   getMovieByIdService,
   getMoviesService,
   getTrendingMoviesService,
-  getVideoPlaybackSource
+  getUrlPresignedByMovieId,
 } from "./movie.service";
 import { successResponse } from "@/common/utils/successResponse";
 import fs from "fs";
 import path from "path";
 import {
-  getPresignedDownloadUrl,
   getPresignedUploadUrl,
-  uploadVideoToS3,
 } from "@/common/utils/s3-upload.util";
 
 export const createMovie = asyncHandler(async (req: Request, res: Response) => {
@@ -38,9 +36,14 @@ export const getMovies = asyncHandler(async (req: Request, res: Response) => {
 export const getMovieById = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.validated!.params;
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing or invalid 'id' parameter",
+      });
+    }
 
     const movie = await getMovieByIdService(id);
-
     return successResponse(res, movie, "Get movie successfully");
   },
 );
@@ -56,67 +59,42 @@ export const uploadMovieVideo = asyncHandler(
       });
     }
 
-    const { videoId } = await uploadVideoToS3(file);
-
+    // const { videoId } = await uploadVideoToS3(file);
+    const videoId = "123";
     return successResponse(res, { videoId }, "Video uploaded successfully");
   },
 );
 
-//PRESIGNED UPLOAD
+//PRESIGNED UPLOAD - Main
 export const getUploadUrl = asyncHandler(
   async (req: Request, res: Response) => {
-    const { filename, contentType } = req.body;
+    const { videoId, fileType } = req.body;
 
-    if (!filename || !contentType) {
+    if (!videoId || !fileType) {
       return res.status(400).json({
         success: false,
-        message: "Missing filename or contentType",
+        message: "Missing videoId or fileType",
       });
     }
 
-    // validate file type
-    if (!contentType.startsWith("video/")) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid file type",
-      });
-    }
+    const data = await getPresignedUploadUrl(videoId, fileType);
 
-    const data = await getPresignedUploadUrl(filename, contentType);
-
-    return successResponse(res, data, "Upload URL generated successfully");
+    return successResponse(res, data, "Get upload URL successfully");
   },
 );
 
-export const downloadUrl = asyncHandler(async (req: Request, res: Response) => {
-  try {
-    const { key } = req.query;
-
-    if (!key || typeof key !== "string") {
-      return res.status(400).json({
-        success: false,
-        message: "Missing or invalid 'key' query parameter",
-      });
-    }
-
-    // Generate the pre-signed download URL
-    const downloadUrl = await getPresignedDownloadUrl(key);
-
-    return successResponse(res, { url: downloadUrl }, "Download URL generated successfully");
-  } catch (error) {
-    console.error("Error generating download URL:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to generate download URL",
-    });
-  }
-});
-
+// Get video
+// GET /movies/123/playback
+// Get thumbnail
+// GET /movies/123/playback?type=thumbnail
 export const getMoviePlayback = asyncHandler(
   async (req: Request, res: Response) => {
-    const { id } = req.validated!.params;
+    const { id } = req.params;
+    const { type } = req.query;
 
-    const data = await getVideoPlaybackSource(id);
+    const fileType = type === "thumbnail" ? "thumbnail" : "video";
+
+    const data = await getUrlPresignedByMovieId(id, fileType);
 
     return successResponse(res, data, "Get video playback source successfully");
   },
@@ -126,11 +104,7 @@ export const getTrendingMovies = asyncHandler(
   async (req: Request, res: Response) => {
     const result = await getTrendingMoviesService();
 
-    return successResponse(
-      res,
-      result,
-      "Get trending movies successfully",
-    );
+    return successResponse(res, result, "Get trending movies successfully");
   },
 );
 
@@ -140,10 +114,6 @@ export const getContinueWatching = asyncHandler(
 
     const result = await getContinueWatchingService(userId);
 
-    return successResponse(
-      res,
-      result,
-      "Get continue watching successfully",
-    );
+    return successResponse(res, result, "Get continue watching successfully");
   },
 );
