@@ -8,17 +8,43 @@ import { AdminMovies } from "../pages/admin/Movies";
 import { AdminUsers } from "../pages/admin/Users";
 import { AdminAnalytics } from "../pages/admin/Analytics";
 import { AdminUpload } from "../pages/admin/Upload";
+import { ProtectedRoute } from "./ProtectedRoute";
+import { Login } from "../pages/auth/Login";
+import { Register } from "../pages/auth/Register";
+import { ForgotPassword } from "../pages/auth/ForgotPassword";
 
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* User */}
+      {/* Public */}
       <Route path="/" element={<BrowsePage />} />
+      {/* <Route
+        path="/"
+        element={
+          <AuthGuard>
+            <ProtectedRoute>
+              <BrowsePage />
+            </ProtectedRoute>
+          </AuthGuard>
+        }
+      /> */}
       <Route path="/search" element={<SearchPage />} />
       <Route path="/movie/:id" element={<PlayerPage />} />
 
+      {/* Login */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+
       {/* Admin */}
-      <Route path="/admin" element={<AdminLayout />}>
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<AdminDashboard />} />
         <Route path="movies" element={<AdminMovies />} />
         <Route path="users" element={<AdminUsers />} />

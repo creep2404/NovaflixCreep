@@ -1,11 +1,14 @@
 import React from "react";
-import { Search, Bell, User } from "lucide-react";
+import { Search, Bell, User, LogOut } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/src/hooks/useAuth";
 
 export const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
+
+  const { profile, logout } = useAuth();
 
   return (
     <nav className="fixed top-0 w-full z-50 transition-all duration-300 bg-surface/80 backdrop-blur-md border-b border-white/5">
@@ -60,9 +63,41 @@ export const Navbar = () => {
           <button className="p-2 text-on-surface-variant hover:text-white hover:bg-white/5 rounded-full transition-colors">
             <Bell size={20} />
           </button>
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-blue-500 flex items-center justify-center cursor-pointer">
-            <User size={16} className="text-surface" />
-          </div>
+          {/* User Section */}
+          {profile ? (
+            <div className="flex items-center gap-4">
+              {/* Avatar */}
+              <div
+                onClick={() => navigate("/profile")}
+                className="w-8 h-8 rounded-full overflow-hidden cursor-pointer bg-gradient-to-tr from-primary to-blue-500 flex items-center justify-center"
+              >
+                {profile.avatarUrl ? (
+                  <img
+                    src={profile.avatarUrl}
+                    alt="avatar"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User size={16} className="text-surface" />
+                )}
+              </div>
+
+              {/* Logout */}
+              <button
+                onClick={logout}
+                className="p-2 text-on-surface-variant hover:text-white hover:bg-white/5 rounded-full transition-colors"
+              >
+                <LogOut size={20} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => navigate("/login")}
+              className="text-sm font-medium text-on-surface-variant hover:text-white transition-colors"
+            >
+              Sign In
+            </button>
+          )}
         </div>
       </div>
     </nav>

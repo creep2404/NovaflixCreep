@@ -1,5 +1,6 @@
 import { createContext, useState, ReactNode } from "react";
 import { FilmLoader } from "../components/common/FilmLoader";
+import ProjectorLoader from "../components/common/ProjectorLoader";
 
 type LoadingContextType = {
   loading: boolean;
@@ -19,7 +20,8 @@ export const LoadingProvider = ({ children }: { children: ReactNode }) => {
       {/* Global loader */}
       {loading && (
         <div className="global-loader">
-          <FilmLoader />
+          {/* <FilmLoader /> */}
+          <ProjectorLoader />
         </div>
       )}
 
