@@ -1,3 +1,4 @@
+import { env } from "@/config/env";
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
@@ -23,7 +24,7 @@ export const authMiddleware = (
   try {
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET as string
+      env.JWT_SECRET as string
     ) as { userId: string };
 
     req.user = decoded;

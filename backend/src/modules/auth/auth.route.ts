@@ -68,7 +68,7 @@ router.post("/register", authLimiter, register);
  *       401:
  *         description: Invalid credentials
  */
-router.post("/login", authLimiter, login);
+router.post("/login", login);
 
 /**
  * @swagger

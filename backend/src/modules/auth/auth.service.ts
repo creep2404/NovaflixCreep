@@ -1,32 +1,31 @@
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { prisma } from "@/database/client";
-import { createUserService, findUserByEmailService } from "@/modules/user/user.service";
 import { AppError } from "@/common/utils/AppError";
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "@/common/utils/jwt.util";
+import { createUserRepo, findUserByEmailRepo, findUserByIdRepo, updateUserRefreshToken } from "../user/user.repository";
 
-const SALT_ROUNDS = 10;
+
+const REFRESH_TOKEN_EXPIRES = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 export const registerService = async (email: string, password: string) => {
-  const existingUser = await findUserByEmailService(email);
+  const existingUser = await findUserByEmailRepo(email);
+
   if (existingUser) {
-    throw new Error("Email already exists");
+    throw new AppError("Email already exists", 400);
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const user = await createUserService({
+  const user = await createUserRepo({
     email,
     password: hashedPassword,
   });
 
-  // remove password
   const { password: _, ...safeUser } = user;
-
   return safeUser;
 };
 
 export const loginService = async (email: string, password: string) => {
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await findUserByEmailRepo(email);
 
   if (!user) {
     throw new AppError("Invalid credentials", 401);
@@ -38,25 +37,71 @@ export const loginService = async (email: string, password: string) => {
     throw new AppError("Invalid credentials", 401);
   }
 
-  if (!process.env.JWT_SECRET) {
-    throw new Error("JWT_SECRET not set");
-  }
+  const accessToken = generateAccessToken({
+    userId: user.id,
+  });
 
-  const token = jwt.sign(
-    {
-      sub: user.id,
-      role: user.role,
-    },
-    process.env.JWT_SECRET as string,
-    {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    } as jwt.SignOptions,
+  const refreshToken = generateRefreshToken({
+    userId: user.id,
+  });
+
+  await updateUserRefreshToken(
+    user.id,
+    refreshToken,
+    new Date(Date.now() + REFRESH_TOKEN_EXPIRES)
   );
 
   const { password: _, ...safeUser } = user;
 
   return {
     user: safeUser,
-    token,
+    accessToken,
+    refreshToken,
+  };
+};
+
+
+export const refreshTokenService = async (token: string) => {
+  if (!token) {
+    throw new AppError("No refresh token provided", 400);
+  }
+
+  const payload = verifyRefreshToken(token);
+
+  const user = await findUserByIdRepo(payload.userId);
+
+  if (!user || !user.refreshToken) {
+    throw new AppError("Invalid refresh token", 401);
+  }
+
+  if (user.refreshToken !== token) {
+    throw new AppError("Invalid refresh token", 401);
+  }
+
+  if (
+    !user.refreshTokenExpiresAt ||
+    user.refreshTokenExpiresAt < new Date()
+  ) {
+    throw new AppError("Refresh token expired", 401);
+  }
+
+  // 🔥 ROTATE refresh token (quan trọng)
+  const newRefreshToken = generateRefreshToken({
+    userId: user.id,
+  });
+
+  await updateUserRefreshToken(
+    user.id,
+    newRefreshToken,
+    new Date(Date.now() + REFRESH_TOKEN_EXPIRES)
+  );
+
+  const accessToken = generateAccessToken({
+    userId: user.id,
+  });
+
+  return {
+    accessToken,
+    refreshToken: newRefreshToken,
   };
 };
