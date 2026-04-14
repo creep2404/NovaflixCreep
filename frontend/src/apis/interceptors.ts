@@ -22,8 +22,8 @@ api.interceptors.request.use((config) => {
 
   const { accessToken, refreshToken } = useAuthStore.getState();
   
-  console.log("🔐 ACCESS TOKEN:", accessToken);
-  console.log("🔁 REFRESH TOKEN:", refreshToken);
+  // console.log("🔐 ACCESS TOKEN:", accessToken);
+  // console.log("🔁 REFRESH TOKEN:", refreshToken);
   // console.log("📡 REQUEST:", config.url);
   
   if (accessToken) {

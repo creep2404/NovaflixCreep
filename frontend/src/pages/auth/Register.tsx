@@ -1,21 +1,21 @@
 import React, { useState } from "react";
-import { ScreenType } from "../../types";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/src/hooks/useAuth";
-import { useRegister } from "@/src/hooks/useRegister";
+import { Eye, EyeOff } from "lucide-react";
 
 export const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  //const [fullName, setFullName] = useState("");
 
   const { register, isRegistering } = useAuth();
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleRegister = async () => {
     try {
-      if (!email || !password || !confirmPassword || !fullName) {
+      if (!email || !password || !confirmPassword) {
         alert("Please fill all fields");
         return;
       }
@@ -49,12 +49,12 @@ export const Register = () => {
       {/* Registration Content Canvas */}
       <div className="relative z-10 w-full max-w-md mx-auto flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-700">
         {/* Header Editorial Hook */}
-        <div className="mt-12 mb-16 space-y-2">
+        <div className="mt-8 mb-10 space-y-2 bg-black/40 p-4 rounded-xl">
           <h1 className="text-[3.5rem] font-extrabold leading-[1.1] tracking-[-0.02em] text-on-surface font-headline">
             Create <br /> Your Account
           </h1>
 
-          <p className="text-on-surface-variant font-body text-sm max-w-[280px]">
+          <p className="text-on-surface-variant font-body text-sm max-w-[280px] ">
             Join our platform to explore thousands of movies, save favorites,
             and get personalized recommendations.
           </p>
@@ -64,7 +64,7 @@ export const Register = () => {
         <form className="space-y-10" onSubmit={(e) => e.preventDefault()}>
           <div className="space-y-6">
             {/* Cinematic Reveal Inputs */}
-            <div className="group relative">
+            {/* <div className="group relative">
               <label className="block text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant mb-2">
                 Full Name
               </label>
@@ -75,13 +75,13 @@ export const Register = () => {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
               />
-            </div>
+            </div> */}
             <div className="group relative">
               <label className="block text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant mb-2">
                 Email Address
               </label>
               <input
-                className="w-full bg-transparent border-b border-outline-variant py-3 px-0 focus:outline-none focus:border-primary transition-all duration-300 placeholder:text-outline text-on-surface font-body"
+                className="px-3 pr-10 w-full bg-transparent border-b border-outline-variant py-3 px-0 focus:outline-none focus:border-primary transition-all duration-300 placeholder:text-outline text-on-surface font-body"
                 placeholder="julian@cinema.com"
                 type="email"
                 value={email}
@@ -92,20 +92,32 @@ export const Register = () => {
               <label className="block text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant mb-2">
                 Password
               </label>
-              <input
-                className="w-full bg-transparent border-b border-outline-variant py-3 px-0 focus:outline-none focus:border-primary transition-all duration-300 placeholder:text-outline text-on-surface font-body"
-                placeholder="••••••••"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+
+              <div className="relative">
+                <input
+                  className="px-3 pr-10 w-full bg-transparent border-b border-outline-variant py-3 px-0 focus:outline-none focus:border-primary transition-all duration-300 placeholder:text-outline text-on-surface font-body"
+                  placeholder="••••••••"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+
+                {/* Eye button */}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 p-2"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
             <div className="group relative">
               <label className="block text-[0.6875rem] uppercase tracking-[0.05em] text-on-surface-variant mb-2">
                 Confirm Password
               </label>
               <input
-                className="w-full bg-transparent border-b border-outline-variant py-3 px-0 focus:outline-none focus:border-primary transition-all duration-300 placeholder:text-outline text-on-surface font-body"
+                className="px-3 pr-10 w-full bg-transparent border-b border-outline-variant py-3 px-0 focus:outline-none focus:border-primary transition-all duration-300 placeholder:text-outline text-on-surface font-body"
                 placeholder="••••••••"
                 type="password"
                 value={confirmPassword}
@@ -118,13 +130,12 @@ export const Register = () => {
           <button
             onClick={handleRegister}
             disabled={isRegistering}
-            className="group relative w-full overflow-hidden bg-primary text-on-primary py-4 rounded-sm font-bold tracking-tight text-lg shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-all duration-300 active:scale-95"
+            className="text-gray-900 w-full py-4 bg-primary hover:bg-white font-bold rounded-full tracking-wide transition-all duration-300 active:scale-95 flex items-center justify-center gap-2"
             type="button"
           >
             <span className="relative z-10">
               {isRegistering ? "Signing up..." : "Sign Up"}
             </span>
-            <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
           </button>
         </form>
 
@@ -139,7 +150,7 @@ export const Register = () => {
           </div>
           <div className="flex justify-center gap-6">
             {/* Google */}
-            <button className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-container-high border border-outline-variant/20 hover:bg-surface-bright transition-colors duration-200 group">
+            <button className="w-14 h-14 rounded-full flex items-center justify-center border border-outline-variant/15 bg-surface-container-high/40 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:-translate-y-1 hover:shadow-lg hover:bg-surface-container-highest active:scale-90 group">
               <svg className="w-6 h-6" viewBox="0 0 24 24">
                 <path
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -160,7 +171,7 @@ export const Register = () => {
               </svg>
             </button>
             {/* Apple */}
-            <button className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-container-high border border-outline-variant/20 hover:bg-surface-bright transition-colors duration-200">
+            <button className="w-14 h-14 rounded-full flex items-center justify-center border border-outline-variant/15 bg-surface-container-high/40 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:-translate-y-1 hover:shadow-lg hover:bg-surface-container-highest active:scale-90 group">
               <svg
                 className="w-6 h-6 text-on-surface"
                 fill="currentColor"
@@ -170,7 +181,7 @@ export const Register = () => {
               </svg>
             </button>
             {/* Facebook */}
-            <button className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-container-high border border-outline-variant/20 hover:bg-surface-bright transition-colors duration-200">
+            <button className="w-14 h-14 rounded-full flex items-center justify-center border border-outline-variant/15 bg-surface-container-high/40 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:-translate-y-1 hover:shadow-lg hover:bg-surface-container-highest active:scale-90 group">
               <svg
                 className="w-6 h-6 text-[#1877F2]"
                 fill="currentColor"
@@ -183,7 +194,7 @@ export const Register = () => {
         </div>
 
         {/* Footer Navigation */}
-        <div className="mt-auto pt-20 text-center">
+        <div className="mt-auto pt-7 text-center">
           <p className="text-on-surface-variant font-body text-sm">
             Already have an account?
             <button

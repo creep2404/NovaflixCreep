@@ -3,12 +3,12 @@ import { api } from "./axios";
 
 export const getMovies = async (params: QueryMovie) => {
   const res = await api.get("/movies", { params });
-  return res.data;
+  return res.data?.data;
 };
 
 export const getMovieById = async (id: string) => {
   const res = await api.get(`/movies/${id}`);
-  return res.data;
+  return res.data?.data;
 };
 
 export const getMoviePlaybackData = async (id: string) => {
@@ -44,7 +44,6 @@ export const createUploadUrl = async (payload: {
 export const createMovieApi = async (payload: {
   title: string;
   description: string;
-  videoUrl: string;
   thumbnailUrl: string;
   duration: number;
   videoId: string;
@@ -54,4 +53,16 @@ export const createMovieApi = async (payload: {
 }) => {
   const res = await api.post("/movies", payload);
   return res.data.data;
+};
+
+export const getSuggestMovies = async (search: string) => {
+  const res = await api.get("/movies", {
+    params: { search, limit: 5 },
+  });
+  return res.data;
+};
+
+export const getMovieReviews = async (id: string) => {
+  const res = await api.get(`/movies/${id}/reviews`);
+  return res.data;
 };

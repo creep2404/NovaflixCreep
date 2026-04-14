@@ -1,5 +1,4 @@
 import React from "react";
-import { ScreenType } from "../../types";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useForgotPassword } from "@/src/hooks/useForgotPassword";

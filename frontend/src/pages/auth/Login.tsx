@@ -1,9 +1,8 @@
-import React from "react";
-import { ScreenType } from "../../types";
+import React, { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useLogin } from "@/src/hooks/useLogin";
 import { useAuth } from "@/src/hooks/useAuth";
+import { Eye, EyeOff } from "lucide-react";
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -12,7 +11,8 @@ export const Login = () => {
   const [password, setPassword] = React.useState("");
   const location = useLocation();
   const from = location.state?.from || "/";
-  //const from = "/register";
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     try {
@@ -83,6 +83,7 @@ export const Login = () => {
                 <label className="block text-[0.75rem] font-label font-bold uppercase tracking-[0.05em] text-on-surface-variant ml-1">
                   Password
                 </label>
+
                 <button
                   onClick={() => navigate("/forgot-password")}
                   className="text-[0.75rem] font-label text-primary hover:text-primary/80 transition-colors"
@@ -90,13 +91,26 @@ export const Login = () => {
                   Forgot Password?
                 </button>
               </div>
-              <input
-                className="w-full bg-surface-container-high border border-outline-variant/15 rounded-lg px-4 py-4 text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-highest focus:ring-1 focus:ring-primary transition-all duration-300"
-                placeholder="••••••••"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+
+              {/* INPUT WRAPPER */}
+              <div className="relative">
+                <input
+                  className="w-full bg-surface-container-high border border-outline-variant/15 rounded-lg px-4 py-4 pr-12 text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-highest focus:ring-1 focus:ring-primary transition-all duration-300"
+                  placeholder="••••••••"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+
+                {/* EYE BUTTON */}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-on-surface-variant hover:text-on-surface transition rounded-md hover:bg-black/10"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
           </div>
 
