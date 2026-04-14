@@ -24,6 +24,7 @@ import { getMovieById, getMoviePlaybackData } from "../apis/movie.api";
 import { getWatchHistory } from "../apis/watchHistory.api";
 import { useVideoPlayer } from "../hooks/useVideoPlayer";
 import VideoPlayer from "../components/ui/VideoPlayer";
+import { useAuth } from "../hooks/useAuth";
 
 export const PlayerPage = () => {
   const { id: movieId } = useParams<{ id: string }>();
@@ -32,6 +33,9 @@ export const PlayerPage = () => {
   const [movie, setMovie] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  const { profile } = useAuth();
+  const hasFetchedRef = useRef(false); //ensure data is only fetched once
 
   const [videoSource, setVideoSource] = useState<{
     type: "mp4" | "hls";
@@ -63,6 +67,7 @@ export const PlayerPage = () => {
       try {
         setIsLoading(true);
         const movieData = await getMovieById(movieId);
+        console.log("🚀 movieData:", movieData);
         setMovie(movieData);
         const res = await getMoviePlaybackData(movieId);
 
@@ -82,8 +87,11 @@ export const PlayerPage = () => {
 
   // RESUME WATCH HISTORY
   //Khi load page -> resume
+
   useEffect(() => {
-    if (!movieId) return;
+    if (!movieId || !profile?.id || hasFetchedRef.current) return;
+
+    hasFetchedRef.current = true;
 
     const fetchProgress = async () => {
       try {
@@ -93,12 +101,15 @@ export const PlayerPage = () => {
           videoRef.current.currentTime = data.progress;
         }
       } catch (err) {
-        console.error(err);
         console.error("Fetch RESUME WATCH HISTORY error", err);
       }
     };
 
     fetchProgress();
+  }, [movieId, profile]);
+
+  useEffect(() => {
+    hasFetchedRef.current = false;
   }, [movieId]);
 
   // UI STATES
@@ -121,7 +132,6 @@ export const PlayerPage = () => {
       </div>
     );
   }
-
 
   if (error) {
     return (

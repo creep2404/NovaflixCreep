@@ -16,7 +16,7 @@ export default function App() {
   const [isNavigating, setIsNavigating] = useState(false);
 
   const hideNavbar =
-    pathname.startsWith("/movie") || pathname.startsWith("/admin");
+    pathname.startsWith("/movie/watch") || pathname.startsWith("/admin");
 
   useEffect(() => {
     if (!isReady) return; // No animate if auth not ready

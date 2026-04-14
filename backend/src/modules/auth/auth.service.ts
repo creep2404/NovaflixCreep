@@ -85,7 +85,6 @@ export const refreshTokenService = async (token: string) => {
     throw new AppError("Refresh token expired", 401);
   }
 
-  // 🔥 ROTATE refresh token (quan trọng)
   const newRefreshToken = generateRefreshToken({
     userId: user.id,
   });

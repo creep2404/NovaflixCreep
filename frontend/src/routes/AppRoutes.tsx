@@ -12,6 +12,7 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import { Login } from "../pages/auth/Login";
 import { Register } from "../pages/auth/Register";
 import { ForgotPassword } from "../pages/auth/ForgotPassword";
+import { MovieDetail } from "../pages/MovieDetail";
 
 export default function AppRoutes() {
   return (
@@ -29,7 +30,8 @@ export default function AppRoutes() {
         }
       /> */}
       <Route path="/search" element={<SearchPage />} />
-      <Route path="/movie/:id" element={<PlayerPage />} />
+      <Route path="/movie/watch/:id" element={<PlayerPage />} />
+      <Route path="/movie/:id" element={<MovieDetail />} />
 
       {/* Login */}
       <Route path="/login" element={<Login />} />

@@ -43,8 +43,8 @@ export const SearchPage = () => {
   };
 
   const { data, isLoading, isError, isFetching } = useMovies(filters);
-  const movies = data?.data?.data || [];
-  const meta = data?.data?.meta;
+  const movies = data?.data || [];
+  const meta = data?.meta;
 
   // ===============================
   // OTHER STATES (Inprogress)
@@ -128,7 +128,7 @@ export const SearchPage = () => {
     setDraftFilters(parsedFilters);
     setAppliedFilters(parsedFilters);
 
-    setIsInitialized(true); // 🔥 quan trọng
+    setIsInitialized(true); 
   }, []);
 
   return (
@@ -206,7 +206,7 @@ export const SearchPage = () => {
                         onClick={() => handleSelect(movie.title)}
                         className="p-2 hover:bg-white/10 rounded cursor-pointer"
                       >
-                        🔥 {movie.title}
+                        {movie.title}
                       </div>
                     ))}
                   </div>

@@ -1,7 +1,7 @@
 import { Info, Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-export const HeroSection = ({ movie, onWatch }) => {
+export const HeroSection = ({ movie }) => {
   if (!movie) return null;
   const navigate = useNavigate();
 
@@ -51,13 +51,15 @@ export const HeroSection = ({ movie, onWatch }) => {
 
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate(`movies/${movie.id}`)}
+              onClick={() => navigate(`/movie/watch/${movie.id}/`)}
               className="flex items-center gap-2 bg-primary text-surface px-8 py-4 rounded-full font-bold text-lg hover:bg-primary-dim transition-all hover:scale-105"
             >
               <Play className="fill-current" size={24} />
               Watch Now
             </button>
-            <button className="flex items-center gap-2 bg-surface-high/80 backdrop-blur-md text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-surface-highest transition-all border border-white/10 hover:border-white/30">
+            <button 
+            onClick={() => navigate(`/movie/${movie.id}/`)}
+            className="flex items-center gap-2 bg-surface-high/80 backdrop-blur-md text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-surface-highest transition-all border border-white/10 hover:border-white/30">
               <Info size={24} />
               More Info
             </button>

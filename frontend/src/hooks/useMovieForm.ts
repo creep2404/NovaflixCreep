@@ -111,7 +111,6 @@ export const useMovieForm = () => {
       await createMovieApi({
         title: form.title,
         description: form.description,
-        videoUrl: videoRes.key,
         thumbnailUrl: thumbRes.key,
         duration: form.duration,
         videoId: newVideoId,

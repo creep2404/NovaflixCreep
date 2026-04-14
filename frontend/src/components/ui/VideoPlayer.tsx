@@ -66,13 +66,13 @@ const VideoPlayer = forwardRef<HTMLVideoElement, Props>(
           const clickX = e.clientX - rect.left;
           const width = rect.width;
 
-          // 🔥 LEFT ZONE
+          // LEFT ZONE
           if (clickX < width * 0.4) {
             video.currentTime = Math.max(0, video.currentTime - 10);
             return;
           }
 
-          // 🔥 RIGHT ZONE
+          // RIGHT ZONE
           if (clickX > width * 0.6) {
             video.currentTime = Math.min(
               video.duration,
@@ -81,7 +81,7 @@ const VideoPlayer = forwardRef<HTMLVideoElement, Props>(
             return;
           }
 
-          // 🔥 CENTER → fullscreen
+          // CENTER → fullscreen
           if (!document.fullscreenElement) {
             video.requestFullscreen();
           } else {

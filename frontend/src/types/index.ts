@@ -16,11 +16,23 @@ export interface Movie {
   id: string;
   title: string;
   description: string;
-  year: number;
-  duration: string;
-  rating: string;
-  genres: string[];
+
   thumbnailUrl: string;
+  videoUrl: string;
+
+  duration: number;          
+  releaseYear: string | null; 
+
+  rating: number;           
+  ratingCount: number;
+
+  genres: {
+    genre: {
+      name: string;
+    };
+  }[];
+
+  
   isPremium?: boolean;
   isOriginal?: boolean;
   quality?: string;
@@ -64,11 +76,29 @@ export interface QueryGenre extends PaginationQuery {}
 export interface CreateMovie {
   title: string;
   description?: string;
-  videoUrl: string;
   thumbnailUrl?: string;
   duration: number;
   genres?: string[]; // list of genreId
   videoId: string;
   releaseYear?: string;
   rating: number; 
+}
+
+export interface CastMember {
+  id: string;
+  name: string;
+  role: string;
+  imageUrl: string;
+  imageAlt: string;
+}
+
+export interface Review {
+  id: string;
+  name: string;
+  initials: string;
+  time: string;
+  rating: number;
+  text: string;
+  likes: number;
+  isLiked: boolean;
 }

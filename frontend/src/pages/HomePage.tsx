@@ -1,19 +1,18 @@
 // pages/BrowsePage.tsx
-import { useNavigate } from "react-router-dom";
 import { useHomepageData } from "../hooks/useHomepageData";
 import { HeroSection } from "../components/sections/HeroSection";
 import { Row } from "../components/sections/Row";
 import { MovieCard } from "../components/ui/MovieCard";
 import { Skeleton } from "../components/ui/Skeleton";
 import { ChevronRight } from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
 
 export const BrowsePage = () => {
-  const navigate = useNavigate();
-
   const { trending, thrillers, continueWatching } = useHomepageData();
   // console.log("trending:", trending);
   // console.log("thrillers:", thrillers);
   // console.log("continueWatching:", continueWatching);
+  const { profile } = useAuth();
 
   const heroMovie =
     trending.data && trending.data.length > 0 ? trending.data[0] : null;
@@ -21,34 +20,30 @@ export const BrowsePage = () => {
   return (
     <div className="min-h-screen bg-surface pb-20 animate-in fade-in duration-500">
       {/* HERO */}
-      {heroMovie && (
-        <HeroSection
-          movie={heroMovie}
-          onWatch={() => navigate(`/movies/${heroMovie.id}/play`)}
-        />
-      )}
+      {heroMovie && <HeroSection movie={heroMovie} />}
 
       {/* <div className="px-6 mt-10 space-y-12"> */}
       <div className="max-w-[1600px] mx-auto px-6 lg:px-12 -mt-32 relative z-10 flex flex-col gap-12">
         {/* CONTINUE WATCHING */}
-        <Row
-          title="Continue Watching"
-          data={continueWatching.data}
-          isLoading={continueWatching.isLoading}
-          error={continueWatching.error}
-          isViewAll={false}
-        >
-          {continueWatching.data?.data?.map((movie) => (
-            <div key={movie.id} className="w-[280px] flex-shrink-0">
-              <MovieCard
-                movie={movie}
-                progress={movie.progress ?? 0}
-                onClick={() => navigate(`/movie/${movie.id}`)}
-                orientation="landscape"
-              />
-            </div>
-          ))}
-        </Row>
+        {profile?.id && (
+          <Row
+            title="Continue Watching"
+            data={continueWatching.data}
+            isLoading={continueWatching.isLoading}
+            error={continueWatching.error}
+            isViewAll={false}
+          >
+            {continueWatching.data?.data?.map((movie) => (
+              <div key={movie.id} className="w-[280px] flex-shrink-0">
+                <MovieCard
+                  movie={movie}
+                  progress={movie.progress ?? 0}
+                  orientation="landscape"
+                />
+              </div>
+            ))}
+          </Row>
+        )}
 
         {/* TRENDING */}
         <Skeleton className="h-8 w-64 mb-6" />
@@ -61,11 +56,7 @@ export const BrowsePage = () => {
         >
           {trending.data?.map((movie) => (
             <div key={movie.id} className="w-[280px] flex-shrink-0">
-              <MovieCard
-                movie={movie}
-                onClick={() => navigate(`/movie/${movie.id}`)}
-                orientation="landscape"
-              />
+              <MovieCard movie={movie} orientation="landscape" />
             </div>
           ))}
         </Row>
@@ -80,11 +71,7 @@ export const BrowsePage = () => {
         >
           {thrillers.data?.map((movie) => (
             <div key={movie.id} className="w-[200px] flex-shrink-0">
-              <MovieCard
-                movie={movie}
-                onClick={() => navigate(`/movie/${movie.id}`)}
-                orientation="portrait"
-              />
+              <MovieCard movie={movie} orientation="portrait" />
             </div>
           ))}
         </Row>

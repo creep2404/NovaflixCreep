@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { getWatchHistory, saveWatchHistory } from "../apis/watchHistory.api";
+import { useAuth } from "./useAuth";
 
 export const useVideoPlayer = (movieId: string) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -13,6 +14,8 @@ export const useVideoPlayer = (movieId: string) => {
 
   const [showControls, setShowControls] = useState(true);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const { profile } = useAuth();
 
   // ========================
   // SHOW CONTROLS ON PAUSE, HIDE ON PLAY
@@ -66,7 +69,7 @@ export const useVideoPlayer = (movieId: string) => {
       video.addEventListener("waiting", onWaiting);
       video.addEventListener("playing", onPlaying);
 
-      clearInterval(interval); // 🔥 dừng polling
+      clearInterval(interval); // dừng polling
 
       return () => {
         video.removeEventListener("timeupdate", onTimeUpdate);
@@ -76,7 +79,7 @@ export const useVideoPlayer = (movieId: string) => {
       };
     };
 
-    interval = setInterval(setup, 100); // 🔥 chờ video mount
+    interval = setInterval(setup, 100); // chờ video mount
 
     return () => clearInterval(interval);
   }, []);
@@ -115,15 +118,23 @@ export const useVideoPlayer = (movieId: string) => {
   // ========================
   // SAVE HISTORY (DEBOUNCE)
   // ========================
+  const lastSavedRef = useRef(0); // last saved progress
   useEffect(() => {
-    if (!movieId) return;
+    if (!movieId || !profile) return;
 
     const handler = setTimeout(() => {
-      if (!videoRef.current) return;
+      const video = videoRef.current;
+      if (!video) return;
 
-      const progress = videoRef.current.currentTime;
+      const progress = video.currentTime;
 
+      // skip nếu chưa xem đủ
       if (progress < 1) return;
+
+      // chỉ save nếu tiến thêm >= 5s
+      if (Math.abs(progress - lastSavedRef.current) < 5) return;
+
+      lastSavedRef.current = progress;
 
       saveWatchHistory({
         movieId,
@@ -132,30 +143,25 @@ export const useVideoPlayer = (movieId: string) => {
 
       console.log("Saving watch history:", {
         movieId,
-        progress: videoRef.current.currentTime,
+        progress,
       });
     }, 3000); // debounce 3s
 
     return () => clearTimeout(handler);
-  }, [currentTime, movieId]);
+  }, [currentTime, movieId, profile]);
 
   // ========================
   // LOAD HISTORY ON MOUNT
   // ========================
   useEffect(() => {
-    console.log("EFFECT RUN: movieId =", movieId);
-
-    if (!movieId) return;
+    if (!movieId || !profile) return;
 
     let cancelled = false;
 
     const init = async () => {
       try {
-        // 🔥 CALL API 1 LẦN
         const res = await getWatchHistory(movieId);
         const progress = res.data?.progress;
-
-        console.log("Loaded watch history:", progress);
 
         if (!progress) return;
 
@@ -192,7 +198,7 @@ export const useVideoPlayer = (movieId: string) => {
     return () => {
       cancelled = true;
     };
-  }, [movieId]);
+  }, [movieId, profile]);
 
   // ========================
   // FULLSCREEN

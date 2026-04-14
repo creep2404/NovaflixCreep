@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { getSuggestMovies } from "../services/movie.service";
+import { getSuggestMovies } from "../apis/movie.api";
+
 export const useSuggest = (search: string) => {
   return useQuery({
     queryKey: ["suggest", search],

@@ -1,6 +1,5 @@
 import { useGenres } from "@/src/hooks/useGenres";
 import { Genre } from "@/src/types";
-import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type Props = {
