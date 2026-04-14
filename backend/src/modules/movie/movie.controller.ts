@@ -60,7 +60,7 @@ export const uploadMovieVideo = asyncHandler(
     }
 
     // const { videoId } = await uploadVideoToS3(file);
-    const videoId = "123";
+    const videoId = "test-video-id";
     return successResponse(res, { videoId }, "Video uploaded successfully");
   },
 );

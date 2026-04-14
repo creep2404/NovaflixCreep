@@ -68,29 +68,7 @@ router.post("/register", authLimiter, register);
  *       401:
  *         description: Invalid credentials
  */
-router.post("/login", login);
-
-/**
- * @swagger
- * /auth/me:
- *   get:
- *     summary: Get current user
- *     description: Retrieve authenticated user information
- *     tags: [Auth]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: User info retrieved successfully
- *       401:
- *         description: Unauthorized
- */
-router.get("/me", authMiddleware, (req, res) => {
-  res.json({
-    message: "Protected route",
-    user: (req as any).user,
-  });
-});
+router.post("/login", authLimiter, login);
 
 /**
  * @swagger

@@ -6,12 +6,20 @@ export const createMovieRepo = async (data: CreateMovieDto) => {
   const movie = await prisma.movie.create({
     data: {
       title: data.title,
-      description: data.description,
-      videoUrl: data.videoUrl,
+      slug: data.slug,
       thumbnailUrl: data.thumbnailUrl,
       duration: data.duration,
-      videoId: data.videoId,
-      releaseYear: data.releaseYear ? new Date(data.releaseYear) : undefined,
+
+      detail: {
+        create: {
+          description: data.description,
+          videoId: data.videoId,
+          trailerUrl: data?.trailerUrl,
+          releaseDate: data.releaseDate
+            ? new Date(data.releaseDate)
+            : undefined,
+        },
+      },
     },
   });
 
@@ -29,24 +37,43 @@ export const createMovieRepo = async (data: CreateMovieDto) => {
     where: { id: movie.id },
     include: {
       genres: { include: { genre: true } },
+      detail: true,
     },
   });
 };
 
 export const updateMovieRepo = async (id: string, data: UpdateMovieDto) => {
-  const { genres, ...rest } = data;
+  const {
+    genres,
+    description,
+    videoId,
+    trailerUrl,
+    releaseDate,
+    rating,
+    ...movieData
+  } = data;
 
   return await prisma.movie.update({
     where: { id },
     data: {
-      ...rest,
+      ...movieData,
+
+      detail: {
+        update: {
+          description,
+          videoId,
+          trailerUrl,
+          releaseDate: releaseDate ? new Date(releaseDate) : undefined,
+          rating,
+        },
+      },
 
       ...(genres && {
         genres: {
-          deleteMany: {}, // delete old genre
-          create: genres.map((name) => ({
+          deleteMany: {},
+          create: genres.map((genreId) => ({
             genre: {
-              connect: { name }, // unique name
+              connect: { id: genreId },
             },
           })),
         },
@@ -70,6 +97,14 @@ export const getAllMoviesRepo = async () => {
 export const getMovieByIdRepo = async (id: string) => {
   return prisma.movie.findUnique({
     where: { id },
+    include: {
+      detail: true,
+      genres: {
+        include: {
+          genre: true,
+        },
+      },
+    },
   });
 };
 
@@ -162,6 +197,7 @@ export const getMoviesRepo = async ({
           genre: true,
         },
       },
+      detail: true,
     },
 
     // SORT
@@ -224,8 +260,10 @@ export const countMoviesRepo = async ({
 
         rating !== undefined
           ? {
-              rating: {
-                gte: rating,
+              detail: {
+                rating: {
+                  gte: rating,
+                },
               },
             }
           : {},

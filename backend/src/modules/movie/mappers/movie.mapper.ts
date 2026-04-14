@@ -10,21 +10,24 @@ export const formatMovie = (movie: any) => {
   return {
     id: movie.id,
     title: movie.title,
-    description: movie.description,
-    videoUrl: movie.videoUrl,
+    slug: movie.slug,
     thumbnailUrl: movie.thumbnailUrl,
 
-    // RAW DATA (logic)
+    // RAW DATA
     duration: movie.duration,
 
-    // FORMATTED DATA (UI render)
+    // UI
     durationLabel: formatDuration(movie.duration),
 
     createdAt: movie.createdAt,
 
-    // FILTER RELATED
-    rating: movie.rating ?? 0,
-    isPremium: movie.isPremium ?? false,
+    // FROM MOVIE DETAIL
+    description: movie.detail?.description,
+    videoId: movie.detail?.videoId,
+    trailerUrl: movie.detail?.trailerUrl,
+    releaseDate: movie.detail?.releaseDate,
+
+    rating: movie.detail?.rating ?? 0,
 
     // GENRES
     genres: movie.genres?.map((g: any) => g.genre.name) || [],

@@ -1,11 +1,17 @@
 export interface CreateMovieDto {
   title: string;
+  slug?: string;
+
   description?: string;
-  videoUrl: string;
   thumbnailUrl?: string;
   duration: number;
-  genres?: string[]; // list of genreId
+
+  genres?: string[]; 
+
   videoId: string;
-  releaseYear?: string;
-  rating: number;
+  trailer: string;
+
+  releaseDate?: string;
+
+  rating: number; 
 }

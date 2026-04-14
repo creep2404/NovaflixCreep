@@ -18,9 +18,28 @@ import { eventBus } from "@/events/eventBus";
 import { EVENTS } from "@/common/constants/events.constants";
 import { getPresignedDownloadUrl } from "@/common/utils/s3-upload.util";
 import { FILE_PATHS } from "@/common/constants/file-path.constants";
+import { generateSlug } from "@/common/utils/slug";
+import { AppError } from "@/common/utils/AppError";
 
 export const createMovieService = async (data: CreateMovieDto) => {
-  const movie = await createMovieRepo(data);
+  if (data.duration > 10 * 3600) {
+    throw new AppError("Duration too long", 400);
+  }
+
+  if (data.rating !== undefined && (data.rating < 0 || data.rating > 5)) {
+    throw new AppError("Rating must be between 0 and 5", 400);
+  }
+
+  if (!data.description || data.description.length < 10) {
+    throw new AppError("Description too short", 400);
+  }
+
+  const slug = generateSlug(data.title);
+  console.log("CREATE MOVIE DATA:", data);
+  const movie = await createMovieRepo({
+    ...data,
+    slug,
+  });
 
   //Invalidate cache
   await invalidateMovieCache();
@@ -30,7 +49,17 @@ export const createMovieService = async (data: CreateMovieDto) => {
 };
 
 export const updateMovieService = async (id: string, data: UpdateMovieDto) => {
-  const movie = await updateMovieRepo(id, data);
+  if (data.rating !== undefined && (data.rating < 0 || data.rating > 5)) {
+    throw new AppError("Invalid rating", 400);
+  }
+
+  let movie;
+  if (!!data.title) {
+    const slug = generateSlug(data.title);
+    await updateMovieRepo(id, { ...data, slug });
+  } else {
+    await updateMovieRepo(id, data);
+  }
 
   await invalidateMovieCache();
 
@@ -50,16 +79,49 @@ export const getAllMoviesService = async () => {
 };
 
 export const getMovieByIdService = async (id: string) => {
-  return await getMovieByIdRepo(id);
+  // CACHE KEY
+  const cacheKey = `movie:${id}`;
+
+  // CHECK CACHE
+  const cached = await getCache(cacheKey);
+  if (cached) {
+    console.log("CACHE HIT ⚡");
+    return cached;
+  }
+
+  console.log("CACHE MISS ❌");
+
+  // QUERY DB
+  const movie = await getMovieByIdRepo(id);
+
+  if (!movie) {
+    throw new Error("Movie not found");
+  }
+
+  // PRESIGNED URL
+  const movieWithUrl = {
+    ...movie,
+    thumbnailUrl: movie.thumbnailUrl
+      ? await getPresignedDownloadUrl(movie.thumbnailUrl)
+      : null,
+  };
+
+  // FORMAT
+  const result = {
+    data: formatMovie(movieWithUrl),
+  };
+
+  // SET CACHE
+  await setCache(cacheKey, result, 60);
+
+  return result;
 };
 
 export const getMoviesService = async (query: QueryMovieDto) => {
   const page = query.page || 1;
   const limit = query.limit || 10;
 
-  // ===============================
   // NORMALIZE INPUT
-  // ===============================
   const genres = Array.isArray(query.genres)
     ? query.genres
     : query.genres
@@ -153,7 +215,7 @@ export const getUrlPresignedByMovieId = async (
     throw new Error("Movie not found");
   }
 
-  const key = FILE_PATHS[fileType](movie.videoId);
+  const key = FILE_PATHS[fileType](movie.detail.videoId);
 
   const url = await getPresignedDownloadUrl(key);
 

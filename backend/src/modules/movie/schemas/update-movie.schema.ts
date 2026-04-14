@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { createMovieSchema } from "./create-movie.schema";
 
 export const updateMovieSchema = createMovieSchema

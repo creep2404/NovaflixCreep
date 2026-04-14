@@ -12,15 +12,47 @@ enum Role {
   ADMIN
 }
 
+enum MovieStatus {
+  COMING_SOON
+  RELEASED
+  ARCHIVED
+}
+
+enum UserStatus {
+  ACTIVE
+  BANNED
+  DELETED
+}
+
+enum UserSubscription {
+  FREE
+  PREMIUM
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
   password  String
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
 
-  refreshToken  String?  
-  refreshTokenExpiresAt DateTime? 
+  name      String?
+  avatarUrl String?
+
+  role      Role     @default(USER)
+  status    UserStatus @default(ACTIVE)
+
+  isVerified Boolean @default(false)
+  emailVerifiedAt DateTime?
+
+  lastLoginAt DateTime?
+  passwordUpdatedAt DateTime?
+
+  refreshToken String?
+  refreshTokenExpiresAt DateTime?
+
+  failedLoginCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   watchHistories WatchHistory[]
   favorites      Favorite[]
@@ -30,19 +62,75 @@ model User {
 model Movie {
   id           String   @id @default(uuid())
   title        String
-  description  String?
+  slug         String   @unique
   thumbnailUrl String?
-  videoUrl     String
   duration     Int
-  createdAt    DateTime @default(now())
-  releaseYear  DateTime?
 
+  views        Int      @default(0)
+  isPublished  Boolean  @default(true)
+  status       MovieStatus @default(RELEASED)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  detail       MovieDetail?
+  
   genres         MovieGenre[]
   watchHistories WatchHistory[]
   favorites      Favorite[]
-  videoId        String
-  rating         Float   @default(0)
-  ratingCount    Int     @default(0)
+  episodes    Episode[]
+  actors      MovieActor[]
+}
+
+model MovieDetail {
+  id          String   @id @default(uuid())
+  movieId     String   @unique
+
+  description String
+  videoId     String
+  trailerUrl  String?
+
+  country     String?
+  ageRating   String?
+  releaseDate DateTime?
+
+  rating      Float   @default(0)
+
+  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@index([movieId])
+}
+
+model Episode {
+  id        String @id @default(uuid())
+  movieId   String
+  title     String
+  videoUrl  String
+  duration  Int
+  episodeNo Int
+
+  movie Movie @relation(fields: [movieId], references: [id])
+
+  @@index([movieId])
+}
+
+model Actor {
+  id    String @id @default(uuid())
+  name  String
+  avatarUrl String?
+  movies MovieActor[]
+}
+
+model MovieActor {
+  movieId String
+  actorId String
+  role    String?
+
+  movie Movie @relation(fields: [movieId], references: [id])
+  actor Actor @relation(fields: [actorId], references: [id])
+
+  @@id([movieId, actorId])
+  @@index([actorId])
 }
 
 model Genre {
