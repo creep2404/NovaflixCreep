@@ -1,4 +1,4 @@
-xport type ScreenType =
+export type ScreenType =
   | "browse"
   | "search"
   | "player"
