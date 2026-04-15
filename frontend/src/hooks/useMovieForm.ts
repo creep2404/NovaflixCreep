@@ -20,9 +20,12 @@ export const useMovieForm = () => {
     description: "",
     duration: 0,
     genres: [] as string[],
-    releaseYear: "",
+    releaseDate: "",
     rating: "",
     thumbnailFile: null as File | null,
+    trailerUrl: "",
+    country: "",
+    ageRating: "",
   });
 
   // ERROR
@@ -41,7 +44,7 @@ export const useMovieForm = () => {
     if (!form.title) return "Title is required";
     if (!form.description) return "Description is required";
     if (form.genres.length === 0) return "Select at least one genre";
-    if (!form.releaseYear) return "Release year is required";
+    if (!form.releaseDate) return "Release year is required";
     if (!form.rating) return "Rating is required";
 
     return null;
@@ -60,9 +63,12 @@ export const useMovieForm = () => {
       description: "",
       duration: 0,
       genres: [],
-      releaseYear: "",
+      releaseDate: "",
       rating: "",
       thumbnailFile: null,
+      trailerUrl: "",
+      country: "",
+      ageRating: "",
     });
   };
 
@@ -91,13 +97,12 @@ export const useMovieForm = () => {
     setVideoId(newVideoId);
 
     try {
-      // upload video
+      // Upload video
       const videoRes = await createUploadUrl({
         videoId: newVideoId,
-        fileType: "video",
       });
 
-      await uploadToS3(file!, videoRes.uploadUrl, setProgress);
+      await uploadToS3(file!, videoRes.key, setProgress);
 
       // Upload thumbnail
       const thumbRes = await createUploadUrl({
@@ -105,7 +110,7 @@ export const useMovieForm = () => {
         fileType: "thumbnail",
       });
 
-      await uploadToS3(thumbnailFile!, thumbRes.uploadUrl, setThumbProgress);
+      await uploadToS3(thumbnailFile!, thumbRes.key, setThumbProgress);
 
       // create movie
       await createMovieApi({
@@ -115,8 +120,11 @@ export const useMovieForm = () => {
         duration: form.duration,
         videoId: newVideoId,
         genres: form.genres,
-        releaseYear: form.releaseYear,
-        rating: form.rating,
+        releaseDate: form.releaseDate,
+        rating: Number(form.rating),
+        trailerUrl: form.trailerUrl,
+        country: form.country,
+        ageRating: form.ageRating,
       });
 
       setAlertModal({
@@ -124,9 +132,11 @@ export const useMovieForm = () => {
         message: "Create movie successfully.",
         type: "success",
       });
+      setLoading(false);
       reset();
     } catch (err) {
       console.error(err);
+      setLoading(false);
       setAlertModal({
         open: true,
         message: "Upload failed. Please try again.",

@@ -28,6 +28,8 @@ export const formatMovie = (movie: any) => {
     releaseDate: movie.detail?.releaseDate,
 
     rating: movie.detail?.rating ?? 0,
+    country: movie.detail?.country,
+    ageRating: movie.detail?.ageRating,
 
     // GENRES
     genres: movie.genres?.map((g: any) => g.genre.name) || [],

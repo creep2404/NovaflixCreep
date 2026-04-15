@@ -35,12 +35,9 @@ export const getMovies = asyncHandler(async (req: Request, res: Response) => {
 
 export const getMovieById = asyncHandler(
   async (req: Request, res: Response) => {
-    const { id } = req.validated!.params;
+    const { id } = req.validated!.params as { id: string };
     if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing or invalid 'id' parameter",
-      });
+      throw new Error("Movie ID is required");
     }
 
     const movie = await getMovieByIdService(id);
@@ -53,10 +50,7 @@ export const uploadMovieVideo = asyncHandler(
     const file = req.file;
 
     if (!file) {
-      return res.status(400).json({
-        success: false,
-        message: "No file uploaded",
-      });
+      throw new Error("No file uploaded");
     }
 
     // const { videoId } = await uploadVideoToS3(file);
@@ -71,10 +65,7 @@ export const getUploadUrl = asyncHandler(
     const { videoId, fileType } = req.body;
 
     if (!videoId || !fileType) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing videoId or fileType",
-      });
+      throw new Error("Video ID and file type are required");
     }
 
     const data = await getPresignedUploadUrl(videoId, fileType);
@@ -89,8 +80,12 @@ export const getUploadUrl = asyncHandler(
 // GET /movies/123/playback?type=thumbnail
 export const getMoviePlayback = asyncHandler(
   async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     const { type } = req.query;
+
+    if (!id) {
+      throw new Error("Movie ID is required");
+    }
 
     const fileType = type === "thumbnail" ? "thumbnail" : "video";
 

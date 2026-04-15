@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { useAuthStore } from "@/store/auth.store";
+import { refreshTokenApi } from "../apis/auth.api";
 
 export const useAuthInit = () => {
   const { refreshToken, setAccessToken, clear } = useAuthStore();
@@ -14,14 +14,8 @@ export const useAuthInit = () => {
       }
 
       try {
-        console.log("🔁 Path:",  `${import.meta.env.VITE_API_URL}/auth/refresh`);
-        console.log("🔁 REFRESH TOKEN:", refreshToken);
-        const res = await axios.post(
-          `${import.meta.env.VITE_API_URL}/auth/refresh`,
-          { refreshToken }
-        );
-
-        const newAccessToken = res.data.data.accessToken;
+        const data = await refreshTokenApi(refreshToken);
+        const newAccessToken = data.accessToken;
 
         setAccessToken(newAccessToken);
       } catch (err) {

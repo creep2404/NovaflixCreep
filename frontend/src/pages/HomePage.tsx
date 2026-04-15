@@ -8,14 +8,14 @@ import { ChevronRight } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
 export const BrowsePage = () => {
-  const { trending, thrillers, continueWatching } = useHomepageData();
+  const { trending, continueWatching } = useHomepageData();
   // console.log("trending:", trending);
   // console.log("thrillers:", thrillers);
   // console.log("continueWatching:", continueWatching);
   const { profile } = useAuth();
 
   const heroMovie =
-    trending.data && trending.data.length > 0 ? trending.data[0] : null;
+    trending.data && trending.data?.length > 0 ? trending.data[0] : null;
 
   return (
     <div className="min-h-screen bg-surface pb-20 animate-in fade-in duration-500">
@@ -33,11 +33,11 @@ export const BrowsePage = () => {
             error={continueWatching.error}
             isViewAll={false}
           >
-            {continueWatching.data?.data?.map((movie) => (
+            {continueWatching?.data?.map((movie) => (
               <div key={movie.id} className="w-[280px] flex-shrink-0">
                 <MovieCard
                   movie={movie}
-                  progress={movie.progress ?? 0}
+                  //progress={movie.progress ?? 0}
                   orientation="landscape"
                 />
               </div>
@@ -54,24 +54,9 @@ export const BrowsePage = () => {
           error={trending.error}
           isViewAll
         >
-          {trending.data?.map((movie) => (
+          {trending?.data?.map((movie) => (
             <div key={movie.id} className="w-[280px] flex-shrink-0">
               <MovieCard movie={movie} orientation="landscape" />
-            </div>
-          ))}
-        </Row>
-
-        {/* THRILLERS */}
-        <Row
-          title="Thrillers"
-          data={thrillers.data}
-          isLoading={thrillers.isLoading}
-          error={thrillers.error}
-          isViewAll={false}
-        >
-          {thrillers.data?.map((movie) => (
-            <div key={movie.id} className="w-[200px] flex-shrink-0">
-              <MovieCard movie={movie} orientation="portrait" />
             </div>
           ))}
         </Row>

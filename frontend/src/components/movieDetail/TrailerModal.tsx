@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
-import { getYoutubeId } from "@/src/utils/youtube";
+import { getYoutubeId } from "@/src/common/utils/youtube";
 
 interface TrailerModalProps {
   isOpen: boolean;

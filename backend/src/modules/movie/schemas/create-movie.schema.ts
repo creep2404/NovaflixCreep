@@ -9,10 +9,12 @@ export const createMovieSchema = z.object({
   genres: z.array(z.string()).optional(),
 
   // MovieDetail
-  description: z.string().min(1),
+  description: z.string().min(1), 
   videoId: z.string().min(1),
   trailerUrl: z.string().optional(),
   releaseDate: z.string().optional(),
 
   rating: z.number().min(0).max(5).optional(),
+  country: z.string().optional(),
+  ageRating: z.string().optional(),
 });

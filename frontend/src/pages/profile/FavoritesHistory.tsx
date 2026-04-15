@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScreenType } from '../../types';
+import { ScreenType } from '../../common/types';
 import { Menu, PlayCircle, MoreVertical } from 'lucide-react';
 
 interface FavoritesHistoryProps {

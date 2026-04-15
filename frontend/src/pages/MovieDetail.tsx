@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import CastAndCrew from "../components/movieDetail/CastAndCrew";
 import HeroSection from "../components/movieDetail/HeroSection";
 import TrailerModal from "../components/movieDetail/TrailerModal";
-import UserReviews from "../components/movieDetail/UserReviews";
 import { getMovieById } from "../apis/movie.api";
 import { useParams } from "react-router-dom";
+import { Review } from "../common/types";
 
 export const MovieDetail = () => {
   const { id } = useParams();
@@ -15,15 +15,15 @@ export const MovieDetail = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [totalReviewCount, setTotalReviewCount] = useState(0);
 
-  // 👉 fetch movie + reviews
+  // fetch movie + reviews
   useEffect(() => {
     if (!id) return;
 
     const fetchData = async () => {
       try {
         const movieRes = await getMovieById(id);
-        console.log("🚀 movieRes:", movieRes.data);
-        setMovie(movieRes.data);
+        console.log("🚀 movieRes:", movieRes);
+        setMovie(movieRes);
 
         //const reviewRes = await getMovieReviews(id);
         //setReviews(reviewRes);

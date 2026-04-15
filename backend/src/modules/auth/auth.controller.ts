@@ -17,9 +17,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   // check block
   const allowed = await checkLoginAttempts(key);
   if (!allowed) {
-    return res.status(429).json({
-      message: "Too many failed attempts. Try again later.",
-    });
+    throw new Error("Too many failed attempts. Try again later.");
   }
   const { email, password } = req.body;
   try {

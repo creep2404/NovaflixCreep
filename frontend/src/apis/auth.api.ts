@@ -1,44 +1,38 @@
+import { useAuthStore } from "@/store/auth.store";
 import { api } from "./axios";
-import { jwtDecode } from "jwt-decode";
+import { getUserIdFromToken } from "../common/utils/jwt";
+import { AuthResponse } from "../common/types";
 
 export const loginApi = async (payload: {
   email: string;
   password: string;
-}) => {
-  const res = await api.post("/auth/login", payload);
-
-  return res.data;
+}): Promise<AuthResponse> => {
+  return await api.post("/auth/login", payload);
 };
 
-export const registerApi = async (email: string, password: string) => {
-  const res = await api.post("/auth/register", {
+export const registerApi = async (email: string, password: string) =>
+  await api.post("/auth/register", {
     email,
     password,
   });
 
-  return res.data;
-};
-
 export const getProfileApi = async () => {
-  const token = localStorage.getItem("accessToken");
+  const token = useAuthStore.getState().accessToken;
 
-  if (!token) {
-    throw new Error("No token");
-  }
-  const decoded: any = jwtDecode(token);
-  console.log("🚀 getProfileApi decoded", decoded);
-  const id = decoded?.userId;
+  if (!token) throw new Error("No token");
+
+  const id = getUserIdFromToken(token);
 
   if (!id) throw new Error("Invalid token");
   const res = await api.get(`/users/${id}`);
-  console.log("🚀 getProfileApi res: ", res);
-  return res.data;
+  return res;
 };
 
-export const logoutApi = async (refreshToken: string) => {
-  return api.post("/auth/logout", { refreshToken });
-};
+export const logoutApi = async (refreshToken: string) =>
+  await api.post("/auth/logout", { refreshToken });
 
-export const forgotPasswordApi = async (email: string) => {
-  return api.post("/auth/forgot-password", { email });
-};
+export const forgotPasswordApi = async (email: string) =>
+  await api.post("/auth/forgot-password", { email });
+
+export const refreshTokenApi = async (refreshToken: string) =>
+  await api.post("/auth/refresh", { refreshToken });

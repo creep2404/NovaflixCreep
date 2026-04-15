@@ -5,7 +5,6 @@ import AppRoutes from "./routes/AppRoutes";
 import { useLocation } from "react-router-dom";
 import { useAuthInit } from "./hooks/useAuthInit";
 import { LoadingProvider } from "./context/LoadingContext";
-import { testAuthStore } from "@/scripts/testAuthStore";
 
 export default function App() {
   const { isReady } = useAuthInit();

@@ -9,8 +9,8 @@ const validate =
     const result = await schema.safeParseAsync(req[source]);
 
     if (!result.success) {
-      return res.status(400).json({
-        success: false,
+      return next({
+        status: 400,
         message: `Invalid ${source} schema`,
         errors: result.error.issues.map((e) => ({
           field: e.path.join("."),

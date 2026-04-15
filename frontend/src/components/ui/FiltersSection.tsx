@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Genre } from "../../types";
+import { Genre } from "../../common/types";
 import { useGenres } from "../../hooks/useGenres";
 import { Clock, Crown, SlidersHorizontal, Star } from "lucide-react";
 

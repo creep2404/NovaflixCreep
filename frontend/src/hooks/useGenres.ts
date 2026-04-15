@@ -12,6 +12,5 @@ export const useGenres = (skip: number) => {
 
       return res?.data || {};
     },
-    keepPreviousData: true,
   });
 };

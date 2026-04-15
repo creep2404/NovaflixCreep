@@ -4,7 +4,7 @@ export class AppError extends Error {
   constructor(message: string, status = 400) {
     super(message);
     this.status = status;
-
+    
     Error.captureStackTrace(this, this.constructor);
   }
 }

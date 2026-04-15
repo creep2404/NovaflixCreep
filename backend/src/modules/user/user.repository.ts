@@ -23,6 +23,8 @@ export const findUserByIdRepo = async (id: string) => {
       email: true,
       role: true,
       createdAt: true,
+      refreshToken: true,
+      refreshTokenExpiresAt: true,
     },
   });
 };

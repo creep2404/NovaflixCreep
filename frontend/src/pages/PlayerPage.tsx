@@ -18,7 +18,7 @@ import {
 import { MOCK_MOVIES, MOCK_EPISODES, MOCK_COMMENTS } from "../data/mock";
 import { MovieCard } from "../components/ui/MovieCard";
 //import { useSimulatedData } from '../hooks/useData';
-import { Skeleton, SkeletonCard } from "../components/ui/Skeleton";
+import { Skeleton } from "../components/ui/Skeleton";
 import { ErrorState, EmptyState } from "../components/ui/StateViews";
 import { getMovieById, getMoviePlaybackData } from "../apis/movie.api";
 import { getWatchHistory } from "../apis/watchHistory.api";
@@ -71,7 +71,7 @@ export const PlayerPage = () => {
         setMovie(movieData);
         const res = await getMoviePlaybackData(movieId);
 
-        const playbackData = await res.data;
+        const playbackData = res;
         console.log("🚀 playbackData:", playbackData);
 
         setVideoSource(playbackData);
@@ -346,7 +346,7 @@ export const PlayerPage = () => {
               </div>
             </div>
             <p className="text-lg text-on-surface-variant leading-relaxed">
-              {movie.data.description}
+              {movie.description}
             </p>
           </div>
 

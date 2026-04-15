@@ -1,8 +1,16 @@
 import bcrypt from "bcrypt";
 import { AppError } from "@/common/utils/AppError";
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "@/common/utils/jwt.util";
-import { createUserRepo, findUserByEmailRepo, findUserByIdRepo, updateUserRefreshToken } from "../user/user.repository";
-
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} from "@/common/utils/jwt.util";
+import {
+  createUserRepo,
+  findUserByEmailRepo,
+  findUserByIdRepo,
+  updateUserRefreshToken,
+} from "../user/user.repository";
 
 const REFRESH_TOKEN_EXPIRES = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -48,7 +56,7 @@ export const loginService = async (email: string, password: string) => {
   await updateUserRefreshToken(
     user.id,
     refreshToken,
-    new Date(Date.now() + REFRESH_TOKEN_EXPIRES)
+    new Date(Date.now() + REFRESH_TOKEN_EXPIRES),
   );
 
   const { password: _, ...safeUser } = user;
@@ -60,13 +68,18 @@ export const loginService = async (email: string, password: string) => {
   };
 };
 
-
 export const refreshTokenService = async (token: string) => {
   if (!token) {
     throw new AppError("No refresh token provided", 400);
   }
 
-  const payload = verifyRefreshToken(token);
+  let payload;
+
+  try {
+    payload = verifyRefreshToken(token);
+  } catch (err) {
+    throw new AppError("Invalid refresh token", 401);
+  }
 
   const user = await findUserByIdRepo(payload.userId);
 
@@ -78,10 +91,7 @@ export const refreshTokenService = async (token: string) => {
     throw new AppError("Invalid refresh token", 401);
   }
 
-  if (
-    !user.refreshTokenExpiresAt ||
-    user.refreshTokenExpiresAt < new Date()
-  ) {
+  if (!user.refreshTokenExpiresAt || user.refreshTokenExpiresAt < new Date()) {
     throw new AppError("Refresh token expired", 401);
   }
 
@@ -92,7 +102,7 @@ export const refreshTokenService = async (token: string) => {
   await updateUserRefreshToken(
     user.id,
     newRefreshToken,
-    new Date(Date.now() + REFRESH_TOKEN_EXPIRES)
+    new Date(Date.now() + REFRESH_TOKEN_EXPIRES),
   );
 
   const accessToken = generateAccessToken({

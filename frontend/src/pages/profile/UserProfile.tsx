@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScreenType } from '../../types';
+import { ScreenType } from '../../common/types';
 import { ArrowLeft, Settings, Star, Lock, CreditCard, Sliders, HelpCircle, LogOut } from 'lucide-react';
 
 interface UserProfileProps {

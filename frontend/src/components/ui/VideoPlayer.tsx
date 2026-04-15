@@ -7,7 +7,7 @@ type VideoSource = {
 };
 
 type Props = {
-  source: VideoSource;
+  source?: VideoSource;
   isPlaying: boolean;
   setIsPlaying: (v: boolean) => void;
 } & React.VideoHTMLAttributes<HTMLVideoElement>;
@@ -24,10 +24,10 @@ const VideoPlayer = forwardRef<HTMLVideoElement, Props>(
       video.removeAttribute("src");
       video.load();
 
-      if (source.type === "mp4") {
+      if (source?.type === "mp4") {
         video.src = source.url;
         video.load();
-      } else if (source.type === "hls") {
+      } else if (source?.type === "hls") {
         if (Hls.isSupported()) {
           const hls = new Hls();
           hls.loadSource(source.url);

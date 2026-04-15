@@ -1,4 +1,4 @@
-import { CastMember } from "../../types"
+import { CastMember } from "../../common/types"
 
 interface CastAndCrewProps {
   members: CastMember[];

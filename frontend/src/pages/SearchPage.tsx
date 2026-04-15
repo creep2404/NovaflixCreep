@@ -7,7 +7,7 @@ import { ErrorState, EmptyState } from "../components/ui/StateViews";
 import { useDebounce } from "../hooks/useDebounce";
 import { useMovies } from "../hooks/useMovies";
 import FiltersSection from "../components/ui/FiltersSection";
-import { getSearchHistory, saveSearchHistory } from "../utils/searchHistory";
+import { getSearchHistory, saveSearchHistory } from "../common/utils/searchHistory";
 import { useTrending } from "../hooks/useTrending";
 import { useSuggest } from "../hooks/useSuggest";
 
@@ -43,7 +43,7 @@ export const SearchPage = () => {
   };
 
   const { data, isLoading, isError, isFetching } = useMovies(filters);
-  const movies = data?.data || [];
+  const movies = data?.items || [];
   const meta = data?.meta;
 
   // ===============================
@@ -280,7 +280,6 @@ export const SearchPage = () => {
                 <MovieCard
                   key={movie.id}
                   movie={movie}
-                  onClick={() => navigate(`/movie/${movie.id}`)}
                 />
               ))}
 

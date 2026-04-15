@@ -1,4 +1,4 @@
-export type ScreenType =
+xport type ScreenType =
   | "browse"
   | "search"
   | "player"
@@ -9,6 +9,7 @@ export type ScreenType =
 
 export interface PaginationQuery {
   page?: number;
+  skip?: number;
   limit?: number;
   search?: string;
 }
@@ -20,10 +21,10 @@ export interface Movie {
   thumbnailUrl: string;
   videoUrl: string;
 
-  duration: number;          
-  releaseYear: string | null; 
+  duration: number;
+  releaseDate: string | null;
 
-  rating: number;           
+  rating: number;
   ratingCount: number;
 
   genres: {
@@ -32,7 +33,6 @@ export interface Movie {
     };
   }[];
 
-  
   isPremium?: boolean;
   isOriginal?: boolean;
   quality?: string;
@@ -80,8 +80,8 @@ export interface CreateMovie {
   duration: number;
   genres?: string[]; // list of genreId
   videoId: string;
-  releaseYear?: string;
-  rating: number; 
+  releaseDate?: string;
+  rating: number;
 }
 
 export interface CastMember {
@@ -101,4 +101,47 @@ export interface Review {
   text: string;
   likes: number;
   isLiked: boolean;
+}
+
+export interface MoviePlayback {
+  type: "mp4" | "hls";
+  url: string;
+}
+
+export interface CreateMovieDto {
+  title: string;
+  description: string;
+  thumbnailUrl: string;
+  duration: number;
+  videoId: string;
+  genres: string[];
+  releaseDate: string;
+  rating: number;
+  trailerUrl: string;
+  country: string;
+  ageRating: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  name: string | null;
+  avatarUrl: string | null;
+  role: "ADMIN" | "USER" | string;
+  status: "ACTIVE" | "INACTIVE" | string;
+  isVerified: boolean;
+  emailVerifiedAt: string | null;
+  lastLoginAt: string | null;
+  passwordUpdatedAt: string | null;
+  refreshToken: string;
+  refreshTokenExpiresAt: string;
+  failedLoginCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  accessToken: string;
+  refreshToken: string;
 }

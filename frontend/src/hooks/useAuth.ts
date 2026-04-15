@@ -1,7 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { loginApi, registerApi, getProfileApi } from "@/src/apis/auth.api";
 import { useAuthStore } from "@/store/auth.store";
-import { useEffect } from "react";
 
 export const useAuth = () => {
   const setTokens = useAuthStore((s) => s.setTokens);
@@ -11,8 +10,8 @@ export const useAuth = () => {
   const loginMutation = useMutation({
     mutationFn: loginApi,
     onSuccess: (data) => {
-      const { accessToken, refreshToken } = data.data;
-      console.log("✅ SET TOKEN", accessToken, refreshToken);
+      console.log("🚀 data:", data);
+      const { accessToken, refreshToken } = data;
       setTokens(accessToken, refreshToken);
     },
   });
@@ -44,7 +43,7 @@ export const useAuth = () => {
     register: registerMutation.mutateAsync,
     isRegistering: registerMutation.isPending,
 
-    profile: profileQuery.data?.data,
+    profile: profileQuery?.data,
     isLoadingProfile: profileQuery.isLoading,
 
     logout,

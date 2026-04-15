@@ -1,6 +1,6 @@
 import React from "react";
 import { Play, Plus } from "lucide-react";
-import { Movie } from "../../types";
+import { Movie } from "../../common/types";
 import { useNavigate } from "react-router-dom";
 
 interface MovieCardProps {

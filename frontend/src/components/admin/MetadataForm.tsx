@@ -67,8 +67,8 @@ export function MetadataForm({
 
           {/* Release Date / Year */}
           <ReleaseDateField
-            value={data.releaseYear}
-            onChange={(v) => setData({ ...data, releaseYear: v })}
+            value={data.releaseDate}
+            onChange={(v) => setData({ ...data, releaseDate: v })}
           />
 
           {/* Rating */}
@@ -109,8 +109,8 @@ export function MetadataForm({
 
           <input
             placeholder="Release Date (YYYY-MM-DD)"
-            value={data.releaseYear}
-            onChange={(e) => setData({ ...data, releaseYear: e.target.value })}
+            value={data.releaseDate}
+            onChange={(e) => setData({ ...data, releaseDate: e.target.value })}
             className="w-full p-3 rounded bg-gray-800 text-white"
           /> */}
         </div>
