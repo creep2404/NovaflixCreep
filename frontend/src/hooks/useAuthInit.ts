@@ -3,23 +3,24 @@ import { useAuthStore } from "@/store/auth.store";
 import { refreshTokenApi } from "../apis/auth.api";
 
 export const useAuthInit = () => {
-  const { refreshToken, setAccessToken, clear } = useAuthStore();
+  const setAccessToken = useAuthStore((s) => s.setAccessToken);
+  const clear = useAuthStore((s) => s.clear);
+
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     const initAuth = async () => {
-      if (!refreshToken) {
-        setIsReady(true);
-        return;
-      }
-
       try {
-        const data = await refreshTokenApi(refreshToken);
-        const newAccessToken = data.accessToken;
+        const data = await refreshTokenApi();
 
-        setAccessToken(newAccessToken);
-      } catch (err) {
-        clear(); // refresh fail → logout
+        if (data?.accessToken) {
+          setAccessToken(data.accessToken);
+        }
+      } catch (err: any) {
+        // KHÔNG clear nếu chỉ là chưa login
+        if (err?.response?.status !== 400) {
+          clear();
+        }
       } finally {
         setIsReady(true);
       }

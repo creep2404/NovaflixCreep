@@ -4,13 +4,13 @@ import { useAuthStore } from "@/store/auth.store";
 
 export default function AuthGuard({ children }: any) {
   const navigate = useNavigate();
-  const { accessToken, refreshToken } = useAuthStore();
+  const accessToken = useAuthStore((s) => s.accessToken);
 
   useEffect(() => {
-    if (!accessToken && !refreshToken) {
+    if (!accessToken) {
       navigate("/login");
     }
-  }, [accessToken, refreshToken]);
+  }, [accessToken]);
 
   return children;
 }

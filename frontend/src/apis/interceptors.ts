@@ -1,7 +1,7 @@
-import { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { refreshTokenApi } from './auth.api';
-import { instance } from './axios';
-import { useAuthStore } from '@/store/auth.store';
+import { AxiosError, InternalAxiosRequestConfig } from "axios";
+import { refreshTokenApi } from "./auth.api";
+import { instance } from "./axios";
+import { useAuthStore } from "@/store/auth.store";
 
 let isRefreshing = false;
 let failedQueue: {
@@ -20,6 +20,7 @@ const processQueue = (error: unknown, token: string | null) => {
 // REQUEST
 instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const { accessToken } = useAuthStore.getState();
+  console.log("🚀 accessToken test:", accessToken);
 
   if (accessToken && config.headers) {
     config.headers.Authorization = `Bearer ${accessToken}`;
@@ -31,7 +32,7 @@ instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 // RESPONSE
 instance.interceptors.response.use(
   (response) => {
-    // unwrap 
+    // unwrap
     return response.data;
   },
   async (error: AxiosError) => {
@@ -49,12 +50,7 @@ instance.interceptors.response.use(
 
     originalRequest._retry = true;
 
-    const { refreshToken, setTokens, clear } = useAuthStore.getState();
-
-    if (!refreshToken) {
-      clear();
-      return Promise.reject(error);
-    }
+    const { setAccessToken, clear } = useAuthStore.getState();
 
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
@@ -71,10 +67,10 @@ instance.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const data = await refreshTokenApi(refreshToken);
+      const data = await refreshTokenApi();
       const newAccessToken = data.accessToken;
 
-      setTokens(newAccessToken, refreshToken);
+      setAccessToken(newAccessToken);
       processQueue(null, newAccessToken);
 
       originalRequest.headers!.Authorization = `Bearer ${newAccessToken}`;
@@ -87,5 +83,5 @@ instance.interceptors.response.use(
     } finally {
       isRefreshing = false;
     }
-  }
+  },
 );

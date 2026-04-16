@@ -28,11 +28,9 @@ export const getProfileApi = async () => {
   return res;
 };
 
-export const logoutApi = async (refreshToken: string) =>
-  await api.post("/auth/logout", { refreshToken });
+export const logoutApi = async () => await api.post("/auth/logout");
 
 export const forgotPasswordApi = async (email: string) =>
   await api.post("/auth/forgot-password", { email });
 
-export const refreshTokenApi = async (refreshToken: string) =>
-  await api.post("/auth/refresh", { refreshToken });
+export const refreshTokenApi = async () => await api.post("/auth/refresh");

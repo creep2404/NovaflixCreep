@@ -70,7 +70,7 @@ export const loginService = async (email: string, password: string) => {
 
 export const refreshTokenService = async (token: string) => {
   if (!token) {
-    throw new AppError("No refresh token provided", 400);
+    return null;
   }
 
   let payload;
@@ -113,4 +113,8 @@ export const refreshTokenService = async (token: string) => {
     accessToken,
     refreshToken: newRefreshToken,
   };
+};
+
+export const logoutService = async (userId: string) => {
+  await updateUserRefreshToken(userId, null, null);
 };

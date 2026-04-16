@@ -1,18 +1,20 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { loginApi, registerApi, getProfileApi } from "@/src/apis/auth.api";
+import { loginApi, registerApi, getProfileApi, logoutApi } from "@/src/apis/auth.api";
 import { useAuthStore } from "@/store/auth.store";
 
 export const useAuth = () => {
-  const setTokens = useAuthStore((s) => s.setTokens);
-  const { accessToken, refreshToken } = useAuthStore.getState();
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const setAccessToken = useAuthStore((s) => s.setAccessToken);
+  const clear = useAuthStore((s) => s.clear);
 
   // 🔐 LOGIN
   const loginMutation = useMutation({
     mutationFn: loginApi,
     onSuccess: (data) => {
       console.log("🚀 data:", data);
-      const { accessToken, refreshToken } = data;
-      setTokens(accessToken, refreshToken);
+
+      const { accessToken } = data;
+      setAccessToken(accessToken);
     },
   });
 
@@ -31,9 +33,15 @@ export const useAuth = () => {
   });
 
   // 🚪 LOGOUT
-  const logout = () => {
-    useAuthStore.getState().clear();
-    window.location.href = "/login";
+  const logout = async () => {
+    try {
+      await logoutApi();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      clear();
+      window.location.href = "/login";
+    }
   };
 
   return {

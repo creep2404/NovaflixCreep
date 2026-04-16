@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { register, login, logout } from "./auth.controller";
+import { register, login, logout, refreshToken, refresh } from "./auth.controller";
 import { authMiddleware } from "@/common/middleware/auth.middleware";
 import { authLimiter } from "@/common/middleware/rateLimit.middleware";
 
@@ -84,5 +84,7 @@ router.post("/login", authLimiter, login);
  *         description: Logout successful
  */
 router.post("/logout", authMiddleware, logout);
+
+router.post("/refresh", refresh);
 
 export default router;
