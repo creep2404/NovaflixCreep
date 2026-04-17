@@ -6,7 +6,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { queryClient } from "./lib/react-query.ts";
 import { LoadingProvider } from "./providers/LoadingProvider.tsx";
-import { loadTokenFromStorage } from "./auth/token";
+import { loadTokenFromStorage } from "./features/auth/utils/token.ts";
 import "./apis/interceptors";
 import AuthProvider from "./providers/AuthProvider.tsx";
 

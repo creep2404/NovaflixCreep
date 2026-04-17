@@ -1,7 +1,7 @@
 import { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { refreshTokenApi } from "./auth.api";
 import { instance } from "./axios";
-import { useAuthStore } from "@/store/auth.store";
+import { useAuthStore } from "@/src/features/auth/store/auth.store";
 
 let isRefreshing = false;
 let failedQueue: {

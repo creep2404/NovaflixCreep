@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Navbar } from "./components/layouts/Navbar";
-import { TopProgressBar } from "./components/ui/TopProgressBar";
+import { Navbar } from "./shared/components/layouts/Navbar";
+import { TopProgressBar } from "./shared/components/ui/TopProgressBar";
 import AppRoutes from "./routes/AppRoutes";
 import { useLocation } from "react-router-dom";
-import { useAuthInit } from "./hooks/useAuthInit";
+import { useAuthInit } from "./features/auth/hooks/useAuthInit";
 import { LoadingProvider } from "./providers/LoadingProvider";
 
 export default function App() {

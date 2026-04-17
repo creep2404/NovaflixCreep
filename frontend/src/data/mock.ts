@@ -1,4 +1,4 @@
-import { Episode, Comment } from "../common/types";
+import { Episode, Comment } from "@/src/shared/types";
 
 export interface Movie {
   id?: string;

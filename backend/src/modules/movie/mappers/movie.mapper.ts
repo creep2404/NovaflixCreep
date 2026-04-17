@@ -32,6 +32,6 @@ export const formatMovie = (movie: any) => {
     ageRating: movie.detail?.ageRating,
 
     // GENRES
-    genres: movie.genres?.map((g: any) => g.genre.name) || [],
+    genres: movie.genres?.map((g: any) => g.genre.name),
   };
 };

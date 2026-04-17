@@ -1,6 +1,5 @@
 import { createContext, useState, ReactNode } from "react";
-import { FilmLoader } from "../components/common/FilmLoader";
-import ProjectorLoader from "../components/common/ProjectorLoader";
+import ProjectorLoader from "@/src/shared/components/ui/loading/ProjectorLoader";
 
 type LoadingContextType = {
   loading: boolean;

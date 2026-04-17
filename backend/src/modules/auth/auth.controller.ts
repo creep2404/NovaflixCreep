@@ -59,7 +59,7 @@ export const logout = asyncHandler(async (req: AuthRequest, res: Response) => {
   await updateUserRefreshToken(req.user!.userId, null, null);
 
   res.clearCookie("refreshToken", {
-    path: "/auth/refresh",
+    path: "/",
   });
 
   return successResponse(res, null, "Logout successfully");

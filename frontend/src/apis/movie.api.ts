@@ -1,4 +1,4 @@
-import { Movie, QueryMovie, Review, MoviePlayback, CreateMovieDto } from '../common/types';
+import { Movie, QueryMovie, Review, MoviePlayback, CreateMovieDto } from '@/src/shared/types';
 import { api } from './axios';
 
 export const getMovies = (params: QueryMovie) =>

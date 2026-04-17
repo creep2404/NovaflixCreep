@@ -1,7 +1,7 @@
-import { useAuthStore } from "@/store/auth.store";
+import { useAuthStore } from "@/src/features/auth/store/auth.store";
 import { api } from "./axios";
-import { getUserIdFromToken } from "../common/utils/jwt";
-import { AuthResponse } from "../common/types";
+import { getUserIdFromToken } from "@/src/features/auth/utils/jwt";
+import { AuthResponse } from "@/src/shared/types";
 
 export const loginApi = async (payload: {
   email: string;
