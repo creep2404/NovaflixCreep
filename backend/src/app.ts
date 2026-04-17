@@ -8,6 +8,7 @@ import { globalLimiter } from "./common/middleware/rateLimit.middleware";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger";
 import { env } from "./config/env";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(globalLimiter);
+app.use(cookieParser());
 app.use("/nova-api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api", routes);
 

@@ -1,6 +1,9 @@
 import dotenv from "dotenv";
+import path from "node:path";
 
-dotenv.config();
+dotenv.config({
+  path: path.resolve(process.cwd(), "../.env"),
+})
 
 export const env = {
   // Server
@@ -21,4 +24,10 @@ export const env = {
 
   // Client
   CLIENT_URL: process.env.CLIENT_URL!,
+
+  //Redis
+  REDIS_HOST: process.env.REDIS_HOST,
+  REDIS_PORT: process.env.REDIS_PORT,
+  REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+
 };

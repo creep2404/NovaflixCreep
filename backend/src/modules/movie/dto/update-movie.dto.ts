@@ -11,4 +11,7 @@ export interface UpdateMovieDto {
   trailerUrl?: string;
   releaseDate?: string;
   rating?: number;
+
+  country?: string;
+  ageRating?: string;
 }

@@ -1,10 +1,16 @@
-import axios from "axios";
+import axios, {
+  AxiosRequestConfig,
+} from 'axios';
 
-export const api = axios.create({
+export const instance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
-  // headers: {
-  //   Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-  //   "Content-Type": "application/json",
-  // },
 });
+
+export const api = {
+  get: <T>(url: string, config?: AxiosRequestConfig) =>
+    instance.get<T>(url, config).then((res) => res.data),
+
+  post: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
+    instance.post<T>(url, data, config).then((res) => res.data),
+};

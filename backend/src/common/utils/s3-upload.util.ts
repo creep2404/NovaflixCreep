@@ -49,7 +49,7 @@ export const getPresignedDownloadUrl = async (key: string) => {
     url: `${urlImagePublic}/${key}`,
     keyPairId: process.env.AWS_CLOUD_FRONT_KEY_PAIR!,
     dateLessThan: new Date(Date.now() + 5 * 60 * 1000),
-    privateKey,
+    privateKey: privateKey!,
   });
   // Return the download URL
   return signedUrl;

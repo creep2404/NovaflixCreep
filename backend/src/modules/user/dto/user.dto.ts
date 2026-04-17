@@ -4,3 +4,9 @@ export interface UserResponseDto {
   role: string;
   createdAt: Date;
 }
+
+export interface UserAuthDto  {
+  id: string;
+  refreshtoken: string;
+  refreshtokenexpires: Date;
+}

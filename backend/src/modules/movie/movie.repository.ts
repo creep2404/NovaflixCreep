@@ -14,10 +14,13 @@ export const createMovieRepo = async (data: CreateMovieDto) => {
         create: {
           description: data.description,
           videoId: data.videoId,
-          trailerUrl: data?.trailerUrl,
+          trailerUrl: data.trailerUrl,
           releaseDate: data.releaseDate
             ? new Date(data.releaseDate)
             : undefined,
+          rating: data.rating,
+          country: data.country,
+          ageRating: data.ageRating,
         },
       },
     },

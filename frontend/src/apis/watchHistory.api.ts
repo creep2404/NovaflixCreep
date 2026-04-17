@@ -1,24 +1,9 @@
 import { api } from "./axios";
 
-export const getWatchHistory = async (movieId: string) => {
-  const res = await api.get(`/watch-history/${movieId}`);
-  // const res = {
-  //   data: {
-  //     progress: 0,
-  //   },
-  // };
-  return res.data;
-};
+export const getWatchHistory = async (movieId: string) =>
+  await api.get(`/watch-history/${movieId}`);
 
 export const saveWatchHistory = async (data: {
   movieId: string;
   progress: number;
-}) => {
-  
-  // return new Promise((resolve) => {
-  //   setTimeout(() => {
-  //     resolve({ success: true });
-  //   }, 500);
-  // });
-  return api.post("/watch-history/progress", data);
-};
+}) => await api.post("/watch-history/progress", data);

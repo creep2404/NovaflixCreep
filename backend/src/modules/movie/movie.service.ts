@@ -107,9 +107,7 @@ export const getMovieByIdService = async (id: string) => {
   };
 
   // FORMAT
-  const result = {
-    data: formatMovie(movieWithUrl),
-  };
+  const result = formatMovie(movieWithUrl);
 
   // SET CACHE
   await setCache(cacheKey, result, 60);
@@ -135,7 +133,7 @@ export const getMoviesService = async (query: QueryMovieDto) => {
     page,
     limit,
     search: query.search,
-    genres: genres.join(","),
+    genres: genres.sort().join(","),
     rating,
     duration,
     //premium,
@@ -190,7 +188,7 @@ export const getMoviesService = async (query: QueryMovieDto) => {
   }
 
   const result = {
-    data: moviesWithUrl.map(formatMovie),
+    items: moviesWithUrl.map(formatMovie),
     meta: {
       page,
       limit,
@@ -213,6 +211,10 @@ export const getUrlPresignedByMovieId = async (
 
   if (!movie) {
     throw new Error("Movie not found");
+  }
+
+  if (!movie.detail) {
+    throw new Error("Movie detail not found");
   }
 
   const key = FILE_PATHS[fileType](movie.detail.videoId);
@@ -263,15 +265,12 @@ export const getTrendingMoviesService = async () => {
 };
 
 export const getContinueWatchingService = async (userId: string) => {
-  // NO CACHE (user-specific data)
   const histories = await getContinueWatchingRepo(userId);
 
-  const result = {
-    data: histories.map((item) => ({
-      ...formatMovie(item.movie),
+  return histories
+    .filter((item) => item.movie)
+    .map((item) => ({
+      ...formatMovie(item.movie!),
       progress: item.progress,
-    })),
-  };
-
-  return result;
+    }));
 };
