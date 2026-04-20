@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 export interface AuthRequest extends Request {
   user?: {
     userId: string;
+    role: "user" | "admin";
   };
 }
 
@@ -27,6 +28,7 @@ export const authMiddleware = (
   try {
     const decoded = jwt.verify(token, env.JWT_SECRET as string) as {
       userId: string;
+      role: "user" | "admin";
     };
 
     req.user = decoded;
@@ -38,3 +40,23 @@ export const authMiddleware = (
     });
   }
 };
+
+export const requireRole =
+  (role: "user" | "admin") =>
+  (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return next({
+        status: 401,
+        message: "Unauthorized",
+      });
+    }
+
+    if (req.user.role !== role) {
+      return next({
+        status: 403,
+        message: "Forbidden",
+      });
+    }
+
+    next();
+  };

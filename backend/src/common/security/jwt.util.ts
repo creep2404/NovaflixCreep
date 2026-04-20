@@ -1,5 +1,6 @@
 import { env } from "@/config/env";
 import jwt from "jsonwebtoken";
+import { AppError } from "../utils/AppError";
 
 
 
@@ -7,7 +8,7 @@ const ACCESS_SECRET = env.JWT_SECRET as string;
 const REFRESH_SECRET = env.JWT_REFRESH_SECRET as string;
 
 if (!ACCESS_SECRET || !REFRESH_SECRET) {
-  throw new Error("JWT secrets are not defined");
+  throw new AppError("JWT secrets are not defined");
 }
 
 // ACCESS TOKEN (short-lived)
@@ -29,7 +30,7 @@ export const verifyRefreshToken = (token: string) => {
   try {
     return jwt.verify(token, REFRESH_SECRET) as { userId: string };
   } catch (error) {
-    throw new Error("Invalid or expired refresh token");
+    throw new AppError("Invalid or expired refresh token");
   }
 };
 
@@ -38,6 +39,6 @@ export const verifyAccessToken = (token: string) => {
   try {
     return jwt.verify(token, ACCESS_SECRET) as { userId: string };
   } catch (error) {
-    throw new Error("Invalid or expired access token");
+    throw new AppError("Invalid or expired access token");
   }
 };

@@ -1,12 +1,17 @@
 import { RequestHandler } from "express";
 import { z } from "zod";
+import { sanitizeObject } from "../security/sanitize.util";
 
 type Source = "body" | "params" | "query";
 
 const validate =
   <T extends z.ZodType>(schema: T, source: Source): RequestHandler =>
   async (req, res, next) => {
-    const result = await schema.safeParseAsync(req[source]);
+    const rawData = req[source];
+
+    const sanitizedData = sanitizeObject(rawData);
+
+    const result = await schema.safeParseAsync(sanitizedData);
 
     if (!result.success) {
       return next({
@@ -19,7 +24,7 @@ const validate =
       });
     }
 
-    // lưu lại data đã parse
+    // saved validated data
     req.validated = req.validated || {};
     req.validated[source] = result.data;
 

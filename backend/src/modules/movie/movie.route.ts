@@ -3,7 +3,7 @@ import {
   getMovies,
   createMovie,
   getMovieById,
-  uploadMovieVideo,
+  //uploadMovieVideo,
   getUploadUrl,
   getMoviePlayback,
   getTrendingMovies,
@@ -112,12 +112,12 @@ router.post(
  *       200:
  *         description: Video uploaded successfully
  */
-router.post(
-  "/upload",
-  authMiddleware,
-  upload.single("video"),
-  uploadMovieVideo,
-);
+// router.post(
+//   "/upload",
+//   authMiddleware,
+//   upload.single("video"),
+//   uploadMovieVideo,
+// );
 
 router.get("/trending", getTrendingMovies);
 

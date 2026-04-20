@@ -30,4 +30,9 @@ export const env = {
   REDIS_PORT: process.env.REDIS_PORT,
   REDIS_PASSWORD: process.env.REDIS_PASSWORD,
 
+  //Other
+  NODE_ENV: process.env.NODE_ENV || "development",
+  CDN_DOMAIN: process.env.CDN_DOMAIN,
+  COOKIE_DOMAIN: process.env.COOKIE_DOMAIN
+
 };

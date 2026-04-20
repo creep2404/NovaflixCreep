@@ -9,6 +9,7 @@ import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger";
 import { env } from "./config/env";
 import cookieParser from "cookie-parser";
+import { requestMiddleware } from "./common/middleware/request.middleware";
 
 const app = express();
 
@@ -19,7 +20,10 @@ app.use(cors({
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
+app.use(requestMiddleware);
+
 app.use(globalLimiter);
+
 app.use(cookieParser());
 app.use("/nova-api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api", routes);
