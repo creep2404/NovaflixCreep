@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ErrorState, EmptyState } from "@/src/shared/components/state/StateViews";
+import {
+  ErrorState,
+  EmptyState,
+} from "@/src/shared/components/state/StateViews";
 import { useDebounce } from "@/src/shared/hooks/useDebounce";
 import { useMovies } from "@/src/features/movie/hooks/useMovies";
 import FiltersSection from "@/src/features/search/components/FiltersSection";
@@ -14,34 +17,40 @@ import SearchBar from "./components/SearchBar";
 import { MovieGrid } from "./components/MovieGrid";
 import { Pagination } from "./components/Pagination";
 
+type Filters = {
+  search: string;
+  genres: string[];
+  rating: number | null;
+  duration: string | null;
+};
 export const SearchPage = () => {
   const [params, setParams] = useSearchParams();
 
   // ===============================
   // STATE
   // ===============================
-  const [search, setSearch] = useState(params.get("search") || "");
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(Number(params.get("page")) || 1);
   const [isInitialized, setIsInitialized] = useState(false);
 
   const debouncedSearch = useDebounce(search, 500);
 
-  const [draftFilters, setDraftFilters] = useState({
-    genres: [] as string[],
-    rating: null as number | null,
-    duration: null as string | null,
-  });
+  const emptyFilters: Omit<Filters, "search"> = {
+    genres: [],
+    rating: null,
+    duration: null,
+  };
 
-  const [appliedFilters, setAppliedFilters] = useState(draftFilters);
+  const [draftFilters, setDraftFilters] = useState(emptyFilters);
+  const [appliedFilters, setAppliedFilters] = useState<Filters>({
+    search: "",
+    ...emptyFilters,
+  });
 
   // ===============================
   // QUERY
   // ===============================
-  const filters = {
-    search: debouncedSearch,
-    page,
-    ...appliedFilters,
-  };
+  const filters = appliedFilters;
 
   const { data, isLoading, isError, isFetching } = useMovies(filters);
   const movies = data?.items ?? [];
@@ -128,7 +137,6 @@ export const SearchPage = () => {
     setAppliedFilters(parsedFilters);
 
     setIsInitialized(true);
-
   }, []);
 
   return (
@@ -162,7 +170,12 @@ export const SearchPage = () => {
           history={history}
           handleSelect={handleSelect}
           onSearch={() => {
-            setAppliedFilters(draftFilters);
+            setAppliedFilters({
+              search,
+              ...draftFilters,
+            });
+
+            setPage(1);
             saveSearchHistory(search);
             setHistory(getSearchHistory());
           }}

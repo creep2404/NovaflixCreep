@@ -11,7 +11,7 @@ export const useAuth = () => {
   const loginMutation = useMutation({
     mutationFn: loginApi,
     onSuccess: (data) => {
-      console.log("🚀 data:", data);
+      console.log("🚀 loginMutation:", data);
 
       const { accessToken } = data;
       setAccessToken(accessToken);

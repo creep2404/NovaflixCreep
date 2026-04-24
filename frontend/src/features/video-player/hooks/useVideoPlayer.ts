@@ -111,7 +111,15 @@ export const useVideoPlayer = (movieId: string) => {
     const video = videoRef.current;
     if (!video) return;
 
-    isPlaying ? video.play() : video.pause();
+    if (isPlaying) {
+      video.play().catch((err) => {
+        if (err.name !== "AbortError") {
+          console.error(err);
+        }
+      });
+    } else {
+      video.pause();
+    }
   }, [isPlaying]);
 
   // ========================

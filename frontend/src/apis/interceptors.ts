@@ -20,7 +20,6 @@ const processQueue = (error: unknown, token: string | null) => {
 // REQUEST
 instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const { accessToken } = useAuthStore.getState();
-  console.log("🚀 accessToken test:", accessToken);
 
   if (accessToken && config.headers) {
     config.headers.Authorization = `Bearer ${accessToken}`;
