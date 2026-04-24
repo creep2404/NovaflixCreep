@@ -29,7 +29,7 @@ export const generateRefreshToken = (payload: { userId: string }) => {
 export const verifyRefreshToken = (token: string) => {
   try {
     return jwt.verify(token, REFRESH_SECRET) as { userId: string };
-  } catch (error) {
+  } catch {
     throw new AppError("Invalid or expired refresh token");
   }
 };
@@ -38,7 +38,7 @@ export const verifyRefreshToken = (token: string) => {
 export const verifyAccessToken = (token: string) => {
   try {
     return jwt.verify(token, ACCESS_SECRET) as { userId: string };
-  } catch (error) {
+  } catch {
     throw new AppError("Invalid or expired access token");
   }
 };

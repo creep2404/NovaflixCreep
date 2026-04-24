@@ -5,7 +5,7 @@ const MOVIE_CACHE_VERSION_KEY = "movies:version";
 // get current version
 export const getMovieCacheVersion = async () => {
   const version = await redis.get(MOVIE_CACHE_VERSION_KEY);
-  return version || "1";
+  return version ?? "1";
 };
 
 // increment version (invalidate cache)
@@ -24,6 +24,6 @@ export const movieCacheKey = async (params: {
 }) => {
   const version = await getMovieCacheVersion();
 
-  return `movies:v${version}:${params.page}:${params.limit}:${params.genres || ""}:${params.search || ""}`;
+  return `movies:v${version}:${params.page}:${params.limit}:${params.genres ?? ""}:${params.search ?? ""}`;
 };
 //ex: movies:v1:1:10:action:batman

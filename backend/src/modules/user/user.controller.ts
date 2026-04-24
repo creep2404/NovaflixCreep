@@ -2,10 +2,10 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "@/common/utils/asyncHandler";
 import { successResponse } from "@/common/utils/successResponse";
-import { getUserByIdService, getUserService } from "./user.service";
+import { getUserByIdService } from "./user.service";
 
 export const getUser = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { id } = req.validated!.params as { id: string };
 
   const user = await getUserByIdService(id);
 

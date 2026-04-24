@@ -77,13 +77,13 @@ export const refreshTokenService = async (token: string) => {
 
   try {
     payload = verifyRefreshToken(token);
-  } catch (err) {
+  } catch {
     throw new AppError("Invalid refresh token", 401);
   }
 
   const user = await findUserByIdRepo(payload.userId);
 
-  if (!user || !user.refreshToken) {
+  if (!user?.refreshToken) {
     throw new AppError("Invalid refresh token", 401);
   }
 
@@ -116,5 +116,5 @@ export const refreshTokenService = async (token: string) => {
 };
 
 export const logoutService = async (userId: string) => {
-  await updateUserRefreshToken(userId, null, null);
+  await updateUserRefreshToken(userId, "", new Date(0));
 };

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { register, login, logout, refreshToken, refresh } from "./auth.controller";
+import { register, login, logout, refresh } from "./auth.controller";
 import { authMiddleware } from "@/common/middleware/auth.middleware";
 import { authLimiter } from "@/common/middleware/rateLimit.middleware";
 

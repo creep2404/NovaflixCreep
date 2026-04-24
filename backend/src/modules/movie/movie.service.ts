@@ -1,5 +1,3 @@
-import { CreateMovieDto } from "./dto/create-movie.dto";
-import { QueryMovieDto } from "./dto/query-movie.dto";
 import { formatMovie } from "./mappers/movie.mapper";
 import {
   countMoviesRepo,
@@ -12,13 +10,7 @@ import {
   updateMovieRepo,
 } from "./movie.repository";
 import { invalidateMovieCache, movieCacheKey } from "./movie.cache";
-import {
-  deleteByPattern,
-  getCache,
-  setCache,
-  withCache,
-} from "@/common/infra/cache.util";
-import { UpdateMovieDto } from "./dto/update-movie.dto";
+import { getCache, setCache, withCache } from "@/common/infra/cache.util";
 import { eventBus } from "@/events/eventBus";
 import { EVENTS } from "@/common/constants/events.constants";
 import { getPresignedDownloadUrl } from "@/common/infra/s3-upload.util";
@@ -26,8 +18,13 @@ import { FILE_PATHS } from "@/common/constants/file-path.constants";
 import { generateSlug } from "@/common/utils/slug";
 import { AppError } from "@/common/utils/AppError";
 import { getCachedPresignedUrl } from "@/common/utils/presigned-cache.util";
+import { CreateMovieInput } from "./dto/create-movie.dto";
+import { QueryMovieInput } from "./dto/query-movie.dto";
+import { buildMovieWhere } from "./movie.filter";
+import { CreateMovieRepoInput, UpdateMovieRepoInput } from "./movie.type";
+import { UpdateMovieInput } from "./dto/update-movie.dto";
 
-export const createMovieService = async (data: CreateMovieDto) => {
+export const createMovieService = async (data: CreateMovieInput) => {
   if (data.duration > 10 * 3600) {
     throw new AppError("Duration too long", 400);
   }
@@ -41,11 +38,13 @@ export const createMovieService = async (data: CreateMovieDto) => {
   }
 
   const slug = generateSlug(data.title);
-  console.log("CREATE MOVIE DATA:", data);
-  const movie = await createMovieRepo({
+
+  const repoData: CreateMovieRepoInput = {
     ...data,
     slug,
-  });
+    releaseDate: data.releaseDate ? new Date(data.releaseDate) : undefined,
+  };
+  const movie = await createMovieRepo(repoData);
 
   //Invalidate cache
   await invalidateMovieCache();
@@ -54,19 +53,24 @@ export const createMovieService = async (data: CreateMovieDto) => {
   return formatMovie(movie);
 };
 
-export const updateMovieService = async (id: string, data: UpdateMovieDto) => {
+export const updateMovieService = async (
+  id: string,
+  data: UpdateMovieInput,
+) => {
   if (data.rating !== undefined && (data.rating < 0 || data.rating > 5)) {
     throw new AppError("Invalid rating", 400);
   }
 
-  let updated;
+  const repoData: UpdateMovieRepoInput = {
+    ...data,
+    releaseDate: data.releaseDate ? new Date(data.releaseDate) : undefined,
+  };
 
   if (data.title) {
-    const slug = generateSlug(data.title);
-    updated = await updateMovieRepo(id, { ...data, slug });
-  } else {
-    updated = await updateMovieRepo(id, data);
+    repoData.slug = generateSlug(data.title);
   }
+
+  const updated = await updateMovieRepo(id, repoData);
 
   await invalidateMovieCache();
 
@@ -105,9 +109,9 @@ export const getMovieByIdService = async (id: string) => {
     return formatMovie(movieWithUrl);
   });
 };
-export const getMoviesService = async (query: QueryMovieDto) => {
-  const page = query.page || 1;
-  const limit = query.limit || 10;
+export const getMoviesService = async (query: QueryMovieInput) => {
+  const page = Math.max(query.page ?? 1, 1);
+  const limit = Math.max(query.limit ?? 10, 1);
 
   const genres = Array.isArray(query.genres)
     ? query.genres
@@ -116,7 +120,7 @@ export const getMoviesService = async (query: QueryMovieDto) => {
       : [];
 
   const rating = query.rating ? Number(query.rating) : undefined;
-  const duration = query.duration;
+  const where = buildMovieWhere(query);
 
   const cacheKey = await movieCacheKey({
     page,
@@ -124,7 +128,7 @@ export const getMoviesService = async (query: QueryMovieDto) => {
     search: query.search,
     genres: genres.sort().join(","),
     rating,
-    duration,
+    duration: query.duration,
   });
 
   return withCache(cacheKey, async () => {
@@ -134,17 +138,9 @@ export const getMoviesService = async (query: QueryMovieDto) => {
       getMoviesRepo({
         skip,
         take: limit,
-        search: query.search,
-        genres,
-        rating,
-        duration,
+        where,
       }),
-      countMoviesRepo({
-        genres,
-        search: query.search,
-        rating,
-        duration,
-      }),
+      countMoviesRepo({ where }),
     ]);
 
     const moviesWithUrl = await mapWithUrl(movies);
@@ -231,6 +227,28 @@ export const getContinueWatchingService = async (userId: string) => {
       ...formatMovie(item.movie!),
       progress: item.progress,
     }));
+};
+
+export const getSuggestMoviesService = async (search: string) => {
+  if (!search?.trim()) return [];
+
+  const movies = await getMoviesRepo({
+    take: 5,
+    where: {
+      title: {
+        contains: search,
+        mode: "insensitive",
+      },
+    },
+    orderByTrending: false,
+  });
+
+  return movies.map((movie) => ({
+    id: movie.id,
+    title: movie.title,
+    slug: movie.slug,
+    thumbnailUrl: movie.thumbnailUrl ?? null,
+  }));
 };
 
 const mapWithUrl = async (movies: any[]) => {

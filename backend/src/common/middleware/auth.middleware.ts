@@ -4,11 +4,10 @@ import jwt from "jsonwebtoken";
 
 export interface AuthRequest extends Request {
   user?: {
-    userId: string;
-    role: "user" | "admin";
+    id: string;
+    role: "USER" | "ADMIN" | "PREMIUM";
   };
 }
-
 export const authMiddleware = (
   req: AuthRequest,
   res: Response,
@@ -16,7 +15,7 @@ export const authMiddleware = (
 ) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (!authHeader?.startsWith("Bearer ")) {
     return next({
       status: 401,
       message: "Unauthorized",
@@ -27,13 +26,13 @@ export const authMiddleware = (
 
   try {
     const decoded = jwt.verify(token, env.JWT_SECRET as string) as {
-      userId: string;
-      role: "user" | "admin";
+      id: string;
+      role: "USER" | "ADMIN" | "PREMIUM";
     };
 
     req.user = decoded;
     next();
-  } catch (error) {
+  } catch {
     return next({
       status: 401,
       message: "Invalid token",
@@ -42,7 +41,7 @@ export const authMiddleware = (
 };
 
 export const requireRole =
-  (role: "user" | "admin") =>
+  (role: "USER" | "ADMIN" | "PREMIUM") =>
   (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
       return next({
