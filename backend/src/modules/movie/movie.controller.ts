@@ -2,26 +2,26 @@ import { Request, Response } from "express";
 import { asyncHandler } from "@/common/utils/asyncHandler";
 import {
   createMovieService,
-  getAllMoviesService,
   getContinueWatchingService,
   getMovieByIdService,
   getMoviesService,
+  getSuggestMoviesService,
   getTrendingMoviesService,
   getUrlPresignedByMovieId,
 } from "./movie.service";
 import { successResponse } from "@/common/utils/successResponse";
-import fs from "fs";
-import path from "path";
-import {
-  getPresignedUploadUrl,
-} from "@/common/infra/s3-upload.util";
-import { AppError } from "@/common/utils/AppError";
+import { getPresignedUploadUrl } from "@/common/infra/s3-upload.util";
+import { CreateMovieInput } from "./dto/create-movie.dto";
+import { QueryMovieInput } from "./dto/query-movie.dto";
+import { typedHandler } from "@/common/utils/typedRoute";
 
-export const createMovie = asyncHandler(async (req: Request, res: Response) => {
-  const movie = await createMovieService(req.validated!.body);
+export const createMovie = asyncHandler(
+  typedHandler<CreateMovieInput>(async (req, res) => {
+    const movie = await createMovieService(req.validated.body);
 
-  return successResponse(res, movie, "Movie created successfully");
-});
+    return successResponse(res, movie, "Movie created successfully");
+  }),
+);
 
 // export const getMovies = asyncHandler(async (req: Request, res: Response) => {
 //   const movies = await getAllMoviesService();
@@ -29,18 +29,22 @@ export const createMovie = asyncHandler(async (req: Request, res: Response) => {
 //   return successResponse(res, movies, "Get movies successfully");
 // });
 
-export const getMovies = asyncHandler(async (req: Request, res: Response) => {
-  const result = await getMoviesService(req.validated!.query);
-  return successResponse(res, result, "Get movies successfully");
-});
+export const getMovies = asyncHandler(
+  typedHandler<unknown, QueryMovieInput>(async (req, res) => {
+    const query = req.validated?.query;
+    const result = await getMoviesService(query);
+    return successResponse(res, result, "Get movies successfully");
+  }),
+);
 
 export const getMovieById = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.validated!.params as { id: string };
+  typedHandler<unknown, unknown, { id: string }>(async (req, res) => {
+    const { id } = req.validated.params;
 
     const movie = await getMovieByIdService(id);
+
     return successResponse(res, movie, "Get movie successfully");
-  },
+  }),
 );
 
 // export const uploadMovieVideo = asyncHandler(
@@ -59,17 +63,13 @@ export const getMovieById = asyncHandler(
 
 //PRESIGNED UPLOAD - Main
 export const getUploadUrl = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { videoId, fileType } = req.validated!.body;
-
-    if (!videoId || !fileType) {
-      throw new AppError("Video ID and file type are required");
-    }
+  typedHandler<{ videoId: string; fileType: string }>(async (req, res) => {
+    const { videoId, fileType } = req.validated.body;
 
     const data = await getPresignedUploadUrl(videoId, fileType);
 
     return successResponse(res, data, "Get upload URL successfully");
-  },
+  }),
 );
 
 // Get video
@@ -77,16 +77,14 @@ export const getUploadUrl = asyncHandler(
 // Get thumbnail
 // GET /movies/123/playback?type=thumbnail
 export const getMoviePlayback = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params as { id: string };
-    const { type } = req.query;
-
-    const fileType = type === "thumbnail" ? "thumbnail" : "video";
+  typedHandler<unknown, unknown , { id: string }>(async (req, res) => {
+    const { id } = req.validated.params;
+    const fileType = "video";
 
     const data = await getUrlPresignedByMovieId(id, fileType);
 
-    return successResponse(res, data, "Get video playback source successfully");
-  },
+    return successResponse(res, data);
+  }),
 );
 
 export const getTrendingMovies = asyncHandler(
@@ -99,10 +97,20 @@ export const getTrendingMovies = asyncHandler(
 
 export const getContinueWatching = asyncHandler(
   async (req: any, res: Response) => {
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     const result = await getContinueWatchingService(userId);
 
     return successResponse(res, result, "Get continue watching successfully");
   },
+);
+
+export const getSuggestMovies = asyncHandler(
+  typedHandler<unknown, { search: string }>(async (req, res) => {
+    const { search } = req.validated.query;
+
+    const result = await getSuggestMoviesService(search);
+
+    return successResponse(res, result, "Get suggest movies successfully");
+  }),
 );

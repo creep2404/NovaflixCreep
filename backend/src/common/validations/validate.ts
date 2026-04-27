@@ -9,9 +9,10 @@ const validate =
   async (req, res, next) => {
     const rawData = req[source];
 
-    const sanitizedData = sanitizeObject(rawData);
+    const dataToValidate =
+      source === "body" ? sanitizeObject(rawData) : rawData;
 
-    const result = await schema.safeParseAsync(sanitizedData);
+    const result = await schema.safeParseAsync(dataToValidate);
 
     if (!result.success) {
       return next({

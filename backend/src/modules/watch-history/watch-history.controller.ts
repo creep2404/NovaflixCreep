@@ -21,7 +21,7 @@ export const getWatchHistoryByMovie = asyncHandler(
     // const userId = req.user.id;
     const { movieId } = req.params;
     const userId = 'b6d981b4-ca42-4997-a930-486203412cf1'
-    const data = await getWatchHistoryByMovieService(userId, movieId);
+    const data = await getWatchHistoryByMovieService(userId, movieId as string);
 
     return successResponse(res, data, "Get watch history successfully");
   },

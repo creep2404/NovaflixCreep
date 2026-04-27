@@ -7,6 +7,7 @@ import {
   getUploadUrl,
   getMoviePlayback,
   getTrendingMovies,
+  getSuggestMovies,
 } from "./movie.controller";
 import { authMiddleware } from "@/common/middleware/auth.middleware";
 import {
@@ -14,11 +15,11 @@ import {
   validateRequestParams,
   validateRequestQuery,
 } from "@/common/validations/validate";
-import { createMovieSchema } from "./schemas/create-movie.schema";
-import { queryMovieSchema } from "./schemas/query-movie.schema";
-import { paramIdSchema } from "./schemas/param-movie.schema";
-import { upload } from "@/config/multer";
+import { createMovieSchema } from "@/modules/movie/dto/create-movie.dto";
+import { queryMovieSchema } from "@/modules/movie/dto/query-movie.dto";
+import { paramIdSchema } from "@/common/dto/param.dto";
 import { uploadLimiter } from "@/common/middleware/rateLimit.middleware";
+import { suggestMovieSchema } from "./dto/suggest-movie-dto";
 
 const router = Router();
 
@@ -136,7 +137,14 @@ router.get("/trending", getTrendingMovies);
  */
 router.post("/upload-url", authMiddleware, uploadLimiter, getUploadUrl);
 
+router.get(
+  "/suggest",
+  validateRequestQuery(suggestMovieSchema),
+  getSuggestMovies,
+);
+
 router.get("/:id/play", validateRequestParams(paramIdSchema), getMoviePlayback);
+
 
 /**
  * @swagger

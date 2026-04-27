@@ -54,10 +54,10 @@ const SearchBar = ({
         {showDropdown && (
           <div className="absolute w-full mt-2 bg-surface-high rounded-xl shadow-lg p-4 z-50">
             {/* SUGGEST */}
-            {search && suggestData?.data?.length > 0 && (
+            {search && suggestData?.length > 0 && (
               <div className="mb-4">
                 <p className="text-xs text-white/50 mb-2">Suggestions</p>
-                {suggestData.data.map((movie: any) => (
+                {suggestData.map((movie: any) => (
                   <div
                     key={movie.id}
                     onClick={() => handleSelect(movie.title)}

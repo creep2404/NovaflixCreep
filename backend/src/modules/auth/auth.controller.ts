@@ -3,12 +3,10 @@ import { asyncHandler } from "../../common/utils/asyncHandler";
 import {
   registerService,
   loginService,
-  logoutService,
   refreshTokenService,
 } from "./auth.service";
 import {
   checkLoginAttempts,
-  increaseLoginAttempts,
   resetLoginAttempts,
 } from "@/common/security/brute-force.util";
 import { successResponse } from "@/common/utils/successResponse";
@@ -26,7 +24,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
 });
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const isProd = env.NODE_ENV === "production";
-  console.log("🚀 isProd:", isProd);
+  
   const key = `login:${req.ip}`;
 
   const allowed = await checkLoginAttempts(key);
@@ -58,7 +56,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const logout = asyncHandler(async (req: AuthRequest, res: Response) => {
-  await updateUserRefreshToken(req.user!.userId, null, null);
+  await updateUserRefreshToken(req.user!.id, "", new Date(0));
 
   res.clearCookie("refreshToken", {
     path: "/",

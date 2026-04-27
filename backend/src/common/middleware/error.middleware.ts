@@ -5,7 +5,7 @@ export const errorMiddleware = (
   err: any,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   const requestId = req.headers["x-request-id"];
 
@@ -22,9 +22,9 @@ export const errorMiddleware = (
     "Unhandled error"
   );
 
-  res.status(err.status || 500).json({
+  res.status(err.status ?? 500).json({
     success: false,
-    message: err.message || "Internal Server Error",
+    message: err.message ?? "Internal Server Error",
     requestId, 
   });
 };

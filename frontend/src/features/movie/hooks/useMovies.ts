@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getMovies } from "@/src/apis/movie.api";
+import { mapDuration } from "@/src/features/movie/utils/mappingDuration";
 
 export const useMovies = (filters: {
   search?: string;
@@ -25,7 +26,7 @@ export const useMovies = (filters: {
         limit: 10,
         genres: filters.genres,
         rating: filters.rating,
-        duration: filters.duration,
+        duration: mapDuration(filters.duration),
       });
     },
 

@@ -1,10 +1,9 @@
-import { prisma } from "@/database/client";
+import { prisma } from "@/database/client"
+import { CreateNotificationInput } from "./dto/create.notification.dto";
 
-export const createNotificationRepo = (data: {
-  userId: string;
-  type: string;
-  content: string;
-}) => {
+export const createNotificationRepo = (
+  data: CreateNotificationInput
+) => {
   return prisma.notification.create({ data });
 };
 

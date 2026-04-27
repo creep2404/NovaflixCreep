@@ -24,7 +24,6 @@ const FiltersSection = ({
   onChangeDuration,
 }: Props) => {
   const [skip, setSkip] = useState(0);
-  const limit = 6;
 
   const [allGenres, setAllGenres] = useState<Genre[]>([]);
   const { data, isFetching } = useGenres(skip);
@@ -40,9 +39,7 @@ const FiltersSection = ({
       });
     }
   }, [data]);
-
-  // Check còn load more được không
-  const hasMore = data?.meta?.hasMore ?? false;
+  
   return (
     <div>
       {/* Sidebar Filters */}

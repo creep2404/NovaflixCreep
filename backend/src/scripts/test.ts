@@ -1,8 +1,8 @@
 import 'dotenv/config'
 
-async function main() {
+export async function main() {
   console.log("DB URL:", process.env.DATABASE_URL)
 
 }
 
-main()
+//main()
