@@ -32,7 +32,6 @@ export const createMovie = asyncHandler(
 export const getMovies = asyncHandler(
   typedHandler<unknown, QueryMovieInput>(async (req, res) => {
     const query = req.validated?.query;
-    console.log("🚀 query ne:", query);
     const result = await getMoviesService(query);
     return successResponse(res, result, "Get movies successfully");
   }),

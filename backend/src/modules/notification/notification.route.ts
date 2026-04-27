@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { getNotifications, markAsRead } from "./notification.controller";
 import { authMiddleware } from "@/common/middleware/auth.middleware";
+import { paramIdSchema } from "@/common/dto/param.dto";
+import { validateRequestParams } from "@/common/validations/validate";
 
 const router = Router();
 
@@ -44,7 +46,7 @@ const router = Router();
  *       401:
  *         description: Unauthorized
  */
-router.get("/", authMiddleware, getNotifications);
+router.get("/", authMiddleware, validateRequestParams(paramIdSchema), getNotifications);
 
 /**
  * @swagger
@@ -70,6 +72,6 @@ router.get("/", authMiddleware, getNotifications);
  *       404:
  *         description: Notification not found
  */
-router.patch("/:id/read", authMiddleware, markAsRead);
+router.patch("/:id/read", authMiddleware, validateRequestParams(paramIdSchema), markAsRead);
 
 export default router;

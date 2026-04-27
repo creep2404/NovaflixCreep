@@ -121,7 +121,7 @@ export const getMoviesService = async (query: QueryMovieInput) => {
 
   const rating = query.rating ? Number(query.rating) : undefined;
   const where = buildMovieWhere(query);
-
+  console.log("where: ", JSON.stringify(where, null, 2));
   const cacheKey = await movieCacheKey({
     page,
     limit,

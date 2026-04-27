@@ -24,6 +24,6 @@ export const movieCacheKey = async (params: {
 }) => {
   const version = await getMovieCacheVersion();
 
-  return `movies:v${version}:${params.page}:${params.limit}:${params.genres ?? ""}:${params.search ?? ""}`;
+  return `movies:v${version}:${params.page}:${params.limit}:${params.genres ?? ""}:${params.search ?? ""}:${params.rating ?? ""}:${params.duration ?? ""}`;
 };
 //ex: movies:v1:1:10:action:batman

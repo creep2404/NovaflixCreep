@@ -24,7 +24,7 @@ export const globalLimiter = rateLimit({
   },
 
   keyGenerator: (req) => {
-    return req.user?.id ?? ipKeyGenerator(req);
+    return req.user?.id ?? ipKeyGenerator(req.ip as string);
   },
 });
 
@@ -34,7 +34,7 @@ export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10, // max 10 login times
   keyGenerator: (req) => {
-    return req.user?.id ?? ipKeyGenerator(req);
+    return req.user?.id ?? ipKeyGenerator(req.ip as string);
   },
   message: {
     success: false,
@@ -48,7 +48,7 @@ export const uploadLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
   max: 20,
   keyGenerator: (req) => {
-    return req.user?.id ?? ipKeyGenerator(req);
+    return req.user?.id ?? ipKeyGenerator(req.ip as string);
   },
   message: {
     success: false,

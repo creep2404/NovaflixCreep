@@ -8,7 +8,6 @@ import {
 import { api } from "./axios";
 
 export const getMovies = (params: QueryMovie) => api.get<Movie[]>("/movies", { params });
-};
 
 export const getMovieById = (id: string) => api.get<Movie>(`/movies/${id}`);
 

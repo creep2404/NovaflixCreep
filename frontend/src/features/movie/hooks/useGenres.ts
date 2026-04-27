@@ -9,7 +9,6 @@ export const useGenres = (skip: number) => {
         skip,
         limit: 6,
       });
-      console.log("🚀 res:", res);
       return res;
     },
   });
