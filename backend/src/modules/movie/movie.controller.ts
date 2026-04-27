@@ -14,10 +14,11 @@ import fs from "fs";
 import path from "path";
 import {
   getPresignedUploadUrl,
-} from "@/common/utils/s3-upload.util";
+} from "@/common/infra/s3-upload.util";
+import { AppError } from "@/common/utils/AppError";
 
 export const createMovie = asyncHandler(async (req: Request, res: Response) => {
-  const movie = await createMovieService(req.body);
+  const movie = await createMovieService(req.validated!.body);
 
   return successResponse(res, movie, "Movie created successfully");
 });
@@ -36,36 +37,33 @@ export const getMovies = asyncHandler(async (req: Request, res: Response) => {
 export const getMovieById = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.validated!.params as { id: string };
-    if (!id) {
-      throw new Error("Movie ID is required");
-    }
 
     const movie = await getMovieByIdService(id);
     return successResponse(res, movie, "Get movie successfully");
   },
 );
 
-export const uploadMovieVideo = asyncHandler(
-  async (req: Request, res: Response) => {
-    const file = req.file;
+// export const uploadMovieVideo = asyncHandler(
+//   async (req: Request, res: Response) => {
+//     const file = req.file;
 
-    if (!file) {
-      throw new Error("No file uploaded");
-    }
+//     if (!file) {
+//       throw new AppError("No file uploaded");
+//     }
 
-    // const { videoId } = await uploadVideoToS3(file);
-    const videoId = "test-video-id";
-    return successResponse(res, { videoId }, "Video uploaded successfully");
-  },
-);
+//     // const { videoId } = await uploadVideoToS3(file);
+//     const videoId = "test-video-id";
+//     return successResponse(res, { videoId }, "Video uploaded successfully");
+//   },
+// );
 
 //PRESIGNED UPLOAD - Main
 export const getUploadUrl = asyncHandler(
   async (req: Request, res: Response) => {
-    const { videoId, fileType } = req.body;
+    const { videoId, fileType } = req.validated!.body;
 
     if (!videoId || !fileType) {
-      throw new Error("Video ID and file type are required");
+      throw new AppError("Video ID and file type are required");
     }
 
     const data = await getPresignedUploadUrl(videoId, fileType);
@@ -82,10 +80,6 @@ export const getMoviePlayback = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params as { id: string };
     const { type } = req.query;
-
-    if (!id) {
-      throw new Error("Movie ID is required");
-    }
 
     const fileType = type === "thumbnail" ? "thumbnail" : "video";
 
@@ -105,7 +99,7 @@ export const getTrendingMovies = asyncHandler(
 
 export const getContinueWatching = asyncHandler(
   async (req: any, res: Response) => {
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     const result = await getContinueWatchingService(userId);
 

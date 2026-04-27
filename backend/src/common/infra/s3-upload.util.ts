@@ -5,6 +5,7 @@ import { getSignedUrl } from "@aws-sdk/cloudfront-signer";
 import dotenv from "dotenv";
 import crypto from "crypto";
 import fs from "fs";
+import { env } from "@/config/env";
 
 export const getPresignedUploadUrl = async (
   videoId: string,
@@ -18,7 +19,7 @@ export const getPresignedUploadUrl = async (
   }
 
   const command = new PutObjectCommand({
-    Bucket: process.env.AWS_S3_BUCKET,
+    Bucket: env.AWS_S3_BUCKET,
     Key: key,
     ContentType: fileType === "thumbnail" ? "image/jpeg" : "video/mp4",
   });
@@ -40,14 +41,14 @@ export const getPresignedUploadUrl = async (
  * - Make sure the key exists in your S3 bucket
  */
 export const getPresignedDownloadUrl = async (key: string) => {
-  const urlImagePublic = process.env.AWS_CLOUD_FRONT_IMAGE_PUBLIC;
-  const privateKey = process.env.AWS_CLOUD_FRONT_KEY_PRIVATE?.replace(/\\n/g, "\n");
+  const urlImagePublic = env.AWS_CLOUD_FRONT_IMAGE_PUBLIC;
+  const privateKey = env.AWS_CLOUD_FRONT_KEY_PRIVATE?.replace(/\\n/g, "\n");
   //const privateKey = fs.readFileSync("./est/private_key.pem", "utf-8");
   //const privateKey = fs.readFileSync("./est/private1.pem", "utf-8");
   
   const signedUrl = getSignedUrl({
     url: `${urlImagePublic}/${key}`,
-    keyPairId: process.env.AWS_CLOUD_FRONT_KEY_PAIR!,
+    keyPairId: env.AWS_CLOUD_FRONT_KEY_PAIR!,
     dateLessThan: new Date(Date.now() + 5 * 60 * 1000),
     privateKey: privateKey!,
   });

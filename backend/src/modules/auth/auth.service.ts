@@ -4,7 +4,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
-} from "@/common/utils/jwt.util";
+} from "@/common/security/jwt.util";
 import {
   createUserRepo,
   findUserByEmailRepo,

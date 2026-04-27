@@ -10,10 +10,12 @@ import {
   checkLoginAttempts,
   increaseLoginAttempts,
   resetLoginAttempts,
-} from "@/common/utils/brute-force.util";
+} from "@/common/security/brute-force.util";
 import { successResponse } from "@/common/utils/successResponse";
 import { AuthRequest } from "@/common/middleware/auth.middleware";
 import { updateUserRefreshToken } from "../user/user.repository";
+import { AppError } from "@/common/utils/AppError";
+import { env } from "@/config/env";
 
 export const register = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -23,12 +25,12 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
   return successResponse(res, user, "Register successfully");
 });
 export const login = asyncHandler(async (req: Request, res: Response) => {
-  const isProd = process.env.NODE_ENV === "production";
+  const isProd = env.NODE_ENV === "production";
   console.log("🚀 isProd:", isProd);
   const key = `login:${req.ip}`;
 
   const allowed = await checkLoginAttempts(key);
-  if (!allowed) throw new Error("Too many attempts");
+  if (!allowed) throw new AppError("Too many attempts");
 
   const { email, password } = req.body;
 
