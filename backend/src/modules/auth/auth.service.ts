@@ -116,7 +116,4 @@ export const refreshTokenService = async (token: string) => {
     accessToken,
     refreshToken: newRefreshToken,
   };
-};
-export const logoutService = async (userId: string) => {
-  await updateUserRefreshToken(userId, "", new Date(0));
-};
+}

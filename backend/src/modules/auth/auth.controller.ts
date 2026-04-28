@@ -56,10 +56,14 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const logout = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const isProd = env.NODE_ENV === "production";
   console.log("user: ", req.user);
   await updateUserRefreshToken(req.user!.id, "", new Date(0));
 
   res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: isProd, 
+    sameSite: "none",
     path: "/",
   });
 
@@ -69,8 +73,9 @@ export const logout = asyncHandler(async (req: AuthRequest, res: Response) => {
 export const refresh = asyncHandler(async (req: Request, res: Response) => {
   const isProd = env.NODE_ENV === "production";
   const token = req.cookies.refreshToken;
-
+  console.log("token: ", token);
   const data = await refreshTokenService(token);
+  console.log("data: ", data);
   if (!data) {
     return successResponse(res, null);
   }
