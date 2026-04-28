@@ -46,11 +46,13 @@ export const loginService = async (email: string, password: string) => {
   }
 
   const accessToken = generateAccessToken({
-    userId: user.id,
+    sub: user.id,
+    role: user.role,
   });
 
   const refreshToken = generateRefreshToken({
-    userId: user.id,
+    sub: user.id,
+    role: user.role,
   });
 
   await updateUserRefreshToken(
@@ -96,7 +98,8 @@ export const refreshTokenService = async (token: string) => {
   }
 
   const newRefreshToken = generateRefreshToken({
-    userId: user.id,
+    sub: user.id,
+    role: user.role,
   });
 
   await updateUserRefreshToken(
@@ -106,7 +109,8 @@ export const refreshTokenService = async (token: string) => {
   );
 
   const accessToken = generateAccessToken({
-    userId: user.id,
+    sub: user.id,
+    role: user.role,
   });
 
   return {

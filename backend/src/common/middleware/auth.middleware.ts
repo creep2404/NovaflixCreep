@@ -25,12 +25,15 @@ export const authMiddleware = (
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, env.JWT_SECRET as string) as {
-      id: string;
+    const decoded = jwt.verify(token, env.JWT_SECRET) as {
+      sub: string;
       role: "USER" | "ADMIN" | "PREMIUM";
     };
 
-    req.user = decoded;
+    req.user = {
+      id: decoded.sub,
+      role: decoded.role,
+    };
     next();
   } catch {
     return next({

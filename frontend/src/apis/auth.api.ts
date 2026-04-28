@@ -17,14 +17,16 @@ export const registerApi = async (email: string, password: string) =>
   });
 
 export const getProfileApi = async () => {
-  const token = useAuthStore.getState().accessToken;
+  // const token = useAuthStore.getState().accessToken;
 
-  if (!token) throw new Error("No token");
+  // if (!token) throw new Error("No token");
 
-  const id = getUserIdFromToken(token);
+  // const id = getUserIdFromToken(token);
 
-  if (!id) throw new Error("Invalid token");
-  const res = await api.get(`/users/${id}`);
+  // if (!id) throw new Error("Invalid token");
+  // const res = await api.get(`/users/${id}`);
+  // return res;
+  const res = await api.get("/users/me");
   return res;
 };
 
