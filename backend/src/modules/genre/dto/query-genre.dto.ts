@@ -1,3 +1,5 @@
-import { QueryDto } from "@/common/dto/common.dto";
+import { QueryDto } from "@/common/dto/query.dto";
 
-export interface QueryGenreDto extends QueryDto {}
+export interface QueryGenreDto extends QueryDto {
+  optional?: string;
+}

@@ -1,14 +1,17 @@
 import dotenv from "dotenv";
+import path from "node:path";
 
-dotenv.config();
+dotenv.config({
+  path: path.resolve(process.cwd(), "../.env"),
+})
 
 export const env = {
   // Server
-  PORT: process.env.PORT || 3000,
-  DATABASE_URL: process.env.DATABASE_URL || "",
+  PORT: process.env.PORT ?? 3000,
+  DATABASE_URL: process.env.DATABASE_URL ?? "",
   JWT_SECRET: process.env.JWT_SECRET!,
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET!,
-  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || 24 * 60 * 60 * 1000,
+  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN ?? 24 * 60 * 60 * 1000,
   
   // AWS
   AWS_REGION: process.env.AWS_REGION!,
@@ -21,4 +24,16 @@ export const env = {
 
   // Client
   CLIENT_URL: process.env.CLIENT_URL!,
+
+  //Redis
+  REDIS_HOST: process.env.REDIS_HOST,
+  REDIS_PORT: process.env.REDIS_PORT,
+  REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+  REDIS_URL: process.env.REDIS_URL,
+
+  //Other
+  NODE_ENV: process.env.NODE_ENV ?? "production",
+  CDN_DOMAIN: process.env.CDN_DOMAIN,
+  COOKIE_DOMAIN: process.env.COOKIE_DOMAIN
+
 };

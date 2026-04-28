@@ -1,17 +1,22 @@
-export interface CreateMovieDto {
-  title: string;
-  slug?: string;
+import z from "zod"
 
-  description?: string;
-  thumbnailUrl?: string;
-  duration: number;
+export const createMovieSchema = z.object({
+  title: z.string().min(1),
 
-  genres?: string[]; 
+  thumbnailUrl: z.string().optional(),
+  duration: z.number().int().positive(),
 
-  videoId: string;
-  trailer: string;
+  genres: z.array(z.string()).optional(),
 
-  releaseDate?: string;
+  // MovieDetail
+  description: z.string().min(1), 
+  videoId: z.string().min(1),
+  trailerUrl: z.string().optional(),
+  releaseDate: z.string().optional(),
 
-  rating: number; 
-}
+  rating: z.number().min(0).max(5).optional(),
+  country: z.string().optional(),
+  ageRating: z.string().optional(),
+});
+
+export type CreateMovieInput = z.infer<typeof createMovieSchema>;

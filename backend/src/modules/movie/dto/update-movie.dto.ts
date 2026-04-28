@@ -1,14 +1,10 @@
-export interface UpdateMovieDto {
-  title?: string;
-  slug?: string;
-  thumbnailUrl?: string;
-  duration?: number;
+import z from "zod";
+import { createMovieSchema } from "./create-movie.dto";
 
-  genres?: string[];
+export const updateMovieSchema = createMovieSchema
+  .partial()
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "At least one field must be provided",
+  });
 
-  description?: string;
-  videoId?: string;
-  trailerUrl?: string;
-  releaseDate?: string;
-  rating?: number;
-}
+export type UpdateMovieInput = z.infer<typeof updateMovieSchema>;

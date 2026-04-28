@@ -1,8 +1,5 @@
 import { api } from "./axios";
-import { QueryGenre } from "../types";
+import { QueryGenre } from "@/src/shared/types";
 
-
-export const getGenres = async (params: QueryGenre) => {
-  const res = await api.get("/genres", { params });
-  return res.data;
-};
+export const getGenres = async (params: QueryGenre) =>
+  await api.get("/genres", { params });

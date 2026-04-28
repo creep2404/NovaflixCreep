@@ -1,8 +1,8 @@
 import { prisma } from "@/database/client";
-import { CreateMovieDto } from "./dto/create-movie.dto";
-import { UpdateMovieDto } from "./dto/update-movie.dto";
+import { buildPrismaUpdate } from "@/common/utils/object.util";
+import { CreateMovieRepoInput, GetMoviesRepoInput, UpdateMovieRepoInput } from "./movie.type";
 
-export const createMovieRepo = async (data: CreateMovieDto) => {
+export const createMovieRepo = async (data: CreateMovieRepoInput) => {
   const movie = await prisma.movie.create({
     data: {
       title: data.title,
@@ -14,10 +14,13 @@ export const createMovieRepo = async (data: CreateMovieDto) => {
         create: {
           description: data.description,
           videoId: data.videoId,
-          trailerUrl: data?.trailerUrl,
+          trailerUrl: data.trailerUrl,
           releaseDate: data.releaseDate
             ? new Date(data.releaseDate)
             : undefined,
+          rating: data.rating,
+          country: data.country,
+          ageRating: data.ageRating,
         },
       },
     },
@@ -42,7 +45,10 @@ export const createMovieRepo = async (data: CreateMovieDto) => {
   });
 };
 
-export const updateMovieRepo = async (id: string, data: UpdateMovieDto) => {
+export const updateMovieRepo = async (
+  id: string,
+  data: UpdateMovieRepoInput,
+) => {
   const {
     genres,
     description,
@@ -50,6 +56,8 @@ export const updateMovieRepo = async (id: string, data: UpdateMovieDto) => {
     trailerUrl,
     releaseDate,
     rating,
+    // country,
+    // ageRating,
     ...movieData
   } = data;
 
@@ -59,13 +67,15 @@ export const updateMovieRepo = async (id: string, data: UpdateMovieDto) => {
       ...movieData,
 
       detail: {
-        update: {
+        update: buildPrismaUpdate({
           description,
           videoId,
           trailerUrl,
-          releaseDate: releaseDate ? new Date(releaseDate) : undefined,
+          releaseDate,
           rating,
-        },
+          // country,
+          // ageRating,
+        }),
       },
 
       ...(genres && {
@@ -111,85 +121,14 @@ export const getMovieByIdRepo = async (id: string) => {
 export const getMoviesRepo = async ({
   skip,
   take,
-  genres,
-  search,
-  rating,
-  duration,
-  //premium,
+  where,
   orderByTrending,
-}: {
-  skip?: number;
-  take?: number;
-  genres?: string[];
-  search?: string;
-  rating?: number;
-  duration?: "short" | "medium" | "long";
-  //premium?: boolean;
-  orderByTrending?: boolean;
-}) => {
+}: GetMoviesRepoInput) => {
   return prisma.movie.findMany({
     skip,
     take,
 
-    where: {
-      AND: [
-        // SEARCH
-        search
-          ? {
-              title: {
-                contains: search,
-                mode: "insensitive",
-              },
-            }
-          : {},
-
-        // GENRES (OR)
-        genres && genres.length > 0
-          ? {
-              genres: {
-                some: {
-                  genre: {
-                    name: {
-                      in: genres,
-                    },
-                  },
-                },
-              },
-            }
-          : {},
-
-        // RATING (>=)
-        rating
-          ? {
-              rating: {
-                gte: rating,
-              },
-            }
-          : {},
-
-        // DURATION
-        duration === "short"
-          ? {
-              duration: { lt: 3600 },
-            }
-          : duration === "medium"
-            ? {
-                duration: { gte: 3600, lte: 7200 },
-              }
-            : duration === "long"
-              ? {
-                  duration: { gt: 7200 },
-                }
-              : {},
-
-        // PREMIUM (future)
-        // premium !== undefined
-        //   ? {
-        //       isPremium: premium,
-        //     }
-        //   : {},
-      ],
-    },
+    where,
 
     include: {
       genres: {
@@ -213,70 +152,11 @@ export const getMoviesRepo = async ({
   });
 };
 
-export const countMoviesRepo = async ({
-  skip,
-  take,
-  genres,
-  search,
-  rating,
-  duration,
-  //premium,
-}: {
-  skip?: number;
-  take?: number;
-  genres?: string[];
-  search?: string;
-  rating?: number;
-  duration?: "short" | "medium" | "long";
-  //premium?: boolean;
-}) => {
+export const countMoviesRepo= async ({
+  where
+}: GetMoviesRepoInput) => {
   return prisma.movie.count({
-    skip,
-    take,
-    where: {
-      AND: [
-        search
-          ? {
-              title: {
-                contains: search,
-                mode: "insensitive",
-              },
-            }
-          : {},
-
-        genres && genres.length > 0
-          ? {
-              genres: {
-                some: {
-                  genre: {
-                    name: {
-                      in: genres,
-                    },
-                  },
-                },
-              },
-            }
-          : {},
-
-        rating !== undefined
-          ? {
-              detail: {
-                rating: {
-                  gte: rating,
-                },
-              },
-            }
-          : {},
-
-        duration === "short"
-          ? { duration: { lt: 3600 } }
-          : duration === "medium"
-            ? { duration: { gte: 3600, lte: 7200 } }
-            : duration === "long"
-              ? { duration: { gt: 7200 } }
-              : {},
-      ],
-    },
+    where
   });
 };
 

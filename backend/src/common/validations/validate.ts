@@ -1,16 +1,22 @@
 import { RequestHandler } from "express";
 import { z } from "zod";
+import { sanitizeObject } from "../security/sanitize.util";
 
 type Source = "body" | "params" | "query";
 
 const validate =
   <T extends z.ZodType>(schema: T, source: Source): RequestHandler =>
   async (req, res, next) => {
-    const result = await schema.safeParseAsync(req[source]);
+    const rawData = req[source];
+
+    const dataToValidate =
+      source === "body" ? sanitizeObject(rawData) : rawData;
+
+    const result = await schema.safeParseAsync(dataToValidate);
 
     if (!result.success) {
-      return res.status(400).json({
-        success: false,
+      return next({
+        status: 400,
         message: `Invalid ${source} schema`,
         errors: result.error.issues.map((e) => ({
           field: e.path.join("."),
@@ -19,7 +25,7 @@ const validate =
       });
     }
 
-    // lưu lại data đã parse
+    // saved validated data
     req.validated = req.validated || {};
     req.validated[source] = result.data;
 

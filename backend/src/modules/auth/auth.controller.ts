@@ -1,8 +1,19 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../../common/utils/asyncHandler";
-import { registerService, loginService } from "./auth.service";
-import { checkLoginAttempts, increaseLoginAttempts, resetLoginAttempts } from "@/common/utils/brute-force.util";
+import {
+  registerService,
+  loginService,
+  refreshTokenService,
+} from "./auth.service";
+import {
+  checkLoginAttempts,
+  resetLoginAttempts,
+} from "@/common/security/brute-force.util";
 import { successResponse } from "@/common/utils/successResponse";
+import { AuthRequest } from "@/common/middleware/auth.middleware";
+import { updateUserRefreshToken } from "../user/user.repository";
+import { AppError } from "@/common/utils/AppError";
+import { env } from "@/config/env";
 
 export const register = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -11,30 +22,74 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
 
   return successResponse(res, user, "Register successfully");
 });
-
 export const login = asyncHandler(async (req: Request, res: Response) => {
+  const isProd = env.NODE_ENV === "production";
+  
   const key = `login:${req.ip}`;
-  // check block
-  const allowed = await checkLoginAttempts(key);
-  if (!allowed) {
-    return res.status(429).json({
-      message: "Too many failed attempts. Try again later.",
-    });
-  }
-  const { email, password } = req.body;
-  try {
-    const userData = await loginService(email, password);
-    
-    await resetLoginAttempts(key);
-    return successResponse(res, userData, "Login successfully");
-  } catch (err) {
-    // login fail → increase count
-    await increaseLoginAttempts(key);
 
-    throw err;
-  }
+  const allowed = await checkLoginAttempts(key);
+  if (!allowed) throw new AppError("Too many attempts");
+
+  const { email, password } = req.body;
+
+  const data = await loginService(email, password);
+
+  // SET COOKIE
+  res.cookie("refreshToken", data.refreshToken, {
+    httpOnly: true,
+    secure: isProd, 
+    sameSite: "none",
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  await resetLoginAttempts(key);
+
+  return successResponse(
+    res,
+    {
+      user: data.user,
+      accessToken: data.accessToken,
+    },
+    "Login successfully",
+  );
 });
 
-export const logout = (req: Request, res: Response) => {
+export const logout = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const isProd = env.NODE_ENV === "production";
+  console.log("user: ", req.user);
+  await updateUserRefreshToken(req.user!.id, "", new Date(0));
+
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: isProd, 
+    sameSite: "none",
+    path: "/",
+  });
+
   return successResponse(res, null, "Logout successfully");
-};
+});
+
+export const refresh = asyncHandler(async (req: Request, res: Response) => {
+  const isProd = env.NODE_ENV === "production";
+  const token = req.cookies.refreshToken;
+  console.log("token: ", token);
+  const data = await refreshTokenService(token);
+  console.log("data: ", data);
+  if (!data) {
+    return successResponse(res, null);
+  }
+
+  // rotate cookie
+  res.cookie("refreshToken", data.refreshToken, {
+    httpOnly: true,
+    secure: isProd, 
+    sameSite: "none",
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+
+  return successResponse(res, {
+    accessToken: data.accessToken,
+  });
+});

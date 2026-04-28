@@ -1,3 +1,4 @@
+import { AppError } from "@/common/utils/AppError";
 import {
   createUserRepo,
   findUserByEmailRepo,
@@ -6,9 +7,9 @@ import {
 } from "./user.repository";
 
 export const findUserByEmailService = async (email: string) => {
-  if (!email) throw new Error("Email is required");
+  if (!email) throw new AppError("Email is required");
   const user = await findUserByEmailRepo(email);
-  if (!user) throw new Error("User not found");
+  if (!user) throw new AppError("User not found");
 
   return user;
 };
@@ -21,11 +22,11 @@ export const createUserService = async (data: {
 };
 
 export const getUserByIdService = async (id: string) => {
-  if (!id) throw new Error("User ID is required");
+  if (!id) throw new AppError("User ID is required");
 
   const user = await findUserByIdRepo(id);
 
-  if (!user) throw new Error("User not found");
+  if (!user) throw new AppError("User not found");
 
   return user;
 };

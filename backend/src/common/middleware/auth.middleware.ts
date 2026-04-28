@@ -1,36 +1,62 @@
 import { env } from "@/config/env";
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { JwtPayload } from "../types/jwt.type";
 
 export interface AuthRequest extends Request {
   user?: {
-    userId: string;
+    id: string;
+    role: "USER" | "ADMIN" | "PREMIUM";
   };
 }
-
 export const authMiddleware = (
   req: AuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Unauthorized" });
+  if (!authHeader?.startsWith("Bearer ")) {
+    return next({
+      status: 401,
+      message: "Unauthorized",
+    });
   }
 
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(
-      token,
-      env.JWT_SECRET as string
-    ) as { userId: string };
+    const decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
 
-    req.user = decoded;
-
+    req.user = {
+      id: decoded.sub,
+      role: decoded.role,
+    };
     next();
-  } catch (error) {
-    return res.status(401).json({ message: "Invalid token" });
+  } catch {
+    return next({
+      status: 401,
+      message: "Invalid token",
+    });
   }
 };
+
+export const requireRole =
+  (role: "USER" | "ADMIN" | "PREMIUM") =>
+  (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return next({
+        status: 401,
+        message: "Unauthorized",
+      });
+    }
+
+    if (req.user.role !== role) {
+      return next({
+        status: 403,
+        message: "Forbidden",
+      });
+    }
+
+    next();
+  };

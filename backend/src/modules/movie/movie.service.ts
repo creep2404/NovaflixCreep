@@ -1,5 +1,3 @@
-import { CreateMovieDto } from "./dto/create-movie.dto";
-import { QueryMovieDto } from "./dto/query-movie.dto";
 import { formatMovie } from "./mappers/movie.mapper";
 import {
   countMoviesRepo,
@@ -12,16 +10,21 @@ import {
   updateMovieRepo,
 } from "./movie.repository";
 import { invalidateMovieCache, movieCacheKey } from "./movie.cache";
-import { deleteByPattern, getCache, setCache } from "@/common/utils/cache.util";
-import { UpdateMovieDto } from "./dto/update-movie.dto";
+import { getCache, setCache, withCache } from "@/common/infra/cache.util";
 import { eventBus } from "@/events/eventBus";
 import { EVENTS } from "@/common/constants/events.constants";
-import { getPresignedDownloadUrl } from "@/common/utils/s3-upload.util";
+import { getPresignedDownloadUrl } from "@/common/infra/s3-upload.util";
 import { FILE_PATHS } from "@/common/constants/file-path.constants";
 import { generateSlug } from "@/common/utils/slug";
 import { AppError } from "@/common/utils/AppError";
+import { getCachedPresignedUrl } from "@/common/utils/presigned-cache.util";
+import { CreateMovieInput } from "./dto/create-movie.dto";
+import { QueryMovieInput } from "./dto/query-movie.dto";
+import { buildMovieWhere } from "./movie.filter";
+import { CreateMovieRepoInput, UpdateMovieRepoInput } from "./movie.type";
+import { UpdateMovieInput } from "./dto/update-movie.dto";
 
-export const createMovieService = async (data: CreateMovieDto) => {
+export const createMovieService = async (data: CreateMovieInput) => {
   if (data.duration > 10 * 3600) {
     throw new AppError("Duration too long", 400);
   }
@@ -35,11 +38,13 @@ export const createMovieService = async (data: CreateMovieDto) => {
   }
 
   const slug = generateSlug(data.title);
-  console.log("CREATE MOVIE DATA:", data);
-  const movie = await createMovieRepo({
+
+  const repoData: CreateMovieRepoInput = {
     ...data,
     slug,
-  });
+    releaseDate: data.releaseDate ? new Date(data.releaseDate) : undefined,
+  };
+  const movie = await createMovieRepo(repoData);
 
   //Invalidate cache
   await invalidateMovieCache();
@@ -48,22 +53,28 @@ export const createMovieService = async (data: CreateMovieDto) => {
   return formatMovie(movie);
 };
 
-export const updateMovieService = async (id: string, data: UpdateMovieDto) => {
+export const updateMovieService = async (
+  id: string,
+  data: UpdateMovieInput,
+) => {
   if (data.rating !== undefined && (data.rating < 0 || data.rating > 5)) {
     throw new AppError("Invalid rating", 400);
   }
 
-  let movie;
-  if (!!data.title) {
-    const slug = generateSlug(data.title);
-    await updateMovieRepo(id, { ...data, slug });
-  } else {
-    await updateMovieRepo(id, data);
+  const repoData: UpdateMovieRepoInput = {
+    ...data,
+    releaseDate: data.releaseDate ? new Date(data.releaseDate) : undefined,
+  };
+
+  if (data.title) {
+    repoData.slug = generateSlug(data.title);
   }
+
+  const updated = await updateMovieRepo(id, repoData);
 
   await invalidateMovieCache();
 
-  return formatMovie(movie);
+  return formatMovie(updated);
 };
 
 export const deleteMovieService = async (id: string) => {
@@ -79,130 +90,71 @@ export const getAllMoviesService = async () => {
 };
 
 export const getMovieByIdService = async (id: string) => {
-  // CACHE KEY
   const cacheKey = `movie:${id}`;
 
-  // CHECK CACHE
-  const cached = await getCache(cacheKey);
-  if (cached) {
-    console.log("CACHE HIT ⚡");
-    return cached;
-  }
+  return withCache(cacheKey, async () => {
+    const movie = await getMovieByIdRepo(id);
 
-  console.log("CACHE MISS ❌");
+    if (!movie) {
+      throw new AppError("Movie not found", 404);
+    }
 
-  // QUERY DB
-  const movie = await getMovieByIdRepo(id);
+    const movieWithUrl = {
+      ...movie,
+      thumbnailUrl: movie.thumbnailUrl
+        ? await getPresignedDownloadUrl(movie.thumbnailUrl)
+        : null,
+    };
 
-  if (!movie) {
-    throw new Error("Movie not found");
-  }
-
-  // PRESIGNED URL
-  const movieWithUrl = {
-    ...movie,
-    thumbnailUrl: movie.thumbnailUrl
-      ? await getPresignedDownloadUrl(movie.thumbnailUrl)
-      : null,
-  };
-
-  // FORMAT
-  const result = {
-    data: formatMovie(movieWithUrl),
-  };
-
-  // SET CACHE
-  await setCache(cacheKey, result, 60);
-
-  return result;
+    return formatMovie(movieWithUrl);
+  });
 };
+export const getMoviesService = async (query: QueryMovieInput) => {
+  const page = Math.max(query.page ?? 1, 1);
+  const limit = Math.max(query.limit ?? 10, 1);
 
-export const getMoviesService = async (query: QueryMovieDto) => {
-  const page = query.page || 1;
-  const limit = query.limit || 10;
-
-  // NORMALIZE INPUT
   const genres = Array.isArray(query.genres)
     ? query.genres
     : query.genres
       ? [query.genres]
       : [];
-  const rating = query.rating ? Number(query.rating) : undefined;
-  const duration = query.duration;
-  //const premium =
 
+  const rating = query.rating ? Number(query.rating) : undefined;
+  const where = buildMovieWhere(query);
+  console.log("where: ", JSON.stringify(where, null, 2));
   const cacheKey = await movieCacheKey({
     page,
     limit,
     search: query.search,
-    genres: genres.join(","),
+    genres: genres.sort().join(","),
     rating,
-    duration,
-    //premium,
+    duration: query.duration,
   });
 
-  //CHECK CACHE
-  const cached = await getCache(cacheKey);
-  if (cached) {
-    console.log("CACHE HIT ⚡");
-    return cached;
-  }
+  return withCache(cacheKey, async () => {
+    const skip = (page - 1) * limit;
 
-  console.log("CACHE MISS ❌");
+    const [movies, total] = await Promise.all([
+      getMoviesRepo({
+        skip,
+        take: limit,
+        where,
+      }),
+      countMoviesRepo({ where }),
+    ]);
 
-  const skip = (page - 1) * limit;
+    const moviesWithUrl = await mapWithUrl(movies);
 
-  //QUERY DB
-  const [movies, total] = await Promise.all([
-    getMoviesRepo({
-      skip,
-      take: limit,
-      search: query.search,
-      genres,
-      rating,
-      duration,
-      //premium,
-    }),
-    countMoviesRepo({
-      genres,
-      search: query.search,
-      rating,
-      duration,
-      //premium,
-    }),
-  ]);
-
-  //ADD PRE-SIGNED URL
-  const batchSize = 50;
-  const moviesWithUrl: typeof movies = [];
-
-  for (let i = 0; i < movies.length; i += batchSize) {
-    const batch = movies.slice(i, i + batchSize);
-    const batchResult = await Promise.all(
-      batch.map(async (movie) => ({
-        ...movie,
-        thumbnailUrl: movie.thumbnailUrl
-          ? await getPresignedDownloadUrl(movie.thumbnailUrl)
-          : null,
-      })),
-    );
-    moviesWithUrl.push(...batchResult);
-  }
-
-  const result = {
-    data: moviesWithUrl.map(formatMovie),
-    meta: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    },
-  };
-
-  //3. SET CACHE
-  await setCache(cacheKey, result, 60);
-
-  return result;
+    return {
+      items: moviesWithUrl.map(formatMovie),
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  });
 };
 
 export const getUrlPresignedByMovieId = async (
@@ -212,7 +164,11 @@ export const getUrlPresignedByMovieId = async (
   const movie = await getMovieByIdRepo(movieId);
 
   if (!movie) {
-    throw new Error("Movie not found");
+    throw new AppError("Movie not found");
+  }
+
+  if (!movie.detail) {
+    throw new AppError("Movie detail not found");
   }
 
   const key = FILE_PATHS[fileType](movie.detail.videoId);
@@ -263,15 +219,47 @@ export const getTrendingMoviesService = async () => {
 };
 
 export const getContinueWatchingService = async (userId: string) => {
-  // NO CACHE (user-specific data)
   const histories = await getContinueWatchingRepo(userId);
 
-  const result = {
-    data: histories.map((item) => ({
-      ...formatMovie(item.movie),
+  return histories
+    .filter((item) => item.movie)
+    .map((item) => ({
+      ...formatMovie(item.movie!),
       progress: item.progress,
-    })),
-  };
+    }));
+};
 
-  return result;
+export const getSuggestMoviesService = async (search: string) => {
+  if (!search?.trim()) return [];
+
+  const movies = await getMoviesRepo({
+    take: 5,
+    where: {
+      title: {
+        contains: search,
+        mode: "insensitive",
+      },
+    },
+    orderByTrending: false,
+  });
+
+  return movies.map((movie) => ({
+    id: movie.id,
+    title: movie.title,
+    slug: movie.slug,
+    thumbnailUrl: movie.thumbnailUrl ?? null,
+  }));
+};
+
+const mapWithUrl = async (movies: any[]) => {
+  return Promise.all(
+    movies.map(async (movie) => {
+      if (!movie.thumbnailUrl) return movie;
+
+      return {
+        ...movie,
+        thumbnailUrl: await getCachedPresignedUrl(movie.thumbnailUrl),
+      };
+    }),
+  );
 };

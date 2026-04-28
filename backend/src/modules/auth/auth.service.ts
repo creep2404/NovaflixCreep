@@ -1,8 +1,17 @@
 import bcrypt from "bcrypt";
 import { AppError } from "@/common/utils/AppError";
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "@/common/utils/jwt.util";
-import { createUserRepo, findUserByEmailRepo, findUserByIdRepo, updateUserRefreshToken } from "../user/user.repository";
-
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} from "@/common/security/jwt.util";
+import {
+  createUserRepo,
+  findUserByEmailRepo,
+  findUserByIdRepo,
+  updateUserRefreshToken,
+} from "../user/user.repository";
+import { JwtPayload } from "@/common/types/jwt.type";
 
 const REFRESH_TOKEN_EXPIRES = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -38,17 +47,19 @@ export const loginService = async (email: string, password: string) => {
   }
 
   const accessToken = generateAccessToken({
-    userId: user.id,
+    sub: user.id,
+    role: user.role,
   });
 
   const refreshToken = generateRefreshToken({
-    userId: user.id,
+    sub: user.id,
+    role: user.role,
   });
 
   await updateUserRefreshToken(
     user.id,
     refreshToken,
-    new Date(Date.now() + REFRESH_TOKEN_EXPIRES)
+    new Date(Date.now() + REFRESH_TOKEN_EXPIRES),
   );
 
   const { password: _, ...safeUser } = user;
@@ -60,17 +71,20 @@ export const loginService = async (email: string, password: string) => {
   };
 };
 
-
 export const refreshTokenService = async (token: string) => {
-  if (!token) {
-    throw new AppError("No refresh token provided", 400);
+  if (!token) return null;
+
+  let payload: JwtPayload;
+
+  try {
+    payload = verifyRefreshToken(token);
+  } catch {
+    throw new AppError("Invalid refresh token", 401);
   }
 
-  const payload = verifyRefreshToken(token);
+  const user = await findUserByIdRepo(payload.sub); 
 
-  const user = await findUserByIdRepo(payload.userId);
-
-  if (!user || !user.refreshToken) {
+  if (!user?.refreshToken) {
     throw new AppError("Invalid refresh token", 401);
   }
 
@@ -78,29 +92,28 @@ export const refreshTokenService = async (token: string) => {
     throw new AppError("Invalid refresh token", 401);
   }
 
-  if (
-    !user.refreshTokenExpiresAt ||
-    user.refreshTokenExpiresAt < new Date()
-  ) {
+  if (!user.refreshTokenExpiresAt || user.refreshTokenExpiresAt < new Date()) {
     throw new AppError("Refresh token expired", 401);
   }
 
   const newRefreshToken = generateRefreshToken({
-    userId: user.id,
+    sub: user.id,
+    role: user.role,
   });
 
   await updateUserRefreshToken(
     user.id,
     newRefreshToken,
-    new Date(Date.now() + REFRESH_TOKEN_EXPIRES)
+    new Date(Date.now() + REFRESH_TOKEN_EXPIRES),
   );
 
   const accessToken = generateAccessToken({
-    userId: user.id,
+    sub: user.id,
+    role: user.role,
   });
 
   return {
     accessToken,
     refreshToken: newRefreshToken,
   };
-};
+}
