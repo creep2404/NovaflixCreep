@@ -56,6 +56,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const logout = asyncHandler(async (req: AuthRequest, res: Response) => {
+  console.log("user: ", req.user);
   await updateUserRefreshToken(req.user!.id, "", new Date(0));
 
   res.clearCookie("refreshToken", {
