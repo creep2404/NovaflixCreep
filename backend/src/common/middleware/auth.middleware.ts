@@ -1,6 +1,7 @@
 import { env } from "@/config/env";
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { JwtPayload } from "../types/jwt.type";
 
 export interface AuthRequest extends Request {
   user?: {
@@ -25,10 +26,7 @@ export const authMiddleware = (
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, env.JWT_SECRET) as {
-      sub: string;
-      role: "USER" | "ADMIN" | "PREMIUM";
-    };
+    const decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
 
     req.user = {
       id: decoded.sub,

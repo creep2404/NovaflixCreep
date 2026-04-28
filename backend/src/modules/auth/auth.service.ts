@@ -11,6 +11,7 @@ import {
   findUserByIdRepo,
   updateUserRefreshToken,
 } from "../user/user.repository";
+import { JwtPayload } from "@/common/types/jwt.type";
 
 const REFRESH_TOKEN_EXPIRES = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -71,11 +72,9 @@ export const loginService = async (email: string, password: string) => {
 };
 
 export const refreshTokenService = async (token: string) => {
-  if (!token) {
-    return null;
-  }
+  if (!token) return null;
 
-  let payload;
+  let payload: JwtPayload;
 
   try {
     payload = verifyRefreshToken(token);
@@ -83,7 +82,7 @@ export const refreshTokenService = async (token: string) => {
     throw new AppError("Invalid refresh token", 401);
   }
 
-  const user = await findUserByIdRepo(payload.userId);
+  const user = await findUserByIdRepo(payload.sub); 
 
   if (!user?.refreshToken) {
     throw new AppError("Invalid refresh token", 401);
@@ -118,7 +117,6 @@ export const refreshTokenService = async (token: string) => {
     refreshToken: newRefreshToken,
   };
 };
-
 export const logoutService = async (userId: string) => {
   await updateUserRefreshToken(userId, "", new Date(0));
 };
