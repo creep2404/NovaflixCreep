@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {
@@ -80,6 +81,11 @@ model Movie {
   favorites      Favorite[]
   episodes    Episode[]
   actors      MovieActor[]
+
+  @@index([title])
+  @@index([status])
+  @@index([createdAt])
+  @@index([duration])
 }
 
 model MovieDetail {
@@ -94,7 +100,7 @@ model MovieDetail {
   ageRating   String?
   releaseDate DateTime?
 
-  rating      Float   @default(0)
+  rating Decimal @default(0)
 
   movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
 
@@ -188,4 +194,5 @@ model Notification {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+  @@index([userId, isRead])
 }

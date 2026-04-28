@@ -5,14 +5,13 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "dev:debug": "tsx watch --inspect src/server.ts",
-
     "build": "tsc",
-
-    "start": "tsx -r tsconfig-paths/register src/server.ts",  
+    "start": "tsx -r tsconfig-paths/register src/server.ts",
     "start:prod": "NODE_ENV=production node dist/server.js",
-
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "migrate": "dotenv -e ../.env -- prisma migrate dev",
+    "migrate:supa": "dotenv -e .env.supabase -- prisma migrate deploy"
   },
   "keywords": [],
   "author": "",
@@ -62,6 +61,7 @@
     "@types/uuid": "^11.0.0",
     "@typescript-eslint/eslint-plugin": "^8.58.2",
     "@typescript-eslint/parser": "^8.58.2",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
