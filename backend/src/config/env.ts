@@ -32,7 +32,7 @@ export const env = {
   REDIS_URL: process.env.REDIS_URL,
 
   //Other
-  NODE_ENV: process.env.NODE_ENV ?? "development",
+  NODE_ENV: process.env.NODE_ENV ?? "production",
   CDN_DOMAIN: process.env.CDN_DOMAIN,
   COOKIE_DOMAIN: process.env.COOKIE_DOMAIN
 

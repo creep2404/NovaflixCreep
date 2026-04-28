@@ -38,7 +38,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   res.cookie("refreshToken", data.refreshToken, {
     httpOnly: true,
     secure: isProd, 
-    sameSite: isProd ? "strict" : "lax", 
+    sameSite: "none",
     path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
@@ -66,6 +66,7 @@ export const logout = asyncHandler(async (req: AuthRequest, res: Response) => {
 });
 
 export const refresh = asyncHandler(async (req: Request, res: Response) => {
+  const isProd = env.NODE_ENV === "production";
   const token = req.cookies.refreshToken;
 
   const data = await refreshTokenService(token);
@@ -76,8 +77,8 @@ export const refresh = asyncHandler(async (req: Request, res: Response) => {
   // rotate cookie
   res.cookie("refreshToken", data.refreshToken, {
     httpOnly: true,
-    secure: true,
-    sameSite: "strict",
+    secure: isProd, 
+    sameSite: "none",
     path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
