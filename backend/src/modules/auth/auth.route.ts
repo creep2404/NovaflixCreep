@@ -70,19 +70,6 @@ router.post("/register", authLimiter, register);
  */
 router.post("/login", authLimiter, login);
 
-/**
- * @swagger
- * /auth/logout:
- *   post:
- *     summary: Logout user
- *     description: Invalidate user session/token
- *     tags: [Auth]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Logout successful
- */
 router.post("/logout", authMiddleware, logout);
 
 router.post("/refresh", refresh);
