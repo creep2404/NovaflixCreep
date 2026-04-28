@@ -1,11 +1,13 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { loginApi, registerApi, getProfileApi, logoutApi } from "@/src/apis/auth.api";
 import { useAuthStore } from "@/src/features/auth/store/auth.store";
+import { useNavigate } from "react-router-dom";
 
 export const useAuth = () => {
   const accessToken = useAuthStore((s) => s.accessToken);
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
   const clear = useAuthStore((s) => s.clear);
+  const navigate = useNavigate();
 
   // 🔐 LOGIN
   const loginMutation = useMutation({
@@ -40,7 +42,7 @@ export const useAuth = () => {
       console.error(e);
     } finally {
       clear();
-      window.location.href = "/login";
+      navigate("/login");
     }
   };
 
