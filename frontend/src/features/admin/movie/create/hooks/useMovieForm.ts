@@ -83,9 +83,12 @@ export const useMovieForm = () => {
 
     try {
       // 1. Upload video
-      const videoRes = await createUploadUrl({ videoId: newVideoId });
+      const videoRes = await createUploadUrl({
+        videoId: newVideoId,
+        fileType: "video",
+      });
 
-      await uploadToS3(file, videoRes.key, setProgress);
+      await uploadToS3(file, videoRes.uploadUrl, setProgress);
 
       // 2. Upload thumbnail
       const thumbRes = await createUploadUrl({
@@ -93,7 +96,7 @@ export const useMovieForm = () => {
         fileType: "thumbnail",
       });
 
-      await uploadToS3(thumbnailFile, thumbRes.key, setThumbProgress);
+      await uploadToS3(thumbnailFile, thumbRes.uploadUrl, setThumbProgress);
 
       // 3. Create movie
       await createMovieApi({

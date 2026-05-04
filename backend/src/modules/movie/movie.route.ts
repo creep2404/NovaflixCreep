@@ -20,6 +20,7 @@ import { queryMovieSchema } from "@/modules/movie/dto/query-movie.dto";
 import { paramIdSchema } from "@/common/dto/param.dto";
 import { uploadLimiter } from "@/common/middleware/rateLimit.middleware";
 import { suggestMovieSchema } from "./dto/suggest-movie-dto";
+import { uploadSchema } from "./dto/upload-video.dto";
 
 const router = Router();
 
@@ -135,7 +136,7 @@ router.get("/trending", getTrendingMovies);
  *       200:
  *         description: Upload URL generated successfully
  */
-router.post("/upload-url", authMiddleware, uploadLimiter, getUploadUrl);
+router.post("/upload-url", authMiddleware, uploadLimiter, validateRequestBody(uploadSchema),getUploadUrl);
 
 router.get(
   "/suggest",

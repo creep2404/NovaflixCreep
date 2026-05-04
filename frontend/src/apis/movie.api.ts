@@ -6,8 +6,10 @@ import {
   CreateMovieDto,
 } from "@/src/shared/types";
 import { api } from "./axios";
+import { UploadUrlResponse } from "../features/admin/movie/types/upload";
 
-export const getMovies = (params: QueryMovie) => api.get<Movie[]>("/movies", { params });
+export const getMovies = (params: QueryMovie) =>
+  api.get<Movie[]>("/movies", { params });
 
 export const getMovieById = (id: string) => api.get<Movie>(`/movies/${id}`);
 
@@ -21,8 +23,10 @@ export const getContinueWatching = () =>
 
 export const createUploadUrl = (payload: {
   videoId: string;
-  fileType?: "thumbnail";
-}) => api.post<{ key: string }>("/movies/upload-url", payload);
+  fileType: "video" | "thumbnail";
+}) => {
+  return api.post<UploadUrlResponse>("/movies/upload-url", payload);
+};
 
 export const createMovieApi = (payload: CreateMovieDto) =>
   api.post<Movie>("/movies", payload);

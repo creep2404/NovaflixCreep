@@ -14,6 +14,7 @@ import { getPresignedUploadUrl } from "@/common/infra/s3-upload.util";
 import { CreateMovieInput } from "./dto/create-movie.dto";
 import { QueryMovieInput } from "./dto/query-movie.dto";
 import { typedHandler } from "@/common/utils/typedRoute";
+import { UploadVideoInput } from "./dto/upload-video.dto";
 
 export const createMovie = asyncHandler(
   typedHandler<CreateMovieInput>(async (req, res) => {
@@ -63,11 +64,11 @@ export const getMovieById = asyncHandler(
 
 //PRESIGNED UPLOAD - Main
 export const getUploadUrl = asyncHandler(
-  typedHandler<{ videoId: string; fileType: string }>(async (req, res) => {
+  typedHandler<UploadVideoInput>(async (req, res) => {
     const { videoId, fileType } = req.validated.body;
 
     const data = await getPresignedUploadUrl(videoId, fileType);
-
+    console.log("Presigned URL data:", data);
     return successResponse(res, data, "Get upload URL successfully");
   }),
 );
