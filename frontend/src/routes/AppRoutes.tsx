@@ -12,6 +12,9 @@ import { Login } from "@/src/features/auth/login/Login";
 import { Register } from "@/src/features/auth/register/Register";
 import { ForgotPassword } from "@/src/features/auth/forgot-password/ForgotPassword";
 import { MovieDetail } from "@/src/features/movie-detail/MovieDetail";
+import { ContentList } from "../features/admin/movie/onGoing/Mock/ContentList";
+import { CreateSeriesPage } from "../features/admin/movie/onGoing/CreateSeries";
+import { UpdateHistory } from "../features/admin/movie/onGoing/Mock/UpdateHistory";
 
 export default function AppRoutes() {
   return (
@@ -40,6 +43,9 @@ export default function AppRoutes() {
         <Route path="movies" element={<AdminMovies />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="upload" element={<CreateMoviePage />} />
+        <Route path="create" element={<ContentList />} />
+        <Route path="create-series" element={<CreateSeriesPage />} />
+        <Route path="update-history" element={<UpdateHistory />} />
       </Route>
     </Routes>
   );

@@ -110,6 +110,7 @@ export interface MoviePlayback {
 
 export interface CreateMovieDto {
   title: string;
+  originalTitle?: string;
   description: string;
   thumbnailUrl: string;
   duration: number;

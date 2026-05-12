@@ -12,6 +12,26 @@
   --color-on-surface: #ffffff;
   --color-on-surface-variant: #a3acb5;
 
+  --color-primary: #ffd165;
+  --color-primary-container: #eab308;
+  --color-on-primary: #3f2e00;
+  --color-on-primary-container: #604700;
+  --color-surface: #0b141b;
+  --color-surface-container-lowest: #060f16;
+  --color-surface-container-low: #131d24;
+  --color-surface-container: #172128;
+  --color-surface-container-high: #222b33;
+  --color-surface-container-highest: #2d363e;
+  --color-on-surface: #dae4ee;
+  --color-on-surface-variant: #d3c5ac;
+  --color-outline: #9b8f79;
+  --color-outline-variant: #4f4633;
+  --color-error: #ffb4ab;
+  --color-error-container: #93000a;
+  --color-tertiary: #adddff;
+  --color-tertiary-container: #60c5ff;
+  --color-secondary: #e2c380;
+
   --font-headline: "Poppins", sans-serif;
   --font-body: "Inter", sans-serif;
 }

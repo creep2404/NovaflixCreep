@@ -1,89 +1,72 @@
 import { useState } from "react";
-import { createUploadUrl, createMovieApi } from "@/src/apis/movie.api";
-import { uploadToS3 } from "@/src/services/s3.service";
-import { useLoading } from "@/src/shared/hooks/useLoading";
-import { validateMovieForm } from "@/src/features/admin/movie/create/utils/validateMovieForm";
 
-export const useMovieForm = () => {
+import { createMovieApi, createUploadUrl } from "@/src/apis/movie.api";
+
+import { uploadToS3 } from "@/src/services/s3.service";
+
+import { useLoading } from "@/src/shared/hooks/useLoading";
+
+import { validateMovieForm } from "@/src/features/admin/movie/create/utils/validateMovieForm";
+import { MovieMetadataFormState } from "./MovieMetadataForm";
+
+export const useSingleMovieUpload = (form: MovieMetadataFormState) => {
   const { setLoading } = useLoading();
 
   // VIDEO
   const [file, setFile] = useState<File | null>(null);
+
   const [progress, setProgress] = useState(0);
 
   // THUMBNAIL
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+
   const [thumbProgress, setThumbProgress] = useState(0);
 
-  // FORM
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    duration: 0,
-    genres: [] as string[],
-    releaseDate: "",
-    rating: "",
-    trailerUrl: "",
-    country: "",
-    ageRating: "",
-    type: "Movie",
-    cast: [] as string[],
-    director: "",
-    status: "Ongoing",
-    originalTitle: "",
-  });
-
+  // ALERT
   const [alertModal, setAlertModal] = useState({
     open: false,
     message: "",
     type: "error" as "error" | "success",
   });
 
+  // VIDEO ID
   const [videoId, setVideoId] = useState("");
 
-  // RESET
-  const reset = () => {
+  const resetMovieUpload = () => {
     setFile(null);
     setThumbnailFile(null);
     setProgress(0);
     setThumbProgress(0);
     setVideoId("");
-
-    setForm({
-      title: "",
-      description: "",
-      duration: 0,
-      genres: [],
-      releaseDate: "",
-      rating: "",
-      trailerUrl: "",
-      country: "",
-      ageRating: "",
-    });
   };
 
-  // DIRTY
-  const isDirty =
-    !!file ||
-    !!thumbnailFile ||
-    Object.values(form).some((v) =>
-      Array.isArray(v) ? v.length > 0 : v !== "" && v !== 0,
-    );
+  const isMovieUploadDirty = !!file || !!thumbnailFile;
 
-  // SUBMIT
-  const submit = async () => {
-    const error = validateMovieForm({ file, thumbnailFile, form });
+  const submitMovie = async () => {
+    const error = validateMovieForm({
+      file,
+      thumbnailFile,
+      form,
+    });
 
     if (error) {
-      setAlertModal({ open: true, message: error, type: "error" });
+      setAlertModal({
+        open: true,
+        message: error,
+        type: "error",
+      });
+
       return;
     }
 
-    if (!file || !thumbnailFile) return; // safety
+    if (!file || !thumbnailFile) {
+      return;
+    }
 
     setLoading(true);
 
     const newVideoId = videoId || crypto.randomUUID();
+
     setVideoId(newVideoId);
 
     try {
@@ -108,11 +91,11 @@ export const useMovieForm = () => {
         title: form.title,
         description: form.description,
         thumbnailUrl: thumbRes.key,
-        duration: form.duration,
+        duration: 0,
         videoId: newVideoId,
         genres: form.genres,
         releaseDate: form.releaseDate,
-        rating: Number(form.rating),
+        rating: form.rating,
         trailerUrl: form.trailerUrl,
         country: form.country,
         ageRating: form.ageRating,
@@ -124,7 +107,7 @@ export const useMovieForm = () => {
         type: "success",
       });
 
-      reset();
+      resetMovieUpload();
     } catch (err) {
       console.error(err);
 
@@ -138,24 +121,32 @@ export const useMovieForm = () => {
     }
   };
 
+  //READY TO SUBMIT
+  const readyToSubmit =
+    !!file &&
+    !!thumbnailFile &&
+    form.title.trim().length > 0 &&
+    form.description.trim().length > 0;
+
   return {
     file,
     setFile,
+
     progress,
 
     thumbnailFile,
     setThumbnailFile,
+
     thumbProgress,
 
-    form,
-    setForm,
+    submitMovie,
 
-    submit,
-    reset,
+    resetMovieUpload,
 
-    isDirty,
+    isMovieUploadDirty,
 
     alertModal,
     setAlertModal,
+    readyToSubmit,
   };
 };

@@ -58,27 +58,22 @@ export default function HeroSection({
           <div className="flex flex-wrap gap-4">
             <button
               onClick={() =>
-                navigate(`/movie/watch/${movie?.id}`, { replace: true })
+                navigate(`/movie/watch/${movie.id}/`, { replace: true })
               }
-              className="bg-primary-fixed text-on-primary px-10 py-4 rounded-full font-bold flex items-center gap-3 
-hover:shadow-[0_0_25px_rgba(226,229,203,0.4)] 
-hover:scale-[1.05] 
-active:scale-95 
-transition-all duration-300 ease-out"
+              className="flex items-center gap-2 bg-primary text-surface px-8 py-4 rounded-full font-bold text-lg hover:bg-primary-dim transition-all hover:scale-105"
             >
-              <Play size={20} className="fill-current" />
-              Play
+              <Play className="fill-current" size={24} />
+              Watch Now
             </button>
 
             <button
               onClick={onWatchTrailer}
               className="bg-surface-variant/40 backdrop-blur-xl border border-white/10 text-white px-10 py-4 rounded-full font-bold flex items-center gap-3 
-hover:bg-surface-variant/60 
-hover:scale-[1.03] 
-hover:-translate-y-0.5 
-hover:shadow-lg 
-active:scale-95 
-transition-all duration-300 ease-out"
+  hover:bg-surface-variant/60 
+  hover:scale-105 
+  hover:shadow-lg 
+  active:scale-95 
+  transition-all duration-300 ease-out will-change-transform"
             >
               <Film size={20} />
               Watch Trailer

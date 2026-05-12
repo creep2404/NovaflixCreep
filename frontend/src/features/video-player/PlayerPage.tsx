@@ -17,7 +17,10 @@ import {
 } from "lucide-react";
 import { MOCK_MOVIES, MOCK_EPISODES, MOCK_COMMENTS } from "@/src/data/mock";
 import { Skeleton } from "@/src/shared/components/skeleton/Skeleton";
-import { ErrorState, EmptyState } from "@/src/shared/components/state/StateViews";
+import {
+  ErrorState,
+  EmptyState,
+} from "@/src/shared/components/state/StateViews";
 import { getWatchHistory } from "@/src/apis/watchHistory.api";
 import { useVideoPlayer } from "./hooks/useVideoPlayer";
 import VideoPlayer from "./components/VideoPlayer";
@@ -30,8 +33,7 @@ export const PlayerPage = () => {
 
   const { profile } = useAuth();
 
-  const { movie, videoSource, isLoading, error } =
-    usePlayerData(movieId);
+  const { movie, videoSource, isLoading, error } = usePlayerData(movieId);
 
   const {
     videoRef,
@@ -54,22 +56,22 @@ export const PlayerPage = () => {
   // RESUME WATCH HISTORY
   //WHEN load page -> resume watch history
   useEffect(() => {
-  if (!movieId || !profile?.id || !videoRef.current) return;
+    if (!movieId || !profile?.id || !videoRef.current) return;
 
-  const fetchProgress = async () => {
-    try {
-      const data = await getWatchHistory(movieId);
+    const fetchProgress = async () => {
+      try {
+        const data = await getWatchHistory(movieId);
 
-      if (data?.progress) {
-        videoRef.current!.currentTime = data.progress;
+        if (data?.progress) {
+          videoRef.current!.currentTime = data.progress;
+        }
+      } catch (err) {
+        console.error("RESUME error", err);
       }
-    } catch (err) {
-      console.error("RESUME error", err);
-    }
-  };
+    };
 
-  fetchProgress();
-}, [movieId, profile, videoRef]);
+    fetchProgress();
+  }, [movieId, profile, videoRef]);
 
   // UI STATES
   if (!movieId) {
@@ -245,7 +247,7 @@ export const PlayerPage = () => {
                 {Math.floor(currentTime / 60)}:
                 {Math.floor(currentTime % 60)
                   .toString()
-                  .padStart(2, "0")}{" "}
+                  .padStart(2, "0")}
                 / {Math.floor(duration / 60)}:
                 {Math.floor(duration % 60)
                   .toString()
