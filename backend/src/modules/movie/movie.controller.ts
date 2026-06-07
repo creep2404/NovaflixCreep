@@ -74,9 +74,9 @@ export const getUploadUrl = asyncHandler(
 );
 
 // Get video
-// GET /movies/123/playback
+// GET /movies/123/play
 // Get thumbnail
-// GET /movies/123/playback?type=thumbnail
+// GET /movies/123/play?type=thumbnail
 export const getMoviePlayback = asyncHandler(
   typedHandler<unknown, unknown , { id: string }>(async (req, res) => {
     const { id } = req.validated.params;

@@ -4,7 +4,7 @@ import { Row } from "@/src/features/home/components/Row";
 import { MovieRowContent } from "@/src/features/home/components/MovieRowContent";
 import { useAuth } from "@/src/features/auth/hooks/useAuth";
 
-export const BrowsePage = () => {
+export const HomePage = () => {
   const { trending, continueWatching } = useHomepageData();
   const { profile } = useAuth();
   console.log("🚀 profile:", profile);

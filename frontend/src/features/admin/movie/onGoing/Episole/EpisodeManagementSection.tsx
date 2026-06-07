@@ -1,7 +1,7 @@
 import { Layers, Plus } from "lucide-react";
 
 import { SeasonCard } from "./SeasonCard";
-import { Episode, Season } from "../HookGoing/useSeriesForm";
+import { Episode, NewEpisode, Season } from "../HookGoing/useSeriesForm";
 
 type Props = {
   seasons: Season[];
@@ -14,7 +14,7 @@ type Props = {
 
   addEpisode: (
     seasonId: string,
-    episode: Omit<Episode, "id" | "status">
+    episode: NewEpisode,
   ) => void;
 
   removeEpisode: (

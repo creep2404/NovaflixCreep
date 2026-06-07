@@ -1,23 +1,16 @@
 import z from "zod";
 
-const emptyToUndefined = (val: any) =>
-  val === "" ? undefined : val;
+const emptyToUndefined = (val: any) => (val === "" ? undefined : val);
 
 export const queryMovieSchema = z.object({
-  page: z.preprocess(
-    emptyToUndefined,
-    z.coerce.number().min(1).default(1)
-  ),
+  page: z.preprocess(emptyToUndefined, z.coerce.number().min(1).default(1)),
 
   limit: z.preprocess(
     emptyToUndefined,
-    z.coerce.number().min(1).max(50).default(10)
+    z.coerce.number().min(1).max(50).default(10),
   ),
 
-  search: z.preprocess(
-    emptyToUndefined,
-    z.string().optional()
-  ),
+  search: z.preprocess(emptyToUndefined, z.string().optional()),
 
   // genres: string | string[] → string[]
   genres: z
@@ -31,20 +24,21 @@ export const queryMovieSchema = z.object({
   // rating: string → number
   rating: z.preprocess(
     emptyToUndefined,
-    z.coerce.number().min(0).max(5).optional()
+    z.coerce.number().min(0).max(5).optional(),
   ),
 
   // duration enum
-  duration: z
-    .preprocess(emptyToUndefined,
-      z.enum(["short", "medium", "long"]).optional()
-    ),
+  duration: z.preprocess(
+    emptyToUndefined,
+    z.enum(["short", "medium", "long"]).optional(),
+  ),
 
   // premium: string → boolean
-  premium: z.preprocess(
-    emptyToUndefined,
-    z.coerce.boolean().optional()
-  ),
+  premium: z.preprocess(emptyToUndefined, z.coerce.boolean().optional()),
+
+  status: z.enum(["COMING_SOON", "RELEASED", "ARCHIVED"]).optional(),
+
+  type: z.enum(["MOVIE", "SERIES"]).optional(),
 });
 
 export type QueryMovieInput = z.infer<typeof queryMovieSchema>;

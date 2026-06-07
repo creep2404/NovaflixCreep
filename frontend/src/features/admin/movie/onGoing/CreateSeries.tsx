@@ -27,8 +27,6 @@ import { ImageUploadCard } from "./ImageUploadCard";
 import { GenreField } from "./GenreField";
 import { EpisodeManagementSection } from "./Episole/EpisodeManagementSection";
 import { useSeriesForm } from "./HookGoing/useSeriesForm";
-import { useSingleMovieUpload } from "./HookGoing/useSingleMovieUpload";
-import { useMovieMetadataForm } from "./HookGoing/useMediaMetadataForm";
 import { VideoDropzone } from "./VideoDropzone";
 import { useMediaForm } from "./Refactor/Hook/useMediaForm";
 import { useSingleMovie } from "./Refactor/Hook/useSingleMovie";
@@ -118,6 +116,7 @@ export const CreateSeriesPage = () => {
     addEpisode,
     removeEpisode,
     updateEpisode,
+    resetSeries,
   } = useSeriesForm();
 
   // ========================= //
@@ -181,6 +180,7 @@ export const CreateSeriesPage = () => {
     // reset callbacks
     resetForm,
     resetMovieUpload,
+    resetSeries,
   });
 
   // ========================= //
@@ -190,8 +190,7 @@ export const CreateSeriesPage = () => {
     resetForm();
     resetMovieUpload();
 
-    // Series state có thể reset
-    // resetSeries();
+    resetSeries();
   };
 
   // ========================= //

@@ -32,6 +32,7 @@ type UseMediaSubmitParams = {
   // Reset callbacks
   resetForm: () => void;
   resetMovieUpload: () => void;
+  resetSeries: () => void;
 };
 
 export const useMediaSubmit = ({
@@ -44,6 +45,7 @@ export const useMediaSubmit = ({
   setAlertModal,
   resetForm,
   resetMovieUpload,
+  resetSeries,
 }: UseMediaSubmitParams) => {
   const { setLoading } = useLoading();
 
@@ -93,18 +95,58 @@ export const useMediaSubmit = ({
     await uploadToS3(thumbnailFile, thumbRes.uploadUrl, setThumbProgress);
 
     // 5. Save metadata to DB
+    // await createMovieApi({
+    //   title: form.title,
+    //   description: form.description,
+    //   thumbnailUrl: thumbRes.key,
+    //   duration: form.duration,
+    //   type: "MOVIE",
+    //   genres: form.genres,
+    //   releaseDate: form.releaseDate,
+    //   rating: form.rating,
+    //   trailerUrl: form.trailerUrl,
+    //   country: form.country,
+    //   ageRating: form.ageRating,
+    //   episodes: [
+    //     {
+    //       title: form.title,
+    //       videoId,
+    //       duration: form.duration,
+    //       episodeNo: 1,
+    //       description: form.description,
+    //     },
+    //   ],
+    // });
+
     await createMovieApi({
       title: form.title,
       description: form.description,
       thumbnailUrl: thumbRes.key,
       duration: form.duration,
-      videoId,
+      type: "MOVIE",
       genres: form.genres,
       releaseDate: form.releaseDate,
       rating: form.rating,
       trailerUrl: form.trailerUrl,
       country: form.country,
       ageRating: form.ageRating,
+
+      seasons: [
+        {
+          title: form.title,
+          seasonNo: 1,
+
+          episodes: [
+            {
+              title: form.title,
+              videoId,
+              duration: form.duration,
+              episodeNo: 1,
+              description: form.description,
+            },
+          ],
+        },
+      ],
     });
 
     // 6. Success feedback
@@ -117,70 +159,136 @@ export const useMediaSubmit = ({
     // 7. Reset local UI state
     resetForm();
     resetMovieUpload();
+    resetSeries();
   };
 
   // ========================= //
   // SERIES PUBLISH FLOW (TODO)
   // ========================= //
   const publishSeries = async () => {
-    // 1. Validate
+    // =========================
+    // Validate
+    // =========================
+    if (!thumbnailFile) {
+      throw new Error("Thumbnail is required.");
+    }
+
     if (seasons.length === 0) {
       throw new Error("Series must have at least one season.");
     }
 
-    // 2. Upload each episode video
-    const uploadedSeasons = [];
+    // =========================
+    // Calculate total duration
+    // =========================
+    const totalDuration = seasons.reduce(
+      (seasonTotal, season) =>
+        seasonTotal +
+        season.episodes.reduce(
+          (episodeTotal, episode) => episodeTotal + (episode.duration || 0),
+          0,
+        ),
+      0,
+    );
 
+    // =========================
+    // Upload thumbnail
+    // =========================
+    const thumbnailId = crypto.randomUUID();
+
+    const thumbRes = await createUploadUrl({
+      videoId: thumbnailId,
+      fileType: "thumbnail",
+    });
+
+    // await uploadToS3(thumbnailFile, thumbRes.uploadUrl, setThumbProgress);
+
+    // =========================
+    // Upload all episodes
+    // =========================
+    //Declare empty array to hold uploaded seasons and episodes
+    const uploadedSeasons: {
+      title: string;
+      seasonNo: number;
+      episodes: {
+        title: string;
+        videoId: string;
+        duration: number;
+        episodeNo: number;
+        description?: string;
+      }[];
+    }[] = [];
+    console.log("Seasons: ", seasons);
     for (const season of seasons) {
-      const uploadedEpisodes = [];
+      const uploadedEpisodes: {
+        title: string;
+        videoId: string;
+        duration: number;
+        episodeNo: number;
+        description?: string;
+      }[] = [];
 
       for (const episode of season.episodes) {
+        console.log("Uploading episode: ", episode);
         if (!episode.file) {
           throw new Error(`${episode.title} is missing video file.`);
         }
 
         const videoId = crypto.randomUUID();
 
-        const uploadRes = await createUploadUrl({
-          videoId,
-          fileType: "video",
-        });
+        // const uploadRes = await createUploadUrl({
+        //   videoId,
+        //   fileType: "video",
+        // });
 
-        await uploadToS3(episode.file, uploadRes.uploadUrl, (progress) => {
-          updateEpisode(season.id, episode.id, {
-            progress,
-            status: "uploading",
-          });
-        });
-
-        updateEpisode(season.id, episode.id, {
-          progress: 100,
-          status: "processed",
-        });
+        // await uploadToS3(episode.file, uploadRes.uploadUrl, () => {});
 
         uploadedEpisodes.push({
           title: episode.title,
-          description: episode.description,
-          duration: episode.duration,
           videoId,
+          duration: episode.duration,
+          episodeNo: episode.episodeNo,
+          description: episode.description,
         });
       }
 
       uploadedSeasons.push({
         title: season.title,
+        seasonNo: season.seasonNo,
         episodes: uploadedEpisodes,
       });
     }
+    console.log("Uploaded seasons: ", uploadedSeasons);
 
-    // 3. Save DB
+    // =========================
+    // Create Series
+    // =========================
     await createMovieApi({
-      ...form,
+      title: form.title,
+      description: form.description,
+      thumbnailUrl: thumbRes.key,
+      duration: totalDuration,
+      type: "SERIES",
+      genres: form.genres,
+      releaseDate: form.releaseDate,
+      rating: form.rating,
+      trailerUrl: form.trailerUrl,
+      country: form.country,
+      ageRating: form.ageRating,
       seasons: uploadedSeasons,
     });
 
-    // 4. Reset
+    // =========================
+    // Success
+    // =========================
+    setAlertModal({
+      open: true,
+      message: "Create series successfully.",
+      type: "success",
+    });
+
     resetForm();
     resetMovieUpload();
+    resetSeries();
   };
 
   // ========================= //

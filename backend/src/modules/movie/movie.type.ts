@@ -1,21 +1,45 @@
+import { MovieType } from "@/common/enums";
 import { Prisma } from "@prisma/client";
+
+export type CreateEpisodeInput = {
+  movieId: string;
+  title: string;
+  videoId: string;
+  duration: number;
+  episodeNo: number;
+  description: string;
+};
+
+type CreateEpisodeRepoInput = {
+  title: string;
+  videoId: string;
+  duration: number;
+  episodeNo: number;
+  description: string;
+};
+
+type CreateSeasonRepoInput = {
+  title: string;
+  seasonNo: number;
+  episodes: CreateEpisodeRepoInput[];
+};
 
 export type CreateMovieRepoInput = {
   title: string;
   slug: string;
   thumbnailUrl?: string;
   duration: number;
+  type: MovieType;
 
+  // MovieDetail
   description: string;
-  videoId: string;
   trailerUrl?: string;
   releaseDate?: Date;
-
   rating?: number;
   country?: string;
   ageRating?: string;
-
   genres?: string[];
+  seasons: CreateSeasonRepoInput[];
 };
 
 export type UpdateMovieRepoInput = {
@@ -24,16 +48,17 @@ export type UpdateMovieRepoInput = {
   thumbnailUrl?: string;
   duration?: number;
 
-  genres?: string[];
+  type: MovieType;
 
-  description?: string;
-  videoId?: string;
+  // MovieDetail
+  description: string;
   trailerUrl?: string;
   releaseDate?: Date;
   rating?: number;
-
   country?: string;
   ageRating?: string;
+  genres?: string[];
+  seasons: CreateSeasonRepoInput[];
 };
 
 export type GetMoviesRepoInput = {

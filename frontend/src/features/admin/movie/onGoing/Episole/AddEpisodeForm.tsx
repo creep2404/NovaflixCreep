@@ -1,6 +1,6 @@
 import { CloudUpload, PlayCircle } from "lucide-react";
 import { useState } from "react";
-import { Episode } from "../HookGoing/useSeriesForm";
+import { NewEpisode } from "../HookGoing/useSeriesForm";
 import { VideoDropzone } from "../VideoDropzone";
 
 type Props = {
@@ -8,17 +8,14 @@ type Props = {
 
   addEpisode: (
     seasonId: string,
-    episode: Omit<Episode, "id" | "status">,
+    episode: NewEpisode,
   ) => void;
 };
 
 export function AddEpisodeForm({ seasonId, addEpisode }: Props) {
   const [title, setTitle] = useState("");
-
   const [duration, setDuration] = useState(45);
-
   const [videoFile, setVideoFile] = useState<File | null>(null);
-
   const [description, setDescription] = useState("");
 
   const handleAddEpisode = () => {

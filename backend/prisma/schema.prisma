@@ -30,6 +30,11 @@ enum UserSubscription {
   PREMIUM
 }
 
+enum MovieType {
+  MOVIE
+  SERIES
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -70,6 +75,7 @@ model Movie {
   views        Int      @default(0)
   isPublished  Boolean  @default(true)
   status       MovieStatus @default(RELEASED)
+  type         MovieType @default(MOVIE)
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -79,7 +85,9 @@ model Movie {
   genres         MovieGenre[]
   watchHistories WatchHistory[]
   favorites      Favorite[]
-  episodes    Episode[]
+  
+  seasons Season[]
+
   actors      MovieActor[]
 
   @@index([title])
@@ -107,17 +115,36 @@ model MovieDetail {
   @@index([movieId])
 }
 
+model Season {
+  id          String @id @default(uuid())
+  movieId      String
+  title        String
+  seasonNo     Int
+
+  movie Movie @relation(fields:[movieId], references:[id], onDelete:Cascade)
+
+  episodes Episode[]
+
+  @@unique([movieId, seasonNo])
+}
+
 model Episode {
   id        String @id @default(uuid())
-  movieId   String
+  seasonId     String
+
   title     String
-  videoUrl  String
+  thumbnailUrl String?
+  videoId  String
   duration  Int
   episodeNo Int
+  description String
 
-  movie Movie @relation(fields: [movieId], references: [id])
+  season Season @relation(fields:[seasonId], references:[id], onDelete:Cascade)
 
-  @@index([movieId])
+  watchHistories WatchHistory[]
+
+  @@unique([seasonId, episodeNo])
+  @@index([seasonId])
 }
 
 model Actor {
@@ -160,13 +187,16 @@ model WatchHistory {
   id        String   @id @default(uuid())
   userId    String
   movieId   String
+  episodeId  String
   progress  Int
   updatedAt DateTime @updatedAt
 
   user  User  @relation(fields: [userId], references: [id])
   movie Movie @relation(fields: [movieId], references: [id])
+  episode Episode @relation(fields: [episodeId], references: [id])
 
-  @@unique([userId, movieId])
+  @@unique([userId, episodeId])
+  @@index([userId, updatedAt])
 }
 
 model Favorite {

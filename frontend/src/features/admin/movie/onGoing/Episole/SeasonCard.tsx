@@ -2,14 +2,14 @@ import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { AddEpisodeForm } from "./AddEpisodeForm";
-import { Episode, Season } from "../HookGoing/useSeriesForm";
+import { Episode, NewEpisode, Season } from "../HookGoing/useSeriesForm";
 import { EpisodeRow } from "./EpisodeRow";
 
 type SeasonCardProps = {
   season: Season;
   index: number;
   removeSeason: (seasonId: string) => void;
-  addEpisode: (seasonId: string, episode: Omit<Episode, "id" | "status">) => void;
+  addEpisode: (seasonId: string, episode: NewEpisode) => void;
   removeEpisode: (seasonId: string, episodeId: string) => void;
   updateEpisode: (
     seasonId: string,

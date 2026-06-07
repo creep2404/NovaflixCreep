@@ -37,6 +37,79 @@ export const createMovieService = async (data: CreateMovieInput) => {
     throw new AppError("Description too short", 400);
   }
 
+  // ===== Seasons =====
+
+  if (!data.seasons?.length) {
+    throw new AppError("Movie must contain at least one season", 400);
+  }
+
+  // MOVIE => 1 season + 1 episode
+  if (data.type === "MOVIE") {
+    if (data.seasons.length !== 1) {
+      throw new AppError("Movie must contain exactly one season", 400);
+    }
+
+    if (data.seasons[0].episodes.length !== 1) {
+      throw new AppError("Movie must contain exactly one episode", 400);
+    }
+  }
+
+  // SERIES => >= 1 season
+  if (data.type === "SERIES" && data.seasons.length < 1) {
+    throw new AppError("Series must contain at least one season", 400);
+  }
+
+  const seasonNos = data.seasons.map((s) => s.seasonNo);
+
+  if (new Set(seasonNos).size !== seasonNos.length) {
+    throw new AppError("Duplicate season numbers detected", 400);
+  }
+
+  for (const season of data.seasons) {
+    if (!season.title?.trim()) {
+      throw new AppError(`Season ${season.seasonNo} title is required`, 400);
+    }
+
+    if (!season.episodes?.length) {
+      throw new AppError(
+        `Season ${season.seasonNo} must contain episodes`,
+        400,
+      );
+    }
+
+    const episodeNos = season.episodes.map((ep) => ep.episodeNo);
+
+    if (new Set(episodeNos).size !== episodeNos.length) {
+      throw new AppError(
+        `Duplicate episode numbers in season ${season.seasonNo}`,
+        400,
+      );
+    }
+
+    for (const episode of season.episodes) {
+      if (episode.duration <= 0) {
+        throw new AppError(
+          `Invalid duration for episode ${episode.episodeNo}`,
+          400,
+        );
+      }
+
+      if (!episode.videoId?.trim()) {
+        throw new AppError(
+          `Missing videoId for episode ${episode.episodeNo}`,
+          400,
+        );
+      }
+
+      if (!episode.description || episode.description.length < 3) {
+        throw new AppError(
+          `Description too short for episode ${episode.episodeNo}`,
+          400,
+        );
+      }
+    }
+  }
+
   const slug = generateSlug(data.title);
 
   const repoData: CreateMovieRepoInput = {
@@ -44,10 +117,11 @@ export const createMovieService = async (data: CreateMovieInput) => {
     slug,
     releaseDate: data.releaseDate ? new Date(data.releaseDate) : undefined,
   };
+
   const movie = await createMovieRepo(repoData);
 
-  //Invalidate cache
   await invalidateMovieCache();
+
   eventBus.emit(EVENTS.MOVIE_CREATED, movie);
 
   return formatMovie(movie);
@@ -109,6 +183,7 @@ export const getMovieByIdService = async (id: string) => {
     return formatMovie(movieWithUrl);
   });
 };
+
 export const getMoviesService = async (query: QueryMovieInput) => {
   const page = Math.max(query.page ?? 1, 1);
   const limit = Math.max(query.limit ?? 10, 1);
@@ -129,6 +204,8 @@ export const getMoviesService = async (query: QueryMovieInput) => {
     genres: genres.sort().join(","),
     rating,
     duration: query.duration,
+    status: query.status,
+    type: query.type,
   });
 
   return withCache(cacheKey, async () => {
@@ -196,21 +273,9 @@ export const getTrendingMoviesService = async () => {
     take: 10,
     orderByTrending: true,
   });
+  console.log("TEST: ", movies);
 
-  const batchSize = 50;
-  const moviesWithUrl: typeof movies = [];
-  for (let i = 0; i < movies.length; i += batchSize) {
-    const batch = movies.slice(i, i + batchSize);
-    const batchResult = await Promise.all(
-      batch.map(async (movie) => ({
-        ...movie,
-        thumbnailUrl: movie.thumbnailUrl
-          ? await getPresignedDownloadUrl(movie.thumbnailUrl)
-          : null,
-      })),
-    );
-    moviesWithUrl.push(...batchResult);
-  }
+  const moviesWithUrl = await mapWithUrl(movies);
   const result = moviesWithUrl.map(formatMovie);
 
   await setCache(cacheKey, result, 60);
@@ -218,15 +283,36 @@ export const getTrendingMoviesService = async () => {
   return result;
 };
 
+// export const getContinueWatchingService = async (userId: string) => {
+//   const histories = await getContinueWatchingRepo(userId);
+
+//   return histories
+//     .filter((item) => item.movie)
+//     .map((item) => ({
+//       ...formatMovie(item.movie!),
+//       progress: item.progress,
+//     }));
+// };
+
 export const getContinueWatchingService = async (userId: string) => {
   const histories = await getContinueWatchingRepo(userId);
 
   return histories
     .filter((item) => item.movie)
-    .map((item) => ({
-      ...formatMovie(item.movie!),
-      progress: item.progress,
-    }));
+    .map((item) => {
+      const percent = Math.floor((item.progress / item.episode.duration) * 100);
+      return {
+        ...formatMovie(item.movie),
+
+        episode: {
+          id: item.episode.id,
+          title: item.episode.title,
+          episodeNo: item.episode.episodeNo,
+        },
+        progress: item.progress,
+        progressPercent: Math.min(percent, 100),
+      };
+    });
 };
 
 export const getSuggestMoviesService = async (search: string) => {

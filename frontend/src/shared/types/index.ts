@@ -39,6 +39,40 @@ export interface Movie {
   matchPercentage?: number;
 }
 
+export interface EpisodeNew {
+  id: string;
+
+  seasonNo: number; //added
+  episodeNo: number;
+
+  title: string;
+  duration: number;
+  description: string;
+}
+
+export interface MovieNew {
+  id: string;
+  title: string;
+  description: string;
+  thumbnailUrl: string;
+  duration: number;
+  releaseDate: string | null;
+  rating: number;
+  genres: {
+    genre: {
+      name: string;
+    };
+  }[];
+  type: "MOVIE" | "SERIES";
+
+  seasonCount: number; //added
+  episodeCount: number; //added
+
+  episodes: EpisodeNew[];
+  continueEpisodeId?: string;
+  progress?: number;
+}
+
 export interface Episode {
   id: string;
   number: number;
@@ -108,19 +142,66 @@ export interface MoviePlayback {
   url: string;
 }
 
+export interface MoviePlaybackNew {
+  playbackUrl: string;
+
+  type: "mp4";
+
+  episode: {
+    id: string;
+    title: string;
+    episodeNo: number;
+    duration: number;
+  };
+
+  movie: {
+    id: string;
+    title: string;
+    thumbnailUrl: string;
+  };
+}
+// export interface CreateMovieDto {
+//   title: string;
+//   originalTitle?: string;
+//   description: string;
+//   thumbnailUrl: string;
+//   duration: number;
+//   videoId: string;
+//   genres: string[];
+//   releaseDate: string;
+//   rating: number;
+//   trailerUrl: string;
+//   country: string;
+//   ageRating: string;
+// }
+
+export interface CreateEpisodeDto {
+  title: string;
+  videoId: string;
+  duration: number;
+  episodeNo: number;
+  description?: string;
+}
+
+export interface CreateSeasonDto {
+  title: string;
+  seasonNo: number;
+  episodes: CreateEpisodeDto[];
+}
+
 export interface CreateMovieDto {
   title: string;
-  originalTitle?: string;
   description: string;
   thumbnailUrl: string;
   duration: number;
-  videoId: string;
+  type: "MOVIE" | "SERIES";
   genres: string[];
   releaseDate: string;
   rating: number;
   trailerUrl: string;
   country: string;
   ageRating: string;
+  seasons: CreateSeasonDto[];
 }
 
 export interface User {

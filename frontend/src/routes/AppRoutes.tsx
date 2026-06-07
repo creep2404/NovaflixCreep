@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import { BrowsePage } from "@/src/features/home/HomePage";
+import { HomePage } from "@/src/features/home/HomePage";
 import { SearchPage } from "@/src/features/search/SearchPage";
 import { PlayerPage } from "@/src/features/video-player/PlayerPage";
 import { AdminLayout } from "@/src/shared/components/layouts/AdminLayout";
@@ -20,7 +20,7 @@ export default function AppRoutes() {
   return (
     <Routes>
       {/* Public */}
-      <Route path="/" element={<BrowsePage />} />
+      <Route path="/" element={<HomePage />} />
       <Route path="/search" element={<SearchPage />} />
       <Route path="/movie/watch/:id" element={<PlayerPage />} />
       <Route path="/movie/:id" element={<MovieDetail />} />

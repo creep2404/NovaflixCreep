@@ -4,19 +4,27 @@ import {
   Review,
   MoviePlayback,
   CreateMovieDto,
+  MovieNew,
 } from "@/src/shared/types";
 import { api } from "./axios";
 import { UploadUrlResponse } from "../features/admin/movie/types/upload";
 
-export const getMovies = (params: QueryMovie) =>
-  api.get<Movie[]>("/movies", { params });
+export const getMovies = (params: QueryMovie) => {
+  const res = api.get<Movie[]>("/movies", { params });
+  console.log("MovieAPI: ", res);
+  return res;
+};
 
 export const getMovieById = (id: string) => api.get<Movie>(`/movies/${id}`);
 
 export const getMoviePlaybackData = (id: string) =>
   api.get<MoviePlayback>(`/movies/${id}/play`);
 
-export const getTrendingMovies = () => api.get<Movie[]>("/movies/trending");
+export const getTrendingMovies = () => {
+  const res = api.get<MovieNew[]>("/movies/trending");
+  console.log("TrendingMovies: ", res);
+  return res;
+}
 
 export const getContinueWatching = () =>
   api.get<Movie[]>("/users/me/continue-watching");
@@ -29,7 +37,10 @@ export const createUploadUrl = (payload: {
 };
 
 export const createMovieApi = (payload: CreateMovieDto) =>
-  api.post<Movie>("/movies", payload);
+{
+  console.log("Creating movie with payload:", payload);
+  return api.post("/movies", payload);
+};
 
 export const getSuggestMovies = (search: string) =>
   api.get<Movie[]>("/movies/suggest", {

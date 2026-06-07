@@ -1,50 +1,45 @@
 import { useState } from "react";
 
 export type EpisodeStatus = "idle" | "uploading" | "processed";
+export type NewEpisode = Omit<Episode, "id" | "status" | "episodeNo">;
 
 export type Episode = {
   id: string;
-
+  episodeNo: number;
   title: string;
-
   description?: string;
-
   duration: number;
-
   file: File | null;
-
   progress: number;
-
   status: EpisodeStatus;
 };
 
 export type Season = {
   id: string;
-
+  seasonNo: number;
   title: string;
-
   episodes: Episode[];
 };
 
+const initialSeasons: Season[] = [
+  {
+    id: crypto.randomUUID(),
+    seasonNo: 1,
+    title: "Tam thoi Season 1",
+    episodes: [],
+  },
+];
+
 export const useSeriesForm = () => {
-  const [seasons, setSeasons] = useState<Season[]>([
-    {
-      id: crypto.randomUUID(),
-
-      title: "Season 1",
-
-      episodes: [],
-    },
-  ]);
+  const [seasons, setSeasons] = useState<Season[]>(initialSeasons);
 
   const addSeason = () => {
     setSeasons((prev) => [
       ...prev,
       {
         id: crypto.randomUUID(),
-
-        title: `Season ${prev.length + 1}`,
-
+        seasonNo: prev.length + 1,
+        title: `Tam thoi Season ${prev.length + 1}`,
         episodes: [],
       },
     ]);
@@ -56,22 +51,22 @@ export const useSeriesForm = () => {
 
   const addEpisode = (
     seasonId: string,
-    episode: Omit<Episode, "id" | "status">,
+    episode: NewEpisode,
   ) => {
     setSeasons((prev) =>
       prev.map((season) => {
         if (season.id !== seasonId) return season;
 
+        const newEpisode: Episode = {
+          ...episode,
+          id: crypto.randomUUID(),
+          status: "idle",
+          episodeNo: season.episodes.length + 1,
+        };
+
         return {
           ...season,
-          episodes: [
-            ...season.episodes,
-            {
-              id: crypto.randomUUID(),
-              status: "idle",
-              ...episode, 
-            },
-          ],
+          episodes: [...season.episodes, newEpisode],
         };
       }),
     );
@@ -86,7 +81,6 @@ export const useSeriesForm = () => {
 
         return {
           ...season,
-
           episodes: season.episodes.filter(
             (episode) => episode.id !== episodeId,
           ),
@@ -124,6 +118,10 @@ export const useSeriesForm = () => {
     );
   };
 
+  const resetSeries = () => {
+  setSeasons(initialSeasons);
+};
+
   return {
     seasons,
     setSeasons,
@@ -135,5 +133,7 @@ export const useSeriesForm = () => {
     removeEpisode,
 
     updateEpisode,
+
+    resetSeries,
   };
 };

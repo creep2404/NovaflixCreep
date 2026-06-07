@@ -6,11 +6,12 @@ import {
 
 export const updateProgressService = async (
   userId: string,
-  data: UpdateProgressDto
+  data: UpdateProgressDto,
 ) => {
   const record = await upsertWatchHistoryRepo({
     userId,
     movieId: data.movieId,
+    episodeId: data.episodeId,
     progress: data.progress,
   });
 
@@ -19,7 +20,7 @@ export const updateProgressService = async (
 
 export const getWatchHistoryByMovieService = async (
   userId: string,
-  movieId: string
+  movieId: string,
 ) => {
   const history = await getWatchHistoryByMovieRepo(userId, movieId);
 
@@ -27,5 +28,7 @@ export const getWatchHistoryByMovieService = async (
 
   return {
     progress: history.progress,
+    episodeId: history.episodeId,
+    episodeNo: history.episode.episodeNo,
   };
 };

@@ -33,5 +33,13 @@ export const formatMovie = (movie: any) => {
 
     // GENRES
     genres: movie.genres?.map((g: any) => g.genre.name),
+
+    // SEASONS
+    seasons: movie.seasons?.map((season) => ({
+      id: season.id,
+      title: season.title,
+      seasonNo: season.seasonNo,
+      episodes: season.episodes,
+    })),
   };
 };
