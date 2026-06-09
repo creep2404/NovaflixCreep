@@ -9,7 +9,7 @@ import {
   getTrendingMovies,
   getSuggestMovies,
 } from "./movie.controller";
-import { authMiddleware } from "@/common/middleware/auth.middleware";
+import { authMiddleware, requireRole } from "@/common/middleware/auth.middleware";
 import {
   validateRequestBody,
   validateRequestParams,
@@ -21,6 +21,7 @@ import { paramIdSchema } from "@/common/dto/param.dto";
 import { uploadLimiter } from "@/common/middleware/rateLimit.middleware";
 import { suggestMovieSchema } from "./dto/suggest-movie-dto";
 import { uploadSchema } from "./dto/upload-video.dto";
+import { ROLE } from "@/common/types/role";
 
 const router = Router();
 
@@ -87,6 +88,7 @@ router.get("/", validateRequestQuery(queryMovieSchema), getMovies);
 router.post(
   "/",
   authMiddleware,
+  //requireRole(ROLE.ADMIN),
   validateRequestBody(createMovieSchema),
   createMovie,
 );

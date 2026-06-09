@@ -12,7 +12,7 @@ import { Login } from "@/src/features/auth/login/Login";
 import { Register } from "@/src/features/auth/register/Register";
 import { ForgotPassword } from "@/src/features/auth/forgot-password/ForgotPassword";
 import { MovieDetail } from "@/src/features/movie-detail/MovieDetail";
-import { ContentList } from "../features/admin/movie/onGoing/Mock/ContentList";
+import { ContentList } from "../features/admin/movie/list/ContentList";
 import { CreateSeriesPage } from "../features/admin/movie/onGoing/CreateSeries";
 import { UpdateHistory } from "../features/admin/movie/onGoing/Mock/UpdateHistory";
 

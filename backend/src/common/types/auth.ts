@@ -1,4 +1,7 @@
+import { UserRole } from "./role";
+
 export type AuthUser = {
   id: string;
-  role: "USER" | "ADMIN" | "PREMIUM";
+  role: UserRole;
 };
+

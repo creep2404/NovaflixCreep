@@ -30,8 +30,24 @@ export const findUserByIdRepo = async (id: string) => {
 };
 
 export const getAllUserRepo = async () => {
-  return await prisma.user.findMany({
-    select: { id: true },
+  return prisma.user.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      avatarUrl: true,
+      role: true,
+      status: true,
+      isVerified: true,
+      emailVerifiedAt: true,
+      lastLoginAt: true,
+      failedLoginCount: true,
+      createdAt: true,
+      updatedAt: true,
+    },
   });
 };
 
