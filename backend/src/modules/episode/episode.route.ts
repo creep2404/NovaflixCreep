@@ -103,12 +103,8 @@ router.delete(
   deleteEpisode,
 );
 
-//not use yet
-router.get(
-  "/:id/playback",
-  validateRequestParams(paramIdSchema),
-  getEpisodePlayback,
-);
+
+router.get("/:id/play", validateRequestParams(paramIdSchema), getEpisodePlayback);
 
 router.get(
   "/:id/next",

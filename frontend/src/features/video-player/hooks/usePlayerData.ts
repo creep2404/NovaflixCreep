@@ -1,22 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
-import { getMovieById, getMoviePlaybackData } from "@/src/apis/movie.api";
-import { getEpisodePlayback } from "@/src/apis/episode.api";
+import { getMovieBySlug } from "@/src/apis/movie.api";
+import { getEpisodePlaybackData } from "@/src/apis/episode.api";
 
-export const usePlayerData = (movieId?: string) => {
+export const usePlayerData = (movieSlug: string, episodeId: string) => {
   const movieQuery = useQuery({
-    queryKey: ["movie", movieId],
+    queryKey: ["movie", movieSlug, episodeId],
     queryFn: () => {
-       const res = getMovieById(movieId!)
+       const res = getMovieBySlug(movieSlug!)
        console.log("Movietest: ", res)
        return res;
     },
-    enabled: !!movieId,
+    enabled: !!movieSlug,
   });
 
   const playbackQuery = useQuery({
-    queryKey: ["playback", movieId],
-    queryFn: () => getMoviePlaybackData(movieId!),
-    enabled: !!movieId,
+    queryKey: ["playback", movieSlug, episodeId],
+    queryFn: () => getEpisodePlaybackData(episodeId!),
+    enabled: !!episodeId,
   });
 
   return {

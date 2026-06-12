@@ -6,6 +6,7 @@ import {
   getAllMoviesRepo,
   getContinueWatchingRepo,
   getMovieByIdRepo,
+  getMovieBySlugRepo,
   getMoviesRepo,
   updateMovieRepo,
 } from "./movie.repository";
@@ -116,6 +117,14 @@ export const createMovieService = async (data: CreateMovieInput) => {
     ...data,
     slug,
     releaseDate: data.releaseDate ? new Date(data.releaseDate) : undefined,
+    // Generate slug for episodes
+    seasons: data.seasons.map((season) => ({
+      ...season,
+      episodes: season.episodes.map((episode) => ({
+        ...episode,
+        slug: generateSlug(episode.title),
+      })),
+    })),
   };
 
   const movie = await createMovieRepo(repoData);
@@ -163,15 +172,18 @@ export const getAllMoviesService = async () => {
   return await getAllMoviesRepo();
 };
 
-export const getMovieByIdService = async (id: string) => {
-  const cacheKey = `movie:${id}`;
-
+const getMovieService = async (
+  cacheKey: string,
+  getMovie: () => Promise<any>,
+) => {
   return withCache(cacheKey, async () => {
-    const movie = await getMovieByIdRepo(id);
+    const movie = await getMovie();
 
     if (!movie) {
       throw new AppError("Movie not found", 404);
     }
+
+    console.log("Movie detail:", JSON.stringify(movie, null, 2));
 
     const movieWithUrl = {
       ...movie,
@@ -182,6 +194,14 @@ export const getMovieByIdService = async (id: string) => {
 
     return formatMovie(movieWithUrl);
   });
+};
+
+export const getMovieByIdService = async (id: string) => {
+  return getMovieService(`movie:${id}`, () => getMovieByIdRepo(id));
+};
+
+export const getMovieBySlugService = async (slug: string) => {
+  return getMovieService(`movie:slug:${slug}`, () => getMovieBySlugRepo(slug));
 };
 
 export const getMoviesService = async (query: QueryMovieInput) => {
@@ -232,30 +252,6 @@ export const getMoviesService = async (query: QueryMovieInput) => {
       },
     };
   });
-};
-
-export const getUrlPresignedByMovieId = async (
-  movieId: string,
-  fileType: keyof typeof FILE_PATHS = "video",
-) => {
-  const movie = await getMovieByIdRepo(movieId);
-
-  if (!movie) {
-    throw new AppError("Movie not found");
-  }
-
-  if (!movie.detail) {
-    throw new AppError("Movie detail not found");
-  }
-
-  const key = FILE_PATHS[fileType](movie.detail.videoId);
-
-  const url = await getPresignedDownloadUrl(key);
-
-  return {
-    type: fileType === "thumbnail" ? "image" : "mp4",
-    url,
-  };
 };
 
 export const getTrendingMoviesService = async () => {

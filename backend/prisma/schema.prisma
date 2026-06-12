@@ -4,8 +4,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  url      = "postgresql://postgres:123@localhost:5432/novaflix?schema=public"
+  directUrl = "postgresql://postgres:123@localhost:5432/novaflix?schema=public"
 }
 
 enum Role {
@@ -133,6 +133,7 @@ model Episode {
   seasonId     String
 
   title     String
+  slug         String?
   thumbnailUrl String?
   videoId  String
   duration  Int

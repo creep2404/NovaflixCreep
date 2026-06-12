@@ -6,6 +6,7 @@ import {
   deleteEpisodeRepo,
   getEpisodeByIdRepo,
   getEpisodeByIdWithMovieRepo,
+  getEpisodeVideoIdByIdRepo,
   getEpisodeWithMovieEpisodesRepo,
   getNextEpisodeRepo,
   updateEpisodeRepo,
@@ -107,33 +108,23 @@ export const deleteEpisodeService = async (id: string) => {
 };
 
 // service
-export const getEpisodePlaybackService = async (episodeId: string) => {
-  const episode = await getEpisodeByIdWithMovieRepo(episodeId);
+export const getUrlPresignedByEpisodeId = async (
+  episodeId: string,
+  fileType: keyof typeof FILE_PATHS = "video",
+) => {
+  const videoId = await getEpisodeVideoIdByIdRepo(episodeId);
 
-  if (!episode) {
-    throw new AppError("Episode not found", 404);
+  if (!videoId) {
+    throw new AppError("Episode not found");
   }
 
-  const key = FILE_PATHS.video(episode.videoId);
+  const key = FILE_PATHS[fileType](videoId);
 
   const url = await getPresignedDownloadUrl(key);
 
   return {
-    playbackUrl: url,
-    type: "mp4",
-
-    episode: {
-      id: episode.id,
-      title: episode.title,
-      episodeNo: episode.episodeNo,
-      duration: episode.duration,
-    },
-
-    movie: {
-      id: episode.movie.id,
-      title: episode.movie.title,
-      thumbnailUrl: episode.movie.thumbnailUrl,
-    },
+    type: fileType === "thumbnail" ? "image" : "mp4",
+    url,
   };
 };
 

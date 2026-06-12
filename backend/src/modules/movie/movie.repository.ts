@@ -18,7 +18,7 @@ export const createMovieRepo = async (data: CreateMovieRepoInput) => {
       detail: {
         create: {
           description: data.description,
-          
+
           videoId: data.seasons[0]?.episodes[0]?.videoId || "",
 
           trailerUrl: data.trailerUrl,
@@ -37,6 +37,7 @@ export const createMovieRepo = async (data: CreateMovieRepoInput) => {
           episodes: {
             create: season.episodes.map((ep) => ({
               title: ep.title,
+              slug: ep.slug,
               videoId: ep.videoId,
               duration: ep.duration,
               episodeNo: ep.episodeNo,
@@ -236,40 +237,49 @@ export const getAllMoviesRepo = async () => {
   });
 };
 
-export const getMovieByIdRepo = async (id: string) => {
-  return prisma.movie.findUnique({
-    where: { id },
+const movieInclude = {
+  detail: true,
+
+  genres: {
     include: {
-      detail: true,
+      genre: true,
+    },
+  },
 
-      genres: {
-        include: {
-          genre: true,
-        },
-      },
+  seasons: {
+    orderBy: {
+      seasonNo: "asc" as const,
+    },
 
-      seasons: {
+    include: {
+      episodes: {
         orderBy: {
-          seasonNo: "asc",
+          episodeNo: "asc" as const,
         },
 
-        include: {
-          episodes: {
-            orderBy: {
-              episodeNo: "asc",
-            },
-
-            select: {
-              id: true,
-              title: true,
-              episodeNo: true,
-              duration: true,
-              description: true,
-            },
-          },
+        select: {
+          id: true,
+          title: true,
+          episodeNo: true,
+          duration: true,
+          description: true,
         },
       },
     },
+  },
+};
+
+export const getMovieByIdRepo = async (id: string) => {
+  return prisma.movie.findUnique({
+    where: { id },
+    include: movieInclude,
+  });
+};
+
+export const getMovieBySlugRepo = async (slug: string) => {
+  return prisma.movie.findUnique({
+    where: { slug },
+    include: movieInclude,
   });
 };
 
@@ -452,9 +462,7 @@ export const getContinueWatchingRepoClone = async (userId: string) => {
   });
 };
 
-export const getContinueWatchingRep8o = async (
-  userId: string
-) => {
+export const getContinueWatchingRep8o = async (userId: string) => {
   return prisma.watchHistory.findMany({
     where: {
       userId,

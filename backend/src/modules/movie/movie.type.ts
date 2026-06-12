@@ -1,17 +1,10 @@
 import { MovieType } from "@/common/enums";
 import { Prisma } from "@prisma/client";
 
-export type CreateEpisodeInput = {
-  movieId: string;
-  title: string;
-  videoId: string;
-  duration: number;
-  episodeNo: number;
-  description: string;
-};
 
 type CreateEpisodeRepoInput = {
   title: string;
+  slug: string;
   videoId: string;
   duration: number;
   episodeNo: number;

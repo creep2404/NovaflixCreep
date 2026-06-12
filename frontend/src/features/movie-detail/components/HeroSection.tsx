@@ -1,15 +1,21 @@
+import { MovieNew, SeasonNew } from "@/src/shared/types";
+import { buildMovieWatchUrl } from "@/src/shared/utils/movie-routes";
 import { Star, Tv, Play, Film } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-interface HeroSectionProps {
-  movie: any;
+interface HeroSectionDetailProps {
+  movie: MovieNew;
   onWatchTrailer: () => void;
+  selectedSeason: SeasonNew;
 }
-export default function HeroSection({
+export default function HeroSectionDetail({
   movie,
   onWatchTrailer,
-}: HeroSectionProps) {
+  selectedSeason,
+}: HeroSectionDetailProps) {
   const navigate = useNavigate();
+  console.log("Selected Season in HeroSectionDetail: ", selectedSeason);
+  const firstEpisode = selectedSeason?.episodes?.[0];
 
   return (
     <section className="relative w-full h-[921px] flex flex-col justify-end overflow-hidden">
@@ -25,7 +31,7 @@ export default function HeroSection({
         {/* <div className="absolute inset-0 hero-gradient"></div> */}
       </div>
 
-      {/* BOX CHỈ BAO CONTENT */}
+      {/* Content */}
       <div className="relative z-10 mx-8 md:mx-16 mb-20">
         <div className="bg-black/30 p-8 rounded-2xl max-w-4xl">
           <div className="flex items-center gap-3 mb-4">
@@ -46,7 +52,7 @@ export default function HeroSection({
             <span className="flex items-center gap-2">
               <Tv size={18} /> 4K Ultra HD
             </span>
-            <span>{movie?.year}</span>
+            {/* <span>{movie?.year}</span> */}
             <span>{movie?.genres?.join(" / ")}</span>
             <span>{movie?.duration}</span>
           </div>
@@ -58,7 +64,14 @@ export default function HeroSection({
           <div className="flex flex-wrap gap-4">
             <button
               onClick={() =>
-                navigate(`/movie/watch/${movie.id}/`, { replace: true })
+                navigate(
+                  buildMovieWatchUrl(
+                    movie.slug,
+                    firstEpisode.episodeNo,
+                    firstEpisode.id,
+                  ),
+                  { replace: true },
+                )
               }
               className="flex items-center gap-2 bg-primary text-surface px-8 py-4 rounded-full font-bold text-lg hover:bg-primary-dim transition-all hover:scale-105"
             >

@@ -8,6 +8,7 @@ import {
   getMoviePlayback,
   getTrendingMovies,
   getSuggestMovies,
+  getMovieBySlug,
 } from "./movie.controller";
 import { authMiddleware, requireRole } from "@/common/middleware/auth.middleware";
 import {
@@ -17,7 +18,7 @@ import {
 } from "@/common/validations/validate";
 import { createMovieSchema } from "@/modules/movie/dto/create-movie.dto";
 import { queryMovieSchema } from "@/modules/movie/dto/query-movie.dto";
-import { paramIdSchema } from "@/common/dto/param.dto";
+import { paramIdSchema, paramSlugSchema } from "@/common/dto/param.dto";
 import { uploadLimiter } from "@/common/middleware/rateLimit.middleware";
 import { suggestMovieSchema } from "./dto/suggest-movie-dto";
 import { uploadSchema } from "./dto/upload-video.dto";
@@ -146,8 +147,7 @@ router.get(
   getSuggestMovies,
 );
 
-router.get("/:id/play", validateRequestParams(paramIdSchema), getMoviePlayback);
-
+router.get("/slug/:slug", validateRequestParams(paramSlugSchema), getMovieBySlug);
 
 /**
  * @swagger

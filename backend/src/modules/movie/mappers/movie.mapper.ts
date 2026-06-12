@@ -2,9 +2,17 @@ export const formatMovie = (movie: any) => {
   const formatDuration = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
 
-    if (h === 0) return `${m}m`;
-    return `${h}h ${m}m`;
+    if (h > 0) {
+      return `${h}h ${m}m`;
+    }
+
+    if (m > 0) {
+      return `${m}m`;
+    }
+
+    return `${s}s`;
   };
 
   return {
@@ -13,12 +21,12 @@ export const formatMovie = (movie: any) => {
     slug: movie.slug,
     thumbnailUrl: movie.thumbnailUrl,
 
-    // RAW DATA
+    // RAW
     duration: movie.duration,
 
     // UI
     durationLabel: formatDuration(movie.duration),
-
+    type: movie.type,
     createdAt: movie.createdAt,
 
     // FROM MOVIE DETAIL
@@ -39,7 +47,17 @@ export const formatMovie = (movie: any) => {
       id: season.id,
       title: season.title,
       seasonNo: season.seasonNo,
-      episodes: season.episodes,
+
+      //EPISODES
+      episodes: season.episodes?.map((episode: any) => ({
+        ...episode,
+
+        // RAW
+        duration: episode.duration,
+
+        // UI
+        durationLabel: formatDuration(episode.duration),
+      })),
     })),
   };
 };

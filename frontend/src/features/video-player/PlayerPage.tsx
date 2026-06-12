@@ -26,14 +26,30 @@ import { useVideoPlayer } from "./hooks/useVideoPlayer";
 import VideoPlayer from "./components/VideoPlayer";
 import { useAuth } from "@/src/features/auth/hooks/useAuth";
 import { usePlayerData } from "./hooks/usePlayerData";
+import { EpisodeCard } from "./components/EpisodeCard";
+import { buildMovieWatchUrl, parseEpisodeInfo } from "@/src/shared/utils/movie-routes";
 
 export const PlayerPage = () => {
-  const { id: movieId } = useParams();
+  //const { id: movieId } = useParams();
+
+  const { movieSlug, episodeInfo } = useParams();
+  const parsed = parseEpisodeInfo(episodeInfo);
+  const episodeId = parsed?.episodeId;
+
   const navigate = useNavigate();
 
   const { profile } = useAuth();
 
-  const { movie, videoSource, isLoading, error } = usePlayerData(movieId);
+  const { movie, videoSource, isLoading, error } = usePlayerData(
+    movieSlug!,
+    episodeId!,
+  );
+
+
+  const movieId = movie?.id;
+  const seasons = movie?.seasons ?? [];
+  const [selectedSeason, setSelectedSeason] = useState(0);
+  const currentSeason = movie?.seasons?.[selectedSeason];
 
   const {
     videoRef,
@@ -291,7 +307,7 @@ export const PlayerPage = () => {
               <span className="px-2 py-0.5 border border-white/20 rounded">
                 {movie.rating}
               </span>
-              <span>{movie.duration}</span>
+              <span>{movie.durationLabel}</span>
               <span className="px-2 py-0.5 bg-white/10 rounded">
                 {movie.quality}
               </span>
@@ -312,51 +328,57 @@ export const PlayerPage = () => {
           </div>
 
           {/* Episodes List (If Series) */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <h2 className="text-2xl font-headline font-bold">Episodes</h2>
-              <select className="bg-surface-high border border-white/10 rounded-lg px-4 py-2 text-sm outline-none focus:border-primary">
-                <option>Season 1</option>
-                <option>Season 2</option>
-              </select>
-            </div>
+          {movie && movie.type === "SERIES" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <h2 className="text-2xl font-headline font-bold">Episodes</h2>
+                {seasons.map((season, index) => (
+                  <button
+                    key={season.id}
+                    onClick={() => setSelectedSeason(index)}
+                  >
+                    Season {season.seasonNo}
+                  </button>
+                ))}
+              </div>
 
-            <div className="space-y-4">
-              {MOCK_EPISODES.map((ep, idx) => (
-                <div
-                  key={ep.id}
-                  className={`flex gap-6 p-4 rounded-xl transition-colors cursor-pointer ${idx === 0 ? "bg-surface-high border border-primary/20" : "hover:bg-surface-high/50 border border-transparent"}`}
-                >
-                  <div className="text-2xl font-headline font-bold text-on-surface-variant/50 w-8 flex items-center justify-center">
-                    {ep.number}
-                  </div>
-                  <div className="relative w-40 aspect-video rounded-lg overflow-hidden flex-shrink-0 group">
-                    <img
-                      src={ep.thumbnailUrl}
-                      alt={ep.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Play size={24} className="text-white fill-current" />
-                    </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-bold text-lg truncate pr-4">
-                        {ep.title}
-                      </h3>
-                      <span className="text-sm text-on-surface-variant">
-                        {ep.duration}
-                      </span>
-                    </div>
-                    <p className="text-sm text-on-surface-variant line-clamp-2">
-                      {ep.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
+              <div className="space-y-4">
+                {currentSeason?.episodes?.map((episode) => (
+                  <EpisodeCard
+                    key={episode.id}
+                    id={episode.id}
+                    number={episode.episodeNo}
+                    title={episode.title}
+                    description={episode.description}
+                    duration={episode.durationLabel}
+                    thumbnailUrl={movie.thumbnailUrl} // TODO: episode thumbnail
+                    active={episode.id === episodeId}
+                    onClick={() =>
+                      navigate(
+                        buildMovieWatchUrl(
+                          movie.slug,
+                          episode.episodeNo,
+                          episode.id,
+                        ),
+                      )
+                    }
+                  />
+                ))}
+                {MOCK_EPISODES.map((ep, idx) => (
+                  <EpisodeCard
+                    key={ep.id}
+                    id={ep.id}
+                    number={ep.number}
+                    title={ep.title}
+                    description={ep.description}
+                    duration={ep.duration}
+                    thumbnailUrl={ep.thumbnailUrl}
+                    active={idx === 0}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Comments Section */}
           <div className="space-y-6 pt-8 border-t border-white/10">

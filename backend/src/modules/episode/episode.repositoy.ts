@@ -126,3 +126,18 @@ export const getNextEpisodeRepo = async (
     },
   });
 };
+
+export const getEpisodeVideoIdByIdRepo = async (
+  episodeId: string,
+): Promise<string> => {
+  const episode = await prisma.episode.findUniqueOrThrow({
+    select: {
+      videoId: true,
+    },
+    where: {
+      id: episodeId,
+    },
+  });
+
+  return episode.videoId;
+};

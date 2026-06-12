@@ -42,33 +42,52 @@ export interface Movie {
 export interface EpisodeNew {
   id: string;
 
-  seasonNo: number; //added
   episodeNo: number;
 
   title: string;
   duration: number;
+  durationLabel: string;
   description: string;
+}
+
+export interface SeasonNew {
+  id: string;
+
+  title: string;
+  seasonNo: number;
+
+  episodes: EpisodeNew[];
 }
 
 export interface MovieNew {
   id: string;
+
   title: string;
+  slug: string;
   description: string;
+
   thumbnailUrl: string;
+  trailerUrl?: string;
+
   duration: number;
+  durationLabel: string;
+
   releaseDate: string | null;
   rating: number;
+
   genres: {
     genre: {
       name: string;
     };
   }[];
+
   type: "MOVIE" | "SERIES";
 
-  seasonCount: number; //added
-  episodeCount: number; //added
+  seasonCount: number;
+  episodeCount: number;
 
-  episodes: EpisodeNew[];
+  seasons: SeasonNew[];
+
   continueEpisodeId?: string;
   progress?: number;
 }
@@ -106,18 +125,6 @@ export interface Genre {
 }
 
 export interface QueryGenre extends PaginationQuery {}
-
-export interface CreateMovie {
-  title: string;
-  description?: string;
-  thumbnailUrl?: string;
-  duration: number;
-  genres?: string[]; // list of genreId
-  videoId: string;
-  releaseDate?: string;
-  rating: number;
-}
-
 export interface CastMember {
   id: string;
   name: string;
@@ -142,24 +149,6 @@ export interface MoviePlayback {
   url: string;
 }
 
-export interface MoviePlaybackNew {
-  playbackUrl: string;
-
-  type: "mp4";
-
-  episode: {
-    id: string;
-    title: string;
-    episodeNo: number;
-    duration: number;
-  };
-
-  movie: {
-    id: string;
-    title: string;
-    thumbnailUrl: string;
-  };
-}
 // export interface CreateMovieDto {
 //   title: string;
 //   originalTitle?: string;

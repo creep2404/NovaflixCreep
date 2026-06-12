@@ -1,16 +1,22 @@
 import React from "react";
 import { Play, Plus } from "lucide-react";
-import { Movie } from "@/src/shared/types";
+import { MovieNew } from "@/src/shared/types";
 import { useNavigate } from "react-router-dom";
+import { buildMovieWatchUrl } from "@/src/shared/utils/movie-routes";
 
 interface MovieCardProps {
-  movie: Movie;
+  movie: MovieNew;
   orientation?: "portrait" | "landscape";
+  playTarget: {
+    episodeId: string;
+    episodeNo: number;
+  };
 }
 
 export const MovieCard: React.FC<MovieCardProps> = ({
   movie,
   orientation = "portrait",
+  playTarget,
 }) => {
   const isLandscape = orientation === "landscape";
   const navigate = useNavigate();
@@ -65,10 +71,16 @@ export const MovieCard: React.FC<MovieCardProps> = ({
 
         <div className="flex gap-2">
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/movie/watch/${movie?.id}`);
-            }}
+            onClick={() =>
+              navigate(
+                buildMovieWatchUrl(
+                  movie.slug,
+                  playTarget.episodeNo,
+                  playTarget.episodeId,
+                ),
+                { replace: true },
+              )
+            }
             className="flex-1 flex items-center justify-center gap-1 bg-white text-black py-1.5 rounded-md font-medium text-sm hover:bg-white/90 transition-colors"
           >
             <Play size={14} className="fill-current" /> Play

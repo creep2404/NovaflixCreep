@@ -22,7 +22,12 @@ export default function AppRoutes() {
       {/* Public */}
       <Route path="/" element={<HomePage />} />
       <Route path="/search" element={<SearchPage />} />
-      <Route path="/movie/watch/:id" element={<PlayerPage />} />
+
+      <Route
+        path="/movie/watch/:movieSlug/:episodeInfo"
+        element={<PlayerPage />}
+      />
+
       <Route path="/movie/:id" element={<MovieDetail />} />
 
       {/* Login */}

@@ -11,7 +11,7 @@ import {
   updateEpisodeService,
   deleteEpisodeService,
   getNextEpisodeService,
-  getEpisodePlaybackService,
+  getUrlPresignedByEpisodeId,
 } from "./episode.service";
 import { CreateEpisodeInput } from "./dto/create-episode.dto";
 import { UpdateEpisodeInput } from "./dto/update-episode.dto";
@@ -68,22 +68,17 @@ export const getNextEpisode = asyncHandler(
   }),
 );
 
-// GET /episodes/:id/playback
+// Get video
+// GET /episodes/123/play
+// Get thumbnail
+// GET /episodes/123/play?type=thumbnail
 export const getEpisodePlayback = asyncHandler(
-  typedHandler<
-    unknown,
-    unknown,
-    { id: string }
-  >(async (req, res) => {
+  typedHandler<unknown, unknown , { id: string }>(async (req, res) => {
     const { id } = req.validated.params;
+    const fileType = "video";
 
-    const data =
-      await getEpisodePlaybackService(id);
+    const data = await getUrlPresignedByEpisodeId(id, fileType);
 
-    return successResponse(
-      res,
-      data,
-      "Get episode playback successfully",
-    );
+    return successResponse(res, data);
   }),
 );
