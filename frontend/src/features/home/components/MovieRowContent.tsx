@@ -1,8 +1,8 @@
 import { MovieCard } from "@/src/features/movie/components/MovieCard";
-import { MovieNew } from "@/src/shared/types";
+import { ContinueWatchingMovie, MovieNew } from "@/src/shared/types";
 
 interface MovieRowContentProps {
-  movies: MovieNew[];
+  movies: MovieNew[] | ContinueWatchingMovie[];
   isContinueWatching?: boolean;
 }
 

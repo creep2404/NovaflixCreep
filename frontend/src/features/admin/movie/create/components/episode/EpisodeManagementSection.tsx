@@ -1,7 +1,7 @@
 import { Layers, Plus } from "lucide-react";
 
 import { SeasonCard } from "./SeasonCard";
-import { Episode, NewEpisode, Season } from "../HookGoing/useSeriesForm";
+import { Episode, NewEpisode, Season } from "../../hooks/useSeriesForm";
 
 type Props = {
   seasons: Season[];

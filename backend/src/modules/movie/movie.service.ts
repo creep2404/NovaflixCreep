@@ -300,6 +300,8 @@ export const getContinueWatchingService = async (userId: string) => {
       return {
         ...formatMovie(item.movie),
 
+        continueEpisodeId: item.episode.id,
+
         episode: {
           id: item.episode.id,
           title: item.episode.title,

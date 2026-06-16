@@ -21,13 +21,17 @@ import {
   ErrorState,
   EmptyState,
 } from "@/src/shared/components/state/StateViews";
-import { getWatchHistory } from "@/src/apis/watchHistory.api";
 import { useVideoPlayer } from "./hooks/useVideoPlayer";
 import VideoPlayer from "./components/VideoPlayer";
 import { useAuth } from "@/src/features/auth/hooks/useAuth";
 import { usePlayerData } from "./hooks/usePlayerData";
 import { EpisodeCard } from "./components/EpisodeCard";
-import { buildMovieWatchUrl, parseEpisodeInfo } from "@/src/shared/utils/movie-routes";
+import {
+  buildMovieWatchUrl,
+  parseEpisodeInfo,
+} from "@/src/shared/utils/movie-routes";
+import { useWatchHistoryQuery } from "./hooks/watch-history.query";
+import { useWatchHistory } from "./hooks/useWatchHistory";
 
 export const PlayerPage = () => {
   //const { id: movieId } = useParams();
@@ -45,11 +49,14 @@ export const PlayerPage = () => {
     episodeId!,
   );
 
-
   const movieId = movie?.id;
   const seasons = movie?.seasons ?? [];
   const [selectedSeason, setSelectedSeason] = useState(0);
   const currentSeason = movie?.seasons?.[selectedSeason];
+
+  const currentEpisode = movie?.seasons
+    ?.flatMap((s) => s.episodes)
+    ?.find((ep) => ep.id === episodeId);
 
   const {
     videoRef,
@@ -67,27 +74,49 @@ export const PlayerPage = () => {
     showControls,
     timeoutRef,
     resetHideTimer,
-  } = useVideoPlayer(movieId!);
+  } = useVideoPlayer();
 
   // RESUME WATCH HISTORY
+  // console.log("test data", {
+  //   profile,  
+  //   movieId,
+  //   profileId: profile?.id,
+  //   episodeId,
+  //   enabled: !!profile?.id && !!episodeId,
+  // });
+
+  const { data: history } = useWatchHistoryQuery(
+    movieId!,
+    !!profile?.id && !!episodeId,
+  );
+  useWatchHistory({
+    movieId: movieId,
+
+    episodeId: currentEpisode?.id ?? "",
+    videoRef,
+    isPlaying,
+    profile,
+    history,
+  });
+
   //WHEN load page -> resume watch history
-  useEffect(() => {
-    if (!movieId || !profile?.id || !videoRef.current) return;
+  // useEffect(() => {
+  //   if (!movieId || !profile?.id || !videoRef.current) return;
 
-    const fetchProgress = async () => {
-      try {
-        const data = await getWatchHistory(movieId);
+  //   const fetchProgress = async () => {
+  //     try {
+  //       const data = await getWatchHistory(movieId);
 
-        if (data?.progress) {
-          videoRef.current!.currentTime = data.progress;
-        }
-      } catch (err) {
-        console.error("RESUME error", err);
-      }
-    };
+  //       if (data?.progress) {
+  //         videoRef.current!.currentTime = data.progress;
+  //       }
+  //     } catch (err) {
+  //       console.error("RESUME error", err);
+  //     }
+  //   };
 
-    fetchProgress();
-  }, [movieId, profile, videoRef]);
+  //   fetchProgress();
+  // }, [movieId, profile, videoRef]);
 
   // UI STATES
   if (!movieId) {

@@ -60,3 +60,4 @@ export type GetMoviesRepoInput = {
   where?: Prisma.MovieWhereInput;
   orderByTrending?: boolean;
 };
+

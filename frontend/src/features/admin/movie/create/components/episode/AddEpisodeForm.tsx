@@ -1,6 +1,6 @@
 import { CloudUpload, PlayCircle } from "lucide-react";
 import { useState } from "react";
-import { NewEpisode } from "../HookGoing/useSeriesForm";
+import { NewEpisode } from "../../hooks/useSeriesForm";
 import { VideoDropzone } from "../VideoDropzone";
 
 type Props = {

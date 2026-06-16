@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Edit2, Check, Trash2 } from "lucide-react";
-import { Episode } from "../HookGoing/useSeriesForm";
+import { Episode } from "../../hooks/useSeriesForm";
 
 type EpisodeRowProps = {
   index: number;

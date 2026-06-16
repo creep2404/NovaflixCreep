@@ -2,146 +2,196 @@ import { useEffect, useRef } from "react";
 import {
   getWatchHistory,
   saveWatchHistory,
+  WatchHistory,
 } from "@/src/apis/watchHistory.api";
+
+interface UseWatchHistoryProps {
+  movieId: string;
+  episodeId: string;
+
+  videoRef: React.RefObject<HTMLVideoElement>;
+
+  isPlaying: boolean;
+  profile: any;
+  history?: WatchHistory | null;
+}
 
 export const useWatchHistory = ({
   movieId,
+  episodeId,
   videoRef,
   isPlaying,
   profile,
-}: {
-  movieId: string;
-  videoRef: React.RefObject<HTMLVideoElement>;
-  isPlaying: boolean;
-  profile: any;
-}) => {
+  history,
+}: UseWatchHistoryProps) => {
   const lastSavedTimeRef = useRef(0);
   const lastSavedAtRef = useRef(0);
 
   // ========================
-  // LOAD (RESUME)
+  // RESUME
   // ========================
+
   useEffect(() => {
-    if (!movieId || !profile) return;
+    if (!profile) return;
+
+    if (!history) return;
+
+    if (history.episode.episodeId !== episodeId) return;
 
     let cancelled = false;
 
-    const init = async () => {
-      try {
-        const res = await getWatchHistory(movieId);
-        const progress = res?.progress;
+    const waitForVideo = () => {
+      const video = videoRef.current;
 
-        if (!progress) return;
+      if (!video) {
+        requestAnimationFrame(waitForVideo);
+        return;
+      }
 
-        const waitForVideo = () => {
-          const video = videoRef.current;
+      const seek = () => {
+        if (cancelled) return;
 
-          if (!video) {
-            requestAnimationFrame(waitForVideo);
-            return;
-          }
+        console.log("RESUME RUNNING", {
+          progress: history.progress,
+          before: video.currentTime,
+        });
 
-          const seek = () => {
-            if (cancelled) return;
-            video.currentTime = progress;
-          };
+        video.currentTime = history.progress;
 
-          if (video.readyState >= 2) {
-            seek();
-          } else {
-            video.addEventListener("loadeddata", seek, { once: true });
-          }
-        };
+        console.log("AFTER SEEK", {
+          after: video.currentTime,
+        });
+      };
 
-        waitForVideo();
-      } catch {
-        console.error("Failed to load watch history");
+      if (video.readyState >= 2) {
+        seek();
+      } else {
+        video.addEventListener("loadeddata", seek, {
+          once: true,
+        });
       }
     };
 
-    init();
+    waitForVideo();
 
     return () => {
       cancelled = true;
     };
-  }, [movieId, profile]);
+  }, [history, episodeId, profile]);
 
   // ========================
   // AUTO SAVE
   // ========================
+
   useEffect(() => {
-    if (!movieId || !profile) return;
+    if (!profile) return;
+
+    if (!movieId) return;
+
+    if (!episodeId) return;
 
     const interval = setInterval(() => {
-      if (document.visibilityState !== "visible") return;
+      if (document.visibilityState !== "visible") {
+        return;
+      }
 
       const video = videoRef.current;
+
       if (!video) return;
 
       const progress = Math.floor(video.currentTime);
+
       const now = Date.now();
 
       if (progress < 1) return;
 
-      if (Math.abs(progress - lastSavedTimeRef.current) < 5) return;
+      if (Math.abs(progress - lastSavedTimeRef.current) < 5) {
+        return;
+      }
 
-      if (now - lastSavedAtRef.current < 10000) return;
+      if (now - lastSavedAtRef.current < 10000) {
+        return;
+      }
 
-      const percent = video.duration
-        ? progress / video.duration
-        : 0;
+      const percent = video.duration > 0 ? progress / video.duration : 0;
 
-      // Netflix logic: nếu gần hết → reset
+      // watched complete
       if (percent > 0.95) {
-        saveWatchHistory({ movieId, progress: 0 });
+        saveWatchHistory({
+          movieId,
+          episodeId,
+          progress: 0,
+        });
+
         lastSavedTimeRef.current = 0;
         lastSavedAtRef.current = now;
+
         return;
       }
 
       lastSavedTimeRef.current = progress;
+
       lastSavedAtRef.current = now;
 
-      saveWatchHistory({ movieId, progress });
+      saveWatchHistory({
+        movieId,
+        episodeId,
+        progress,
+      });
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [movieId, profile]);
+  }, [movieId, episodeId, profile]);
 
   // ========================
   // SAVE ON PAUSE
   // ========================
+
   useEffect(() => {
-    if (!movieId || !profile) return;
+    console.log("useWatchHistory - isPlaying:", isPlaying);
+    if (!profile) return;
 
-    if (!isPlaying) {
-      const video = videoRef.current;
-      if (!video) return;
+    if (isPlaying) return;
 
-      const progress = Math.floor(video.currentTime);
+    const video = videoRef.current;
 
-      if (progress > 1) {
-        saveWatchHistory({ movieId, progress });
-      }
-    }
-  }, [isPlaying]);
+    if (!video) return;
 
+    const progress = Math.floor(video.currentTime);
+
+    if (progress < 1) return;
+
+    saveWatchHistory({
+      movieId,
+      episodeId,
+      progress,
+    });
+  }, [isPlaying, movieId, episodeId, profile]);
+
+  // ========================
   // SAVE ON UNLOAD
+  // ========================
+
   useEffect(() => {
-    if (!movieId || !profile) return;
+    if (!profile) return;
 
     const handleBeforeUnload = () => {
       const video = videoRef.current;
+
       if (!video) return;
 
       const progress = Math.floor(video.currentTime);
 
-      if (progress > 1) {
-        navigator.sendBeacon(
-          "/api/watch-history",
-          JSON.stringify({ movieId, progress })
-        );
-      }
+      if (progress < 1) return;
+
+      navigator.sendBeacon(
+        "/api/watch-history/progress",
+        JSON.stringify({
+          movieId,
+          episodeId,
+          progress,
+        }),
+      );
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -149,5 +199,5 @@ export const useWatchHistory = ({
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [movieId, profile]);
+  }, [movieId, episodeId, profile]);
 };

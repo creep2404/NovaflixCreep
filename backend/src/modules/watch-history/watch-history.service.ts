@@ -28,7 +28,10 @@ export const getWatchHistoryByMovieService = async (
 
   return {
     progress: history.progress,
-    episodeId: history.episodeId,
-    episodeNo: history.episode.episodeNo,
+    episode: {
+      episodeId: history.episode.id,
+      episodeNo: history.episode.episodeNo,
+      seasonNo: history.episode.season.seasonNo,
+    },
   };
 };

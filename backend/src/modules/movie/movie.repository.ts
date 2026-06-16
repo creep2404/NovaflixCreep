@@ -462,7 +462,7 @@ export const getContinueWatchingRepoClone = async (userId: string) => {
   });
 };
 
-export const getContinueWatchingRep8o = async (userId: string) => {
+export const getContinueWatchingRepo = async (userId: string) => {
   return prisma.watchHistory.findMany({
     where: {
       userId,
@@ -519,6 +519,7 @@ export const getContinueWatchingRep8o = async (userId: string) => {
           id: true,
           title: true,
           episodeNo: true,
+          duration: true,
         },
       },
     },

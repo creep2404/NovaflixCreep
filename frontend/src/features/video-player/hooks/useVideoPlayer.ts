@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { getWatchHistory, saveWatchHistory } from "@/src/apis/watchHistory.api";
 import { useAuth } from "@/src/features/auth/hooks/useAuth";
 import { useWatchHistory } from "./useWatchHistory";
 import { useKeyboardShortcuts } from "./useKeyboardShortcuts";
 import { useFullscreen } from "./useFullscreen";
 
-export const useVideoPlayer = (movieId: string) => {
+export const useVideoPlayer = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -17,15 +16,6 @@ export const useVideoPlayer = (movieId: string) => {
 
   const [showControls, setShowControls] = useState(true);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const { profile } = useAuth();
-
-  useWatchHistory({
-    movieId,
-    videoRef,
-    isPlaying,
-    profile,
-  });
 
   useKeyboardShortcuts({
     videoRef,

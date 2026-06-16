@@ -31,7 +31,11 @@ export const getWatchHistoryByMovieRepo = async (
     },
 
     include: {
-      episode: true,
+      episode: {
+        include: {
+          season: true,
+        },
+      },
     },
 
     orderBy: {

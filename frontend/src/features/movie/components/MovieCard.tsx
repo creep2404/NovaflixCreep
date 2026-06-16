@@ -1,11 +1,11 @@
 import React from "react";
 import { Play, Plus } from "lucide-react";
-import { MovieNew } from "@/src/shared/types";
+import { ContinueWatchingMovie, MovieNew } from "@/src/shared/types";
 import { useNavigate } from "react-router-dom";
 import { buildMovieWatchUrl } from "@/src/shared/utils/movie-routes";
 
 interface MovieCardProps {
-  movie: MovieNew;
+  movie: MovieNew | ContinueWatchingMovie;
   orientation?: "portrait" | "landscape";
   playTarget: {
     episodeId: string;

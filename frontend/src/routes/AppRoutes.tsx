@@ -6,14 +6,13 @@ import { AdminLayout } from "@/src/shared/components/layouts/AdminLayout";
 import { AdminDashboard } from "@/src/features/admin/dashboard/Dashboard";
 import { AdminMovies } from "@/src/features/admin/movie/list/Movies";
 import { AdminUsers } from "@/src/features/admin/user/Users";
-import { CreateMoviePage } from "@/src/features/admin/movie/create/CreateMoviePage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { Login } from "@/src/features/auth/login/Login";
 import { Register } from "@/src/features/auth/register/Register";
 import { ForgotPassword } from "@/src/features/auth/forgot-password/ForgotPassword";
 import { MovieDetail } from "@/src/features/movie-detail/MovieDetail";
 import { ContentList } from "../features/admin/movie/list/ContentList";
-import { CreateSeriesPage } from "../features/admin/movie/onGoing/CreateSeries";
+import { CreateSeriesPage } from "../features/admin/movie/create/CreateSeries";
 import { UpdateHistory } from "../features/admin/movie/onGoing/Mock/UpdateHistory";
 
 export default function AppRoutes() {
@@ -47,7 +46,6 @@ export default function AppRoutes() {
         <Route index element={<AdminDashboard />} />
         <Route path="movies" element={<AdminMovies />} />
         <Route path="users" element={<AdminUsers />} />
-        <Route path="upload" element={<CreateMoviePage />} />
         <Route path="create" element={<ContentList />} />
         <Route path="create-series" element={<CreateSeriesPage />} />
         <Route path="update-history" element={<UpdateHistory />} />

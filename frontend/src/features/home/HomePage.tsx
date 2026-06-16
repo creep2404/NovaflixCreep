@@ -23,7 +23,7 @@ export const HomePage = () => {
         />
       )}
 
-      <div className="max-w-[1600px] mx-auto px-6 lg:px-12 -mt-32 relative z-10 flex flex-col gap-12">
+      <div className="max-w-[1600px] mx-auto px-6 lg:px-12 relative z-10 flex flex-col gap-12">
         {/* CONTINUE WATCHING */}
         {!!profile && (
           <Row

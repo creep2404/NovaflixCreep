@@ -2,7 +2,7 @@ import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { AddEpisodeForm } from "./AddEpisodeForm";
-import { Episode, NewEpisode, Season } from "../HookGoing/useSeriesForm";
+import { Episode, NewEpisode, Season } from "../../hooks/useSeriesForm";
 import { EpisodeRow } from "./EpisodeRow";
 
 type SeasonCardProps = {

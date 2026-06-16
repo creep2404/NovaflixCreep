@@ -3,6 +3,7 @@ import {
   Review,
   CreateMovieDto,
   MovieNew,
+  ContinueWatchingMovie,
 } from "@/src/shared/types";
 import { api } from "./axios";
 import { UploadUrlResponse } from "../features/admin/movie/types/upload";
@@ -29,7 +30,11 @@ export const getTrendingMovies = () => {
 };
 
 export const getContinueWatching = () =>
-  api.get<MovieNew[]>("/users/me/continue-watching");
+{
+  const res = api.get<ContinueWatchingMovie[]>("/users/me/continue-watching");
+  console.log("ContinueWatching: ", res);
+  return res;
+}
 
 export const createUploadUrl = (payload: {
   videoId: string;

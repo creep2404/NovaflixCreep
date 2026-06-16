@@ -3,7 +3,7 @@ import { uploadToS3 } from "@/src/services/s3.service";
 import { useLoading } from "@/src/shared/hooks/useLoading";
 import { validateMovieForm } from "@/src/features/admin/movie/create/utils/validateMovieForm";
 import { MovieMetadataFormState } from "./useMediaForm";
-import { Season } from "../../HookGoing/useSeriesForm";
+import { Season } from "./useSeriesForm";
 
 type AlertModalState = {
   open: boolean;
@@ -300,10 +300,12 @@ export const useMediaSubmit = ({
 
     try {
       if (form.type === "Movie") {
+        console.log("Publishing movie...");
         await publishMovie();
         return;
       }
 
+      console.log("Publishing series...");
       await publishSeries();
     } catch (error) {
       console.error(error);

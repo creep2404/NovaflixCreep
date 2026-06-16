@@ -1,96 +1,27 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ChevronRight,
   Info,
-  Calendar,
-  X,
-  PlusCircle,
-  Star,
   Layers,
-  Plus,
-  Edit2,
-  Trash2,
-  CloudUpload,
   Image as ImageIcon,
   Camera,
   MonitorPlay,
-  PlayCircle,
   Wand2,
-  ChevronDown,
 } from "lucide-react";
-import { ViewState } from "../types";
-import { useMovieForm } from "../create/hooks/useMovieForm";
-import { RatingInput } from "./StarRating";
-import { ReleaseDateField } from "./DurationField";
-import { TrailerUrlField } from "./TrailerUrlField";
-import { ImageUploadCard } from "./ImageUploadCard";
-import { GenreField } from "./GenreField";
-import { EpisodeManagementSection } from "./Episole/EpisodeManagementSection";
-import { useSeriesForm } from "./HookGoing/useSeriesForm";
-import { VideoDropzone } from "./VideoDropzone";
-import { useMediaForm } from "./Refactor/Hook/useMediaForm";
-import { useSingleMovie } from "./Refactor/Hook/useSingleMovie";
-import { useMediaSubmit } from "./Refactor/Hook/useMediaSubmit";
+import { RatingInput } from "./components/StarRating";
+import { ReleaseDateField } from "./components/DurationField";
+import { TrailerUrlField } from "./components/TrailerUrlField";
+import { ImageUploadCard } from "./components/ImageUploadCard";
+import { GenreField } from "./components/GenreField";
+import { EpisodeManagementSection } from "./components/episode/EpisodeManagementSection";
+import { useSeriesForm } from "./hooks/useSeriesForm";
+import { VideoDropzone } from "./components/VideoDropzone";
+import { useMediaForm } from "./hooks/useMediaForm";
+import { useSingleMovie } from "./hooks/useSingleMovie";
+import { useMediaSubmit } from "./hooks/useMediaSubmit";
 import { AlertModal } from "@/src/shared/components/ui/AlertModal";
 
 export const CreateSeriesPage = () => {
-  
-
-  // // ========================= //
-  // // METADATA //
-  // // =========================
-  // const { form, setForm, resetMetadata, isMetadataDirty } =
-  //   useMovieMetadataForm();
-  // // ========================= //
-  // // SINGLE MOVIE //
-  // // =========================
-  // const {
-  //   file,
-  //   setFile,
-  //   progress,
-  //   thumbnailFile,
-  //   setThumbnailFile,
-  //   thumbProgress,
-  //   submitMovie,
-  //   resetMovieUpload,
-  //   isMovieUploadDirty,
-  //   alertModal,
-  //   setAlertModal,
-  // } = useSingleMovieUpload(form);
-
-  // // ========================= //
-  // // SERIES //
-  // // =========================
-  // const {
-  //   seasons,
-  //   addSeason,
-  //   removeSeason,
-  //   addEpisode,
-  //   removeEpisode,
-  //   updateEpisode,
-  // } = useSeriesForm();
-
-  // // ========================= //
-  // // RESET ALL //
-  // // ========================= //
-  // const handleReset = () => {
-  //   resetMetadata();
-  //   resetMovieUpload();
-  // };
-
-  // // ========================= //
-  // // SUBMIT ALL //
-  // // ========================= //
-  // const handleSubmit = async () => {
-  //   if (form.type === "Movie") {
-  //     await submitMovie();
-  //     return;
-  //   }
-  //   //TODO: Submit series data
-  //   //submitSeries();
-  // };
-
-  //OLD
   // ========================= //
   // 1. COMMON METADATA FORM
   // - title, description, genres, rating...
@@ -105,7 +36,7 @@ export const CreateSeriesPage = () => {
   } = useMediaForm();
 
   // ========================= //
-  // 2. SERIES BUILDER
+  // 2. SERIES
   // - chỉ quản lý UI state của season/episode
   // - chưa upload, chưa save DB
   // ========================= //
@@ -121,7 +52,7 @@ export const CreateSeriesPage = () => {
 
   // ========================= //
   // 3. SINGLE MOVIE
-  // - chỉ quản lý file state cho Movie
+  // - chỉ quản lý file state cho Movie lẻ
   // - file video + thumbnail
   // - chưa submit API
   // ========================= //
@@ -129,13 +60,13 @@ export const CreateSeriesPage = () => {
     file,
     setFile,
     progress,
-    setProgress, // <-- cần export để useMediaSubmit cập nhật progress
+    setProgress,
 
     // THUMBNAIL
     thumbnailFile,
     setThumbnailFile,
     thumbProgress,
-    setThumbProgress, // <-- cần export để useMediaSubmit cập nhật progress
+    setThumbProgress,
     poster,
     setPoster,
     banner,

@@ -92,6 +92,17 @@ export interface MovieNew {
   progress?: number;
 }
 
+export interface ContinueWatchingMovie extends MovieNew {
+  episode?: {
+    id: string;
+    title: string;
+    episodeNo: number;
+  };
+
+  progress?: number;
+  progressPercent?: number;
+}
+
 export interface Episode {
   id: string;
   number: number;

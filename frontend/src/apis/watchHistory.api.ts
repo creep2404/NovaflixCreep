@@ -1,9 +1,30 @@
 import { api } from "./axios";
 
-export const getWatchHistory = async (movieId: string) =>
-  await api.get(`/watch-history/${movieId}`);
-
-export const saveWatchHistory = async (data: {
-  movieId: string;
+export interface WatchHistory {
   progress: number;
-}) => await api.post("/watch-history/progress", data);
+  episode: {
+    episodeId: string;
+    episodeNo: number;
+    seasonNo: number;
+  };
+}
+
+export interface UpdateProgressPayload {
+  movieId: string;
+  episodeId: string;
+  progress: number;
+}
+
+export const getWatchHistory = async (movieId: string) =>
+{
+  const res = await api.get<WatchHistory>(`/watch-history/${movieId}`);
+  //console.log("Fetched watch history:", res);
+  return res;
+}
+
+export const saveWatchHistory = async (data: UpdateProgressPayload) =>
+{
+  console.log("Saving watch history with data:", data);
+  return await api.post("/watch-history/progress", data);
+}
+ 
