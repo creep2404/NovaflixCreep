@@ -15,7 +15,6 @@ import { getCache, setCache, withCache } from "@/common/infra/cache.util";
 import { eventBus } from "@/events/eventBus";
 import { EVENTS } from "@/common/constants/events.constants";
 import { getPresignedDownloadUrl } from "@/common/infra/s3-upload.util";
-import { FILE_PATHS } from "@/common/constants/file-path.constants";
 import { generateSlug } from "@/common/utils/slug";
 import { AppError } from "@/common/utils/AppError";
 import { getCachedPresignedUrl } from "@/common/utils/presigned-cache.util";
@@ -24,8 +23,9 @@ import { QueryMovieInput } from "./dto/query-movie.dto";
 import { buildMovieWhere } from "./movie.filter";
 import { CreateMovieRepoInput, UpdateMovieRepoInput } from "./movie.type";
 import { UpdateMovieInput } from "./dto/update-movie.dto";
+import { signMovieThumbnail, signMovieThumbnails } from "@/common/utils/movie.helper";
 
-export const createMovieService = async (data: CreateMovieInput) => {
+const validateMovieInput = (data: CreateMovieInput) => {
   if (data.duration > 10 * 3600) {
     throw new AppError("Duration too long", 400);
   }
@@ -38,13 +38,10 @@ export const createMovieService = async (data: CreateMovieInput) => {
     throw new AppError("Description too short", 400);
   }
 
-  // ===== Seasons =====
-
   if (!data.seasons?.length) {
     throw new AppError("Movie must contain at least one season", 400);
   }
 
-  // MOVIE => 1 season + 1 episode
   if (data.type === "MOVIE") {
     if (data.seasons.length !== 1) {
       throw new AppError("Movie must contain exactly one season", 400);
@@ -55,18 +52,19 @@ export const createMovieService = async (data: CreateMovieInput) => {
     }
   }
 
-  // SERIES => >= 1 season
   if (data.type === "SERIES" && data.seasons.length < 1) {
     throw new AppError("Series must contain at least one season", 400);
   }
+};
 
-  const seasonNos = data.seasons.map((s) => s.seasonNo);
+const validateSeasons = (seasons: CreateMovieInput["seasons"]) => {
+  const seasonNos = seasons.map((s) => s.seasonNo);
 
   if (new Set(seasonNos).size !== seasonNos.length) {
     throw new AppError("Duplicate season numbers detected", 400);
   }
 
-  for (const season of data.seasons) {
+  for (const season of seasons) {
     if (!season.title?.trim()) {
       throw new AppError(`Season ${season.seasonNo} title is required`, 400);
     }
@@ -110,14 +108,15 @@ export const createMovieService = async (data: CreateMovieInput) => {
       }
     }
   }
+};
 
+const buildRepoData = (data: CreateMovieInput): CreateMovieRepoInput => {
   const slug = generateSlug(data.title);
 
-  const repoData: CreateMovieRepoInput = {
+  return {
     ...data,
     slug,
     releaseDate: data.releaseDate ? new Date(data.releaseDate) : undefined,
-    // Generate slug for episodes
     seasons: data.seasons.map((season) => ({
       ...season,
       episodes: season.episodes.map((episode) => ({
@@ -126,6 +125,13 @@ export const createMovieService = async (data: CreateMovieInput) => {
       })),
     })),
   };
+};
+
+export const createMovieService = async (data: CreateMovieInput) => {
+  validateMovieInput(data);
+  validateSeasons(data.seasons);
+
+  const repoData = buildRepoData(data);
 
   const movie = await createMovieRepo(repoData);
 
@@ -240,7 +246,7 @@ export const getMoviesService = async (query: QueryMovieInput) => {
       countMoviesRepo({ where }),
     ]);
 
-    const moviesWithUrl = await mapWithUrl(movies);
+    const moviesWithUrl = await signMovieThumbnails(movies);
 
     return {
       items: moviesWithUrl.map(formatMovie),
@@ -269,7 +275,6 @@ export const getTrendingMoviesService = async () => {
     take: 10,
     orderByTrending: true,
   });
-  console.log("TEST: ", movies);
 
   const moviesWithUrl = await mapWithUrl(movies);
   const result = moviesWithUrl.map(formatMovie);
@@ -293,10 +298,23 @@ export const getTrendingMoviesService = async () => {
 export const getContinueWatchingService = async (userId: string) => {
   const histories = await getContinueWatchingRepo(userId);
 
-  return histories
+  const signedHistories = await Promise.all(
+    histories.map(async (item) => ({
+      ...item,
+      movie: item.movie
+        ? await signMovieThumbnail(item.movie)
+        : item.movie,
+    })),
+  );
+
+  return signedHistories
     .filter((item) => item.movie)
     .map((item) => {
-      const percent = Math.floor((item.progress / item.episode.duration) * 100);
+      const percent = Math.min(
+        Math.floor((item.progress / item.episode.duration) * 100),
+        100,
+      );
+
       return {
         ...formatMovie(item.movie),
 
@@ -307,8 +325,9 @@ export const getContinueWatchingService = async (userId: string) => {
           title: item.episode.title,
           episodeNo: item.episode.episodeNo,
         },
+
         progress: item.progress,
-        progressPercent: Math.min(percent, 100),
+        progressPercent: percent,
       };
     });
 };
@@ -338,7 +357,10 @@ export const getSuggestMoviesService = async (search: string) => {
 const mapWithUrl = async (movies: any[]) => {
   return Promise.all(
     movies.map(async (movie) => {
-      if (!movie.thumbnailUrl) return movie;
+      if (!movie.thumbnailUrl) {
+        console.log("NO THUMBNAIL URL");
+        return movie;
+      }
 
       return {
         ...movie,

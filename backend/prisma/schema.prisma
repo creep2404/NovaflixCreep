@@ -58,7 +58,7 @@ model User {
   failedLoginCount Int @default(0)
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @updatedAt @default(now())
 
   watchHistories WatchHistory[]
   favorites      Favorite[]
@@ -110,6 +110,9 @@ model MovieDetail {
 
   rating Decimal @default(0)
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+
   movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
 
   @@index([movieId])
@@ -120,6 +123,9 @@ model Season {
   movieId      String
   title        String
   seasonNo     Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
 
   movie Movie @relation(fields:[movieId], references:[id], onDelete:Cascade)
 
@@ -140,6 +146,9 @@ model Episode {
   episodeNo Int
   description String
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+
   season Season @relation(fields:[seasonId], references:[id], onDelete:Cascade)
 
   watchHistories WatchHistory[]
@@ -152,6 +161,10 @@ model Actor {
   id    String @id @default(uuid())
   name  String
   avatarUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+
   movies MovieActor[]
 }
 
@@ -159,6 +172,9 @@ model MovieActor {
   movieId String
   actorId String
   role    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
 
   movie Movie @relation(fields: [movieId], references: [id])
   actor Actor @relation(fields: [actorId], references: [id])
@@ -171,12 +187,18 @@ model Genre {
   id    String @id @default(uuid())
   name  String @unique
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+
   movies MovieGenre[]
 }
 
 model MovieGenre {
   movieId String
   genreId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
 
   movie Movie @relation(fields: [movieId], references: [id])
   genre Genre @relation(fields: [genreId], references: [id])
@@ -190,7 +212,9 @@ model WatchHistory {
   movieId   String
   episodeId  String
   progress  Int
-  updatedAt DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
 
   user  User  @relation(fields: [userId], references: [id])
   movie Movie @relation(fields: [movieId], references: [id])
@@ -204,6 +228,9 @@ model Favorite {
   id      String @id @default(uuid())
   userId  String
   movieId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
 
   user  User  @relation(fields: [userId], references: [id])
   movie Movie @relation(fields: [movieId], references: [id])
@@ -222,7 +249,9 @@ model Notification {
   type      NotificationType
   content   String
   isRead    Boolean  @default(false)
+  
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
 
   user User @relation(fields: [userId], references: [id])
   @@index([userId, isRead])

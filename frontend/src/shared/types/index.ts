@@ -13,53 +13,34 @@ export interface PaginationQuery {
   limit?: number;
   search?: string;
 }
-export interface Movie {
-  id: string;
-  title: string;
-  description: string;
 
-  thumbnailUrl: string;
-  videoUrl: string;
-
-  duration: number;
-  releaseDate: string | null;
-
-  rating: number;
-  ratingCount: number;
-
-  genres: {
-    genre: {
-      name: string;
-    };
-  }[];
-
-  isPremium?: boolean;
-  isOriginal?: boolean;
-  quality?: string;
-  matchPercentage?: number;
+export interface PaginationMeta extends PaginationQuery {
+  total: number;
+  totalPages: number;
 }
 
-export interface EpisodeNew {
+export interface Episode {
   id: string;
 
   episodeNo: number;
 
+  thumbnailUrl?: string;
   title: string;
   duration: number;
   durationLabel: string;
   description: string;
 }
 
-export interface SeasonNew {
+export interface Season {
   id: string;
 
   title: string;
   seasonNo: number;
 
-  episodes: EpisodeNew[];
+  episodes: Episode[];
 }
 
-export interface MovieNew {
+export interface Movie {
   id: string;
 
   title: string;
@@ -86,13 +67,18 @@ export interface MovieNew {
   seasonCount: number;
   episodeCount: number;
 
-  seasons: SeasonNew[];
+  seasons: Season[];
 
   continueEpisodeId?: string;
   progress?: number;
 }
 
-export interface ContinueWatchingMovie extends MovieNew {
+export interface SearchMovie {
+  items: Movie[];
+  meta: PaginationMeta;
+}
+
+export interface ContinueWatchingMovie extends Movie {
   episode?: {
     id: string;
     title: string;
@@ -101,15 +87,6 @@ export interface ContinueWatchingMovie extends MovieNew {
 
   progress?: number;
   progressPercent?: number;
-}
-
-export interface Episode {
-  id: string;
-  number: number;
-  title: string;
-  duration: string;
-  description: string;
-  thumbnailUrl: string;
 }
 
 export interface Comment {
@@ -159,21 +136,6 @@ export interface MoviePlayback {
   type: "mp4" | "hls";
   url: string;
 }
-
-// export interface CreateMovieDto {
-//   title: string;
-//   originalTitle?: string;
-//   description: string;
-//   thumbnailUrl: string;
-//   duration: number;
-//   videoId: string;
-//   genres: string[];
-//   releaseDate: string;
-//   rating: number;
-//   trailerUrl: string;
-//   country: string;
-//   ageRating: string;
-// }
 
 export interface CreateEpisodeDto {
   title: string;

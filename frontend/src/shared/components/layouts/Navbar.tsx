@@ -33,7 +33,9 @@ export const Navbar = () => {
             >
               Home
             </button>
-            <button className="text-on-surface-variant hover:text-white transition-colors">
+            <button 
+            onClick={() => navigate("/search?type=movie")}
+            className="text-on-surface-variant hover:text-white transition-colors">
               Series
             </button>
             <button className="text-on-surface-variant hover:text-white transition-colors">

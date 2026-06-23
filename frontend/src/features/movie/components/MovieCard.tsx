@@ -1,11 +1,11 @@
 import React from "react";
 import { Play, Plus } from "lucide-react";
-import { ContinueWatchingMovie, MovieNew } from "@/src/shared/types";
+import { ContinueWatchingMovie, Movie } from "@/src/shared/types";
 import { useNavigate } from "react-router-dom";
 import { buildMovieWatchUrl } from "@/src/shared/utils/movie-routes";
 
 interface MovieCardProps {
-  movie: MovieNew | ContinueWatchingMovie;
+  movie: Movie | ContinueWatchingMovie;
   orientation?: "portrait" | "landscape";
   playTarget: {
     episodeId: string;
@@ -23,7 +23,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({
 
   return (
     <div
-      onClick={(e) => navigate(`/movie/${movie.id}`)}
+      onClick={(e) => navigate(`/movie/${movie.slug}`)}
       className={`group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:z-10 hover:shadow-2xl hover:shadow-primary/20 ${isLandscape ? "aspect-video" : "aspect-[2/3]"}`}
     >
       <img

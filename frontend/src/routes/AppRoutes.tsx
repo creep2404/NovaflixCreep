@@ -14,6 +14,8 @@ import { MovieDetail } from "@/src/features/movie-detail/MovieDetail";
 import { ContentList } from "../features/admin/movie/list/ContentList";
 import { CreateSeriesPage } from "../features/admin/movie/create/CreateSeries";
 import { UpdateHistory } from "../features/admin/movie/onGoing/Mock/UpdateHistory";
+import { UserProfile } from "../features/user/UserProfile";
+import { FavoritesHistory } from "../features/user/FavoritesHistory";
 
 export default function AppRoutes() {
   return (
@@ -27,13 +29,30 @@ export default function AppRoutes() {
         element={<PlayerPage />}
       />
 
-      <Route path="/movie/:id" element={<MovieDetail />} />
+      <Route path="/movie/:slug" element={<MovieDetail />} />
 
       {/* Login */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
 
+      {/* User */}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <UserProfile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile/favorites"
+        element={
+          <ProtectedRoute>
+            <FavoritesHistory />
+          </ProtectedRoute>
+        }
+      />
       {/* Admin */}
       <Route
         path="/admin"

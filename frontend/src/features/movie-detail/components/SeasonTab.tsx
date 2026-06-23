@@ -1,9 +1,9 @@
-import { SeasonNew } from "@/src/shared/types";
+import { Season } from "@/src/shared/types";
 
 interface SeasonTabsProps {
-  seasons: SeasonNew[];
-  selectedSeason?: SeasonNew;
-  onChange: (season: SeasonNew) => void;
+  seasons: Season[];
+  selectedSeason?: Season;
+  onChange: (season: Season) => void;
 }
 
 export const SeasonTabs = ({

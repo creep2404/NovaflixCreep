@@ -78,7 +78,7 @@ export const PlayerPage = () => {
 
   // RESUME WATCH HISTORY
   // console.log("test data", {
-  //   profile,  
+  //   profile,
   //   movieId,
   //   profileId: profile?.id,
   //   episodeId,
@@ -155,7 +155,7 @@ export const PlayerPage = () => {
         <nav className="fixed top-0 w-full z-50 p-6 flex items-center justify-between bg-gradient-to-b from-surface/80 to-transparent">
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-2 text-white hover:text-primary transition-colors bg-surface-highest/50 backdrop-blur-md px-4 py-2 rounded-full"
+            className="flex items-center gap-2 p-2 rounded-full text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors"
           >
             <ChevronLeft size={20} /> Back to Browse
           </button>
@@ -175,15 +175,15 @@ export const PlayerPage = () => {
       <nav className="fixed top-0 w-full z-50 p-6 flex items-center justify-between bg-gradient-to-b from-surface/80 to-transparent">
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-2 text-white hover:text-primary transition-colors bg-surface-highest/50 backdrop-blur-md px-4 py-2 rounded-full"
+          className="flex items-center gap-2 p-2 rounded-full text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors"
         >
           <ChevronLeft size={20} /> Back to Browse
         </button>
         <div className="flex gap-4 items-center">
-          <button className="p-2 bg-surface-highest/50 backdrop-blur-md rounded-full hover:bg-white/10 transition-colors">
+          <button className="p-2 rounded-full text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors">
             <Heart size={20} />
           </button>
-          <button className="p-2 bg-surface-highest/50 backdrop-blur-md rounded-full hover:bg-white/10 transition-colors">
+          <button className="p-2 rounded-full text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors">
             <Share2 size={20} />
           </button>
         </div>
@@ -193,7 +193,7 @@ export const PlayerPage = () => {
       <div
         onMouseMove={resetHideTimer}
         onClick={resetHideTimer}
-        className="relative w-full max-w-6xl mx-auto aspect-video bg-black"
+        className="relative w-full max-w-7xl mx-auto aspect-video bg-black"
       >
         <VideoPlayer
           source={videoSource}
@@ -215,7 +215,9 @@ export const PlayerPage = () => {
             onClick={() => setIsPlaying(true)}
             className="absolute inset-0 flex items-center justify-center"
           >
-            <Play size={60} />
+            <div className="w-20 h-20 rounded-full bg-primary text-surface flex items-center justify-center hover:scale-105 transition-transform">
+              <Play size={36} className="fill-current ml-1" />
+            </div>
           </button>
         )}
 
@@ -487,7 +489,7 @@ export const PlayerPage = () => {
                   <MovieCard
                     key={m.id}
                     movie={m}
-                    onClick={() => navigate(`/movie/${m.id}`)}
+                    onClick={() => navigate(`/movie/${m.slug}`)}
                     orientation="portrait"
                   />
                 ))} */}

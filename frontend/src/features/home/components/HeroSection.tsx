@@ -1,10 +1,10 @@
-import { MovieNew } from "@/src/shared/types";
+import { Movie } from "@/src/shared/types";
 import { buildMovieWatchUrl } from "@/src/shared/utils/movie-routes";
 import { Info, Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface HeroSectionProps {
-  movie: MovieNew;
+  movie: Movie;
   playTarget: {
     episodeId: string;
     episodeNo: number;
@@ -77,7 +77,7 @@ export const HeroSection = ({ movie, playTarget }: HeroSectionProps) => {
               Watch Now
             </button>
             <button
-              onClick={() => navigate(`/movie/${movie.id}/`)}
+              onClick={() => navigate(`/movie/${movie.slug}/`)}
               className="flex items-center gap-2 bg-surface-high/80 backdrop-blur-md text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-surface-highest transition-all border border-white/10 hover:border-white/30"
             >
               <Info size={24} />

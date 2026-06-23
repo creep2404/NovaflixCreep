@@ -9,7 +9,6 @@ import { ROLE } from "@/common/types/role";
 
 const router = Router();
 
-router.get("/me/continue-watching", authMiddleware, getContinueWatching);
 router.get("/me", authMiddleware, getMe);
 router.get(
   "/",

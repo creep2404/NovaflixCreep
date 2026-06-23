@@ -9,8 +9,12 @@ import {
   getTrendingMovies,
   getSuggestMovies,
   getMovieBySlug,
+  getContinueWatching,
 } from "./movie.controller";
-import { authMiddleware, requireRole } from "@/common/middleware/auth.middleware";
+import {
+  authMiddleware,
+  requireRole,
+} from "@/common/middleware/auth.middleware";
 import {
   validateRequestBody,
   validateRequestParams,
@@ -139,7 +143,13 @@ router.get("/trending", getTrendingMovies);
  *       200:
  *         description: Upload URL generated successfully
  */
-router.post("/upload-url", authMiddleware, uploadLimiter, validateRequestBody(uploadSchema),getUploadUrl);
+router.post(
+  "/upload-url",
+  authMiddleware,
+  uploadLimiter,
+  validateRequestBody(uploadSchema),
+  getUploadUrl,
+);
 
 router.get(
   "/suggest",
@@ -147,7 +157,13 @@ router.get(
   getSuggestMovies,
 );
 
-router.get("/slug/:slug", validateRequestParams(paramSlugSchema), getMovieBySlug);
+router.get("/me/continue-watching", authMiddleware, getContinueWatching);
+
+router.get(
+  "/slug/:slug",
+  validateRequestParams(paramSlugSchema),
+  getMovieBySlug,
+);
 
 /**
  * @swagger

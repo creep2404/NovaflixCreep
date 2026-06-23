@@ -27,6 +27,7 @@ export const getProfileApi = async () => {
   // const res = await api.get(`/users/${id}`);
   // return res;
   const res = await api.get("/users/me");
+  console.log("Fetched user profile:", res);
   return res;
 };
 
