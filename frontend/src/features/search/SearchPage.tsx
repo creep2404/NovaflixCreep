@@ -51,9 +51,9 @@ export const SearchPage = () => {
   // QUERY
   // ===============================
   const filters = {
-  ...appliedFilters,
-  page,
-};
+    ...appliedFilters,
+    page,
+  };
 
   const { data, isLoading, isError, isFetching } = useMovies(filters);
   const movies = data?.items ?? [];
@@ -146,7 +146,7 @@ export const SearchPage = () => {
 
     setIsInitialized(true);
   }, []);
-
+  
   return (
     <div className="min-h-screen bg-surface pt-24 pb-12 flex animate-in fade-in duration-500">
       {/* SIDEBAR */}

@@ -10,6 +10,7 @@ import { api } from "./axios";
 import { UploadUrlResponse } from "../features/admin/movie/types/upload";
 
 export const getMovies = (params: QueryMovie) => {
+  console.log("Params: ", params);
   const res = api.get<SearchMovie>("/movies", { params });
   console.log("MovieAPI: ", res);
   return res;

@@ -101,6 +101,7 @@ export interface Comment {
 }
 
 export interface QueryMovie extends PaginationQuery {
+  type?: string | null;
   genres?: string[];
   rating?: number | null;
   duration?: string | null;

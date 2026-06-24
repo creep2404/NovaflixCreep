@@ -24,6 +24,8 @@ const MOVIE_TYPE_FILTERS = [
   { label: "Series", value: "series" },
 ];
 
+const DURATION_ARRAY = ["Under 1h", "1h - 2h", "Over 2h"];
+
 const FiltersSection = ({
   type,
   onChangeType,
@@ -106,7 +108,7 @@ const FiltersSection = ({
                   </label>
                 );
               })}
-            </div>  
+            </div>
           </div>
 
           {/* Genre Filter */}
@@ -174,7 +176,7 @@ const FiltersSection = ({
               Duration
             </h3>
             <div className="space-y-3">
-              {["Under 1h", "1h - 2h", "Over 2h"].map((dur) => {
+              {DURATION_ARRAY.map((dur) => {
                 const isSelected = duration === dur;
 
                 return (
