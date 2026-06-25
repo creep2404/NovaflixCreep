@@ -6,6 +6,7 @@ export const createEpisodeSchema = z.object({
   duration: z.number().int().positive(),
   episodeNo: z.number().int().positive(),
   description: z.string().min(1),
+  thumbnailUrl: z.string().optional(),
 });
 
 export type CreateEpisodeInput =

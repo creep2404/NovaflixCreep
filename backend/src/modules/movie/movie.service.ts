@@ -23,7 +23,10 @@ import { QueryMovieInput } from "./dto/query-movie.dto";
 import { buildMovieWhere } from "./movie.filter";
 import { CreateMovieRepoInput, UpdateMovieRepoInput } from "./movie.type";
 import { UpdateMovieInput } from "./dto/update-movie.dto";
-import { signMovieThumbnail, signMovieThumbnails } from "@/common/utils/movie.helper";
+import {
+  signMovieThumbnail,
+  signMovieThumbnails,
+} from "@/common/utils/movie.helper";
 
 const validateMovieInput = (data: CreateMovieInput) => {
   if (data.duration > 10 * 3600) {
@@ -119,9 +122,12 @@ const buildRepoData = (data: CreateMovieInput): CreateMovieRepoInput => {
     releaseDate: data.releaseDate ? new Date(data.releaseDate) : undefined,
     seasons: data.seasons.map((season) => ({
       ...season,
+      thumbnailUrl: season.thumbnailUrl ?? data.thumbnailUrl,
+      description: season.description ?? data.description,
       episodes: season.episodes.map((episode) => ({
         ...episode,
         slug: generateSlug(episode.title),
+        thumbnailUrl: episode.thumbnailUrl ?? data.thumbnailUrl,
       })),
     })),
   };
@@ -301,9 +307,7 @@ export const getContinueWatchingService = async (userId: string) => {
   const signedHistories = await Promise.all(
     histories.map(async (item) => ({
       ...item,
-      movie: item.movie
-        ? await signMovieThumbnail(item.movie)
-        : item.movie,
+      movie: item.movie ? await signMovieThumbnail(item.movie) : item.movie,
     })),
   );
 

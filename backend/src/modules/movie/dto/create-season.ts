@@ -4,5 +4,7 @@ import z from "zod";
 export const createSeasonSchema = z.object({
   title: z.string().min(1),
   seasonNo: z.number().int().positive(),
+  thumbnailUrl: z.string().optional(),
+  description: z.string().optional(),
   episodes: z.array(createEpisodeSchema).min(1),
 });

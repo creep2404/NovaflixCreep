@@ -3,23 +3,33 @@ import ProjectorLoader from "@/src/shared/components/ui/loading/ProjectorLoader"
 
 type LoadingContextType = {
   loading: boolean;
-  setLoading: (val: boolean) => void;
+  showLoading: () => void;
+  hideLoading: () => void;
 };
 
 export const LoadingContext = createContext<LoadingContextType>({
   loading: false,
-  setLoading: () => {},
+  showLoading: () => {},
+  hideLoading: () => {},
 });
 
 export const LoadingProvider = ({ children }: { children: ReactNode }) => {
-  const [loading, setLoading] = useState(false);
+  const [count, setCount] = useState(0);
+
+  const showLoading = () => {
+    setCount((c) => c + 1);
+  };
+
+  const hideLoading = () => {
+    setCount((c) => Math.max(0, c - 1));
+  };
+
+  const loading = count > 0;
 
   return (
-    <LoadingContext.Provider value={{ loading, setLoading }}>
-      {/* Global loader */}
+    <LoadingContext.Provider value={{ loading, showLoading, hideLoading }}>
       {loading && (
         <div className="global-loader">
-          {/* <FilmLoader /> */}
           <ProjectorLoader />
         </div>
       )}

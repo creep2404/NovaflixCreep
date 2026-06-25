@@ -47,7 +47,7 @@ export const useMediaSubmit = ({
   resetMovieUpload,
   resetSeries,
 }: UseMediaSubmitParams) => {
-  const { setLoading } = useLoading();
+  const { showLoading, hideLoading } = useLoading();
 
   // ========================= //
   // MOVIE PUBLISH FLOW
@@ -95,29 +95,6 @@ export const useMediaSubmit = ({
     await uploadToS3(thumbnailFile, thumbRes.uploadUrl, setThumbProgress);
 
     // 5. Save metadata to DB
-    // await createMovieApi({
-    //   title: form.title,
-    //   description: form.description,
-    //   thumbnailUrl: thumbRes.key,
-    //   duration: form.duration,
-    //   type: "MOVIE",
-    //   genres: form.genres,
-    //   releaseDate: form.releaseDate,
-    //   rating: form.rating,
-    //   trailerUrl: form.trailerUrl,
-    //   country: form.country,
-    //   ageRating: form.ageRating,
-    //   episodes: [
-    //     {
-    //       title: form.title,
-    //       videoId,
-    //       duration: form.duration,
-    //       episodeNo: 1,
-    //       description: form.description,
-    //     },
-    //   ],
-    // });
-
     await createMovieApi({
       title: form.title,
       description: form.description,
@@ -200,7 +177,7 @@ export const useMediaSubmit = ({
       fileType: "thumbnail",
     });
 
-    // await uploadToS3(thumbnailFile, thumbRes.uploadUrl, setThumbProgress);
+    await uploadToS3(thumbnailFile, thumbRes.uploadUrl, setThumbProgress);
 
     // =========================
     // Upload all episodes
@@ -236,12 +213,12 @@ export const useMediaSubmit = ({
 
         const videoId = crypto.randomUUID();
 
-        // const uploadRes = await createUploadUrl({
-        //   videoId,
-        //   fileType: "video",
-        // });
+        const uploadRes = await createUploadUrl({
+          videoId,
+          fileType: "video",
+        });
 
-        // await uploadToS3(episode.file, uploadRes.uploadUrl, () => {});
+        await uploadToS3(episode.file, uploadRes.uploadUrl, () => {});
 
         uploadedEpisodes.push({
           title: episode.title,
@@ -296,7 +273,7 @@ export const useMediaSubmit = ({
   // PUBLIC API
   // ========================= //
   const publish = async () => {
-    setLoading(true);
+    showLoading();
 
     try {
       if (form.type === "Movie") {
@@ -316,7 +293,7 @@ export const useMediaSubmit = ({
         type: "error",
       });
     } finally {
-      setLoading(false);
+      hideLoading();
     }
   };
 

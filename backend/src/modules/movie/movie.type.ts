@@ -1,7 +1,6 @@
 import { MovieType } from "@/common/enums";
 import { Prisma } from "@prisma/client";
 
-
 type CreateEpisodeRepoInput = {
   title: string;
   slug: string;
@@ -9,11 +8,14 @@ type CreateEpisodeRepoInput = {
   duration: number;
   episodeNo: number;
   description: string;
+  thumbnailUrl?: string;
 };
 
 type CreateSeasonRepoInput = {
   title: string;
   seasonNo: number;
+  thumbnailUrl?: string;
+  description?: string;
   episodes: CreateEpisodeRepoInput[];
 };
 
@@ -60,4 +62,3 @@ export type GetMoviesRepoInput = {
   where?: Prisma.MovieWhereInput;
   orderByTrending?: boolean;
 };
-
