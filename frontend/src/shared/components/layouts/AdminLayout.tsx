@@ -13,6 +13,9 @@ export const AdminLayout = () => {
     { path: "users", icon: Users, label: "Users" },
     { path: "analytics", icon: BarChart3, label: "Analytics" },
     { path: "upload", icon: BarChart3, label: "Upload" },
+    { path: "create-series", icon: BarChart3, label: "Create Series" },
+    { path: "update-history", icon: BarChart3, label: "Update History" },
+    { path: "create", icon: BarChart3, label: "Create Content" },
   ];
 
   return (
