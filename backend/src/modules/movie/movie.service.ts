@@ -141,6 +141,10 @@ export const createMovieService = async (data: CreateMovieInput) => {
 
   const movie = await createMovieRepo(repoData);
 
+  if (!movie) {
+    throw new AppError("Movie not found", 404);
+  }
+
   await invalidateMovieCache();
 
   eventBus.emit(EVENTS.MOVIE_CREATED, movie);
@@ -156,7 +160,11 @@ export const updateMovieService = async (
     throw new AppError("Invalid rating", 400);
   }
 
-  const repoData: UpdateMovieRepoInput = {
+  // const repoData: UpdateMovieRepoInput = {
+  //   ...data,
+  //   releaseDate: data.releaseDate ? new Date(data.releaseDate) : undefined,
+  // };
+  const repoData: any = {
     ...data,
     releaseDate: data.releaseDate ? new Date(data.releaseDate) : undefined,
   };
@@ -169,7 +177,8 @@ export const updateMovieService = async (
 
   await invalidateMovieCache();
 
-  return formatMovie(updated);
+  //return formatMovie(updated);
+  return;
 };
 
 export const deleteMovieService = async (id: string) => {
@@ -320,7 +329,7 @@ export const getContinueWatchingService = async (userId: string) => {
       );
 
       return {
-        ...formatMovie(item.movie),
+        ...formatMovie(item.movie as any),
 
         continueEpisodeId: item.episode.id,
 

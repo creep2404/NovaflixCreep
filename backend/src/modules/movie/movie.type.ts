@@ -1,5 +1,4 @@
-import { MovieType } from "@/common/enums";
-import { Prisma } from "@prisma/client";
+import { MovieType, Prisma } from "@prisma/client";
 
 type CreateEpisodeRepoInput = {
   title: string;
@@ -62,3 +61,19 @@ export type GetMoviesRepoInput = {
   where?: Prisma.MovieWhereInput;
   orderByTrending?: boolean;
 };
+
+export type MoviePayload = Prisma.MovieGetPayload<{
+  include: {
+    detail: true;
+    genres: {
+      include: {
+        genre: true;
+      };
+    };
+    seasons: {
+      include: {
+        episodes: true;
+      };
+    };
+  };
+}>;

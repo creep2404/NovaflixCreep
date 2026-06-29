@@ -5,7 +5,6 @@ import {
   getMovieById,
   //uploadMovieVideo,
   getUploadUrl,
-  getMoviePlayback,
   getTrendingMovies,
   getSuggestMovies,
   getMovieBySlug,
@@ -13,7 +12,6 @@ import {
 } from "./movie.controller";
 import {
   authMiddleware,
-  requireRole,
 } from "@/common/middleware/auth.middleware";
 import {
   validateRequestBody,

@@ -1,12 +1,13 @@
 import z from "zod";
 import { createSeasonSchema } from "./create-season";
+import { MovieType } from "@prisma/client";
 
 export const createMovieSchema = z
   .object({
     title: z.string().min(1),
     thumbnailUrl: z.string().optional(),
     duration: z.number().int().positive(),
-    type: z.enum(["MOVIE", "SERIES"]),
+    type: z.nativeEnum(MovieType),
     genres: z.array(z.string()).optional(),
     // MovieDetail
     description: z.string().min(1),

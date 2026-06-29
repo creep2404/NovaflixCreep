@@ -114,53 +114,6 @@ export const createMovieRepo = async (data: CreateMovieRepoInput) => {
   });
 };
 
-// export const updateMovieRepo = async (
-//   id: string,
-//   data: UpdateMovieRepoInput,
-// ) => {
-//   const {
-//     genres,
-//     description,
-//     videoId,
-//     trailerUrl,
-//     releaseDate,
-//     rating,
-//     // country,
-//     // ageRating,
-//     ...movieData
-//   } = data;
-
-//   return await prisma.movie.update({
-//     where: { id },
-//     data: {
-//       ...movieData,
-
-//       detail: {
-//         update: buildPrismaUpdate({
-//           description,
-//           videoId,
-//           trailerUrl,
-//           releaseDate,
-//           rating,
-//           // country,
-//           // ageRating,
-//         }),
-//       },
-
-//       ...(genres && {
-//         genres: {
-//           deleteMany: {},
-//           create: genres.map((genreId) => ({
-//             genre: {
-//               connect: { id: genreId },
-//             },
-//           })),
-//         },
-//       }),
-//     },
-//   });
-// };
-
 export const updateMovieRepo = async (
   id: string,
   data: UpdateMovieRepoInput,
@@ -175,54 +128,54 @@ export const updateMovieRepo = async (
     ageRating,
     ...movieData
   } = data;
+  return;
+  // return prisma.movie.update({
+  //   where: {
+  //     id,
+  //   },
 
-  return prisma.movie.update({
-    where: {
-      id,
-    },
+  //   data: {
+  //     ...movieData,
 
-    data: {
-      ...movieData,
+  //     detail: {
+  //       update: buildPrismaUpdate({
+  //         description,
+  //         trailerUrl,
+  //         releaseDate,
+  //         rating,
+  //         country,
+  //         ageRating,
+  //       }),
+  //     },
+  //     ...(genres && {
+  //       genres: {
+  //         deleteMany: {},
 
-      detail: {
-        update: buildPrismaUpdate({
-          description,
-          trailerUrl,
-          releaseDate,
-          rating,
-          country,
-          ageRating,
-        }),
-      },
-      ...(genres && {
-        genres: {
-          deleteMany: {},
+  //         create: genres.map((genreId) => ({
+  //           genre: {
+  //             connect: {
+  //               id: genreId,
+  //             },
+  //           },
+  //         })),
+  //       },
+  //     }),
+  //   },
 
-          create: genres.map((genreId) => ({
-            genre: {
-              connect: {
-                id: genreId,
-              },
-            },
-          })),
-        },
-      }),
-    },
-
-    include: {
-      detail: true,
-      genres: {
-        include: {
-          genre: true,
-        },
-      },
-      episodes: {
-        orderBy: {
-          episodeNo: "asc",
-        },
-      },
-    },
-  });
+  //   include: {
+  //     detail: true,
+  //     genres: {
+  //       include: {
+  //         genre: true,
+  //       },
+  //     },
+  //     episodes: {
+  //       orderBy: {
+  //         episodeNo: "asc",
+  //       },
+  //     },
+  //   },
+  // });
 };
 
 export const deleteMovieRepo = async (id: string) => {
@@ -349,33 +302,16 @@ export const getMoviesRepo = async ({
       },
 
       seasons: {
-        // Get only latest season with 1 episode to optimize for trending page
         take: 1,
-
         orderBy: {
           seasonNo: "desc",
         },
-        select: {
-          id: true,
-          seasonNo: true,
 
-          _count: {
-            select: {
-              episodes: true,
-            },
-          },
-
+        include: {
           episodes: {
             take: 1,
-
             orderBy: {
               episodeNo: "asc",
-            },
-
-            select: {
-              id: true,
-              title: true,
-              episodeNo: true,
             },
           },
         },
