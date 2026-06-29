@@ -5,7 +5,7 @@ import { getYoutubeId } from "@/src/features/movie-detail/utils/youtube";
 interface TrailerModalProps {
   isOpen: boolean;
   onClose: () => void;
-  trailerUrl: string;
+  trailerUrl?: string;
 }
 
 export default function TrailerModal({

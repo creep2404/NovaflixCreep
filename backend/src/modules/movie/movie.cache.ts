@@ -21,9 +21,21 @@ export const movieCacheKey = async (params: {
   genres?: string;
   rating?: number;
   duration?: "short" | "medium" | "long";
+  status?: "COMING_SOON" | "RELEASED" | "ARCHIVED";
+  type?: "MOVIE" | "SERIES";
 }) => {
   const version = await getMovieCacheVersion();
 
-  return `movies:v${version}:${params.page}:${params.limit}:${params.genres ?? ""}:${params.search ?? ""}:${params.rating ?? ""}:${params.duration ?? ""}`;
+  return [
+    `movies:v${version}`,
+    `page:${params.page}`,
+    `limit:${params.limit}`,
+    `search:${params.search ?? ""}`,
+    `genres:${params.genres ?? ""}`,
+    `rating:${params.rating ?? ""}`,
+    `duration:${params.duration ?? ""}`,
+    `status:${params.status ?? ""}`,
+    `type:${params.type ?? ""}`,
+  ].join(":");
 };
-//ex: movies:v1:1:10:action:batman
+// ex: movies:v1:page:1:limit:10:search::genres:action,comedy:rating:4:duration:medium:status:RELEASED:type:MOVIE

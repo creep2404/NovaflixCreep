@@ -1,7 +1,17 @@
+import { Movie } from "@/src/shared/types";
+import { buildMovieWatchUrl } from "@/src/shared/utils/movie-routes";
 import { Info, Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-export const HeroSection = ({ movie }) => {
+interface HeroSectionProps {
+  movie: Movie;
+  playTarget: {
+    episodeId: string;
+    episodeNo: number;
+  };
+}
+
+export const HeroSection = ({ movie, playTarget }: HeroSectionProps) => {
   if (!movie) return null;
   const navigate = useNavigate();
 
@@ -51,15 +61,25 @@ export const HeroSection = ({ movie }) => {
 
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate(`/movie/watch/${movie.id}/`)}
+              onClick={() =>
+                navigate(
+                  buildMovieWatchUrl(
+                    movie.slug,
+                    playTarget?.episodeNo,
+                    playTarget?.episodeId,
+                  ),
+                  { replace: true },
+                )
+              }
               className="flex items-center gap-2 bg-primary text-surface px-8 py-4 rounded-full font-bold text-lg hover:bg-primary-dim transition-all hover:scale-105"
             >
               <Play className="fill-current" size={24} />
               Watch Now
             </button>
-            <button 
-            onClick={() => navigate(`/movie/${movie.id}/`)}
-            className="flex items-center gap-2 bg-surface-high/80 backdrop-blur-md text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-surface-highest transition-all border border-white/10 hover:border-white/30">
+            <button
+              onClick={() => navigate(`/movie/${movie.slug}/`)}
+              className="flex items-center gap-2 bg-surface-high/80 backdrop-blur-md text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-surface-highest transition-all border border-white/10 hover:border-white/30"
+            >
               <Info size={24} />
               More Info
             </button>

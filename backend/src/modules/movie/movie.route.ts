@@ -8,8 +8,13 @@ import {
   getMoviePlayback,
   getTrendingMovies,
   getSuggestMovies,
+  getMovieBySlug,
+  getContinueWatching,
 } from "./movie.controller";
-import { authMiddleware } from "@/common/middleware/auth.middleware";
+import {
+  authMiddleware,
+  requireRole,
+} from "@/common/middleware/auth.middleware";
 import {
   validateRequestBody,
   validateRequestParams,
@@ -17,10 +22,11 @@ import {
 } from "@/common/validations/validate";
 import { createMovieSchema } from "@/modules/movie/dto/create-movie.dto";
 import { queryMovieSchema } from "@/modules/movie/dto/query-movie.dto";
-import { paramIdSchema } from "@/common/dto/param.dto";
+import { paramIdSchema, paramSlugSchema } from "@/common/dto/param.dto";
 import { uploadLimiter } from "@/common/middleware/rateLimit.middleware";
 import { suggestMovieSchema } from "./dto/suggest-movie-dto";
 import { uploadSchema } from "./dto/upload-video.dto";
+import { ROLE } from "@/common/types/role";
 
 const router = Router();
 
@@ -87,6 +93,7 @@ router.get("/", validateRequestQuery(queryMovieSchema), getMovies);
 router.post(
   "/",
   authMiddleware,
+  //requireRole(ROLE.ADMIN),
   validateRequestBody(createMovieSchema),
   createMovie,
 );
@@ -136,7 +143,13 @@ router.get("/trending", getTrendingMovies);
  *       200:
  *         description: Upload URL generated successfully
  */
-router.post("/upload-url", authMiddleware, uploadLimiter, validateRequestBody(uploadSchema),getUploadUrl);
+router.post(
+  "/upload-url",
+  authMiddleware,
+  uploadLimiter,
+  validateRequestBody(uploadSchema),
+  getUploadUrl,
+);
 
 router.get(
   "/suggest",
@@ -144,8 +157,13 @@ router.get(
   getSuggestMovies,
 );
 
-router.get("/:id/play", validateRequestParams(paramIdSchema), getMoviePlayback);
+router.get("/me/continue-watching", authMiddleware, getContinueWatching);
 
+router.get(
+  "/slug/:slug",
+  validateRequestParams(paramSlugSchema),
+  getMovieBySlug,
+);
 
 /**
  * @swagger

@@ -21,19 +21,42 @@ import {
   ErrorState,
   EmptyState,
 } from "@/src/shared/components/state/StateViews";
-import { getWatchHistory } from "@/src/apis/watchHistory.api";
 import { useVideoPlayer } from "./hooks/useVideoPlayer";
 import VideoPlayer from "./components/VideoPlayer";
 import { useAuth } from "@/src/features/auth/hooks/useAuth";
 import { usePlayerData } from "./hooks/usePlayerData";
+import { EpisodeCard } from "./components/EpisodeCard";
+import {
+  buildMovieWatchUrl,
+  parseEpisodeInfo,
+} from "@/src/shared/utils/movie-routes";
+import { useWatchHistoryQuery } from "./hooks/watch-history.query";
+import { useWatchHistory } from "./hooks/useWatchHistory";
 
 export const PlayerPage = () => {
-  const { id: movieId } = useParams();
+  //const { id: movieId } = useParams();
+
+  const { movieSlug, episodeInfo } = useParams();
+  const parsed = parseEpisodeInfo(episodeInfo);
+  const episodeId = parsed?.episodeId;
+
   const navigate = useNavigate();
 
   const { profile } = useAuth();
 
-  const { movie, videoSource, isLoading, error } = usePlayerData(movieId);
+  const { movie, videoSource, isLoading, error } = usePlayerData(
+    movieSlug!,
+    episodeId!,
+  );
+
+  const movieId = movie?.id;
+  const seasons = movie?.seasons ?? [];
+  const [selectedSeason, setSelectedSeason] = useState(0);
+  const currentSeason = movie?.seasons?.[selectedSeason];
+
+  const currentEpisode = movie?.seasons
+    ?.flatMap((s) => s.episodes)
+    ?.find((ep) => ep.id === episodeId);
 
   const {
     videoRef,
@@ -51,27 +74,49 @@ export const PlayerPage = () => {
     showControls,
     timeoutRef,
     resetHideTimer,
-  } = useVideoPlayer(movieId!);
+  } = useVideoPlayer();
 
   // RESUME WATCH HISTORY
+  // console.log("test data", {
+  //   profile,
+  //   movieId,
+  //   profileId: profile?.id,
+  //   episodeId,
+  //   enabled: !!profile?.id && !!episodeId,
+  // });
+
+  const { data: history } = useWatchHistoryQuery(
+    movieId!,
+    !!profile?.id && !!episodeId,
+  );
+  useWatchHistory({
+    movieId: movieId,
+
+    episodeId: currentEpisode?.id ?? "",
+    videoRef,
+    isPlaying,
+    profile,
+    history,
+  });
+
   //WHEN load page -> resume watch history
-  useEffect(() => {
-    if (!movieId || !profile?.id || !videoRef.current) return;
+  // useEffect(() => {
+  //   if (!movieId || !profile?.id || !videoRef.current) return;
 
-    const fetchProgress = async () => {
-      try {
-        const data = await getWatchHistory(movieId);
+  //   const fetchProgress = async () => {
+  //     try {
+  //       const data = await getWatchHistory(movieId);
 
-        if (data?.progress) {
-          videoRef.current!.currentTime = data.progress;
-        }
-      } catch (err) {
-        console.error("RESUME error", err);
-      }
-    };
+  //       if (data?.progress) {
+  //         videoRef.current!.currentTime = data.progress;
+  //       }
+  //     } catch (err) {
+  //       console.error("RESUME error", err);
+  //     }
+  //   };
 
-    fetchProgress();
-  }, [movieId, profile, videoRef]);
+  //   fetchProgress();
+  // }, [movieId, profile, videoRef]);
 
   // UI STATES
   if (!movieId) {
@@ -110,7 +155,7 @@ export const PlayerPage = () => {
         <nav className="fixed top-0 w-full z-50 p-6 flex items-center justify-between bg-gradient-to-b from-surface/80 to-transparent">
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-2 text-white hover:text-primary transition-colors bg-surface-highest/50 backdrop-blur-md px-4 py-2 rounded-full"
+            className="flex items-center gap-2 p-2 rounded-full text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors"
           >
             <ChevronLeft size={20} /> Back to Browse
           </button>
@@ -130,15 +175,15 @@ export const PlayerPage = () => {
       <nav className="fixed top-0 w-full z-50 p-6 flex items-center justify-between bg-gradient-to-b from-surface/80 to-transparent">
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-2 text-white hover:text-primary transition-colors bg-surface-highest/50 backdrop-blur-md px-4 py-2 rounded-full"
+          className="flex items-center gap-2 p-2 rounded-full text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors"
         >
           <ChevronLeft size={20} /> Back to Browse
         </button>
         <div className="flex gap-4 items-center">
-          <button className="p-2 bg-surface-highest/50 backdrop-blur-md rounded-full hover:bg-white/10 transition-colors">
+          <button className="p-2 rounded-full text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors">
             <Heart size={20} />
           </button>
-          <button className="p-2 bg-surface-highest/50 backdrop-blur-md rounded-full hover:bg-white/10 transition-colors">
+          <button className="p-2 rounded-full text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors">
             <Share2 size={20} />
           </button>
         </div>
@@ -148,7 +193,7 @@ export const PlayerPage = () => {
       <div
         onMouseMove={resetHideTimer}
         onClick={resetHideTimer}
-        className="relative w-full max-w-6xl mx-auto aspect-video bg-black"
+        className="relative w-full max-w-7xl mx-auto aspect-video bg-black"
       >
         <VideoPlayer
           source={videoSource}
@@ -170,7 +215,9 @@ export const PlayerPage = () => {
             onClick={() => setIsPlaying(true)}
             className="absolute inset-0 flex items-center justify-center"
           >
-            <Play size={60} />
+            <div className="w-20 h-20 rounded-full bg-primary text-surface flex items-center justify-center hover:scale-105 transition-transform">
+              <Play size={36} className="fill-current ml-1" />
+            </div>
           </button>
         )}
 
@@ -291,7 +338,7 @@ export const PlayerPage = () => {
               <span className="px-2 py-0.5 border border-white/20 rounded">
                 {movie.rating}
               </span>
-              <span>{movie.duration}</span>
+              <span>{movie.durationLabel}</span>
               <span className="px-2 py-0.5 bg-white/10 rounded">
                 {movie.quality}
               </span>
@@ -312,51 +359,57 @@ export const PlayerPage = () => {
           </div>
 
           {/* Episodes List (If Series) */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <h2 className="text-2xl font-headline font-bold">Episodes</h2>
-              <select className="bg-surface-high border border-white/10 rounded-lg px-4 py-2 text-sm outline-none focus:border-primary">
-                <option>Season 1</option>
-                <option>Season 2</option>
-              </select>
-            </div>
+          {movie && movie.type === "SERIES" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <h2 className="text-2xl font-headline font-bold">Episodes</h2>
+                {seasons.map((season, index) => (
+                  <button
+                    key={season.id}
+                    onClick={() => setSelectedSeason(index)}
+                  >
+                    Season {season.seasonNo}
+                  </button>
+                ))}
+              </div>
 
-            <div className="space-y-4">
-              {MOCK_EPISODES.map((ep, idx) => (
-                <div
-                  key={ep.id}
-                  className={`flex gap-6 p-4 rounded-xl transition-colors cursor-pointer ${idx === 0 ? "bg-surface-high border border-primary/20" : "hover:bg-surface-high/50 border border-transparent"}`}
-                >
-                  <div className="text-2xl font-headline font-bold text-on-surface-variant/50 w-8 flex items-center justify-center">
-                    {ep.number}
-                  </div>
-                  <div className="relative w-40 aspect-video rounded-lg overflow-hidden flex-shrink-0 group">
-                    <img
-                      src={ep.thumbnailUrl}
-                      alt={ep.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Play size={24} className="text-white fill-current" />
-                    </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-bold text-lg truncate pr-4">
-                        {ep.title}
-                      </h3>
-                      <span className="text-sm text-on-surface-variant">
-                        {ep.duration}
-                      </span>
-                    </div>
-                    <p className="text-sm text-on-surface-variant line-clamp-2">
-                      {ep.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
+              <div className="space-y-4">
+                {currentSeason?.episodes?.map((episode) => (
+                  <EpisodeCard
+                    key={episode.id}
+                    id={episode.id}
+                    number={episode.episodeNo}
+                    title={episode.title}
+                    description={episode.description}
+                    duration={episode.durationLabel}
+                    thumbnailUrl={movie.thumbnailUrl} // TODO: episode thumbnail
+                    active={episode.id === episodeId}
+                    onClick={() =>
+                      navigate(
+                        buildMovieWatchUrl(
+                          movie.slug,
+                          episode.episodeNo,
+                          episode.id,
+                        ),
+                      )
+                    }
+                  />
+                ))}
+                {MOCK_EPISODES.map((ep, idx) => (
+                  <EpisodeCard
+                    key={ep.id}
+                    id={ep.id}
+                    number={ep.number}
+                    title={ep.title}
+                    description={ep.description}
+                    duration={ep.duration}
+                    thumbnailUrl={ep.thumbnailUrl}
+                    active={idx === 0}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Comments Section */}
           <div className="space-y-6 pt-8 border-t border-white/10">
@@ -436,7 +489,7 @@ export const PlayerPage = () => {
                   <MovieCard
                     key={m.id}
                     movie={m}
-                    onClick={() => navigate(`/movie/${m.id}`)}
+                    onClick={() => navigate(`/movie/${m.slug}`)}
                     orientation="portrait"
                   />
                 ))} */}

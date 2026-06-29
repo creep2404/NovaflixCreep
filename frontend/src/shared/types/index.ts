@@ -13,19 +13,48 @@ export interface PaginationQuery {
   limit?: number;
   search?: string;
 }
+
+export interface PaginationMeta extends PaginationQuery {
+  total: number;
+  totalPages: number;
+}
+
+export interface Episode {
+  id: string;
+
+  episodeNo: number;
+
+  thumbnailUrl?: string;
+  title: string;
+  duration: number;
+  durationLabel: string;
+  description: string;
+}
+
+export interface Season {
+  id: string;
+
+  title: string;
+  seasonNo: number;
+
+  episodes: Episode[];
+}
+
 export interface Movie {
   id: string;
+
   title: string;
+  slug: string;
   description: string;
 
   thumbnailUrl: string;
-  videoUrl: string;
+  trailerUrl?: string;
 
   duration: number;
-  releaseDate: string | null;
+  durationLabel: string;
 
+  releaseDate: string | null;
   rating: number;
-  ratingCount: number;
 
   genres: {
     genre: {
@@ -33,19 +62,31 @@ export interface Movie {
     };
   }[];
 
-  isPremium?: boolean;
-  isOriginal?: boolean;
-  quality?: string;
-  matchPercentage?: number;
+  type: "MOVIE" | "SERIES";
+
+  seasonCount: number;
+  episodeCount: number;
+
+  seasons: Season[];
+
+  continueEpisodeId?: string;
+  progress?: number;
 }
 
-export interface Episode {
-  id: string;
-  number: number;
-  title: string;
-  duration: string;
-  description: string;
-  thumbnailUrl: string;
+export interface SearchMovie {
+  items: Movie[];
+  meta: PaginationMeta;
+}
+
+export interface ContinueWatchingMovie extends Movie {
+  episode?: {
+    id: string;
+    title: string;
+    episodeNo: number;
+  };
+
+  progress?: number;
+  progressPercent?: number;
 }
 
 export interface Comment {
@@ -60,6 +101,7 @@ export interface Comment {
 }
 
 export interface QueryMovie extends PaginationQuery {
+  type?: string | null;
   genres?: string[];
   rating?: number | null;
   duration?: string | null;
@@ -72,18 +114,6 @@ export interface Genre {
 }
 
 export interface QueryGenre extends PaginationQuery {}
-
-export interface CreateMovie {
-  title: string;
-  description?: string;
-  thumbnailUrl?: string;
-  duration: number;
-  genres?: string[]; // list of genreId
-  videoId: string;
-  releaseDate?: string;
-  rating: number;
-}
-
 export interface CastMember {
   id: string;
   name: string;
@@ -108,19 +138,33 @@ export interface MoviePlayback {
   url: string;
 }
 
+export interface CreateEpisodeDto {
+  title: string;
+  videoId: string;
+  duration: number;
+  episodeNo: number;
+  description?: string;
+}
+
+export interface CreateSeasonDto {
+  title: string;
+  seasonNo: number;
+  episodes: CreateEpisodeDto[];
+}
+
 export interface CreateMovieDto {
   title: string;
-  originalTitle?: string;
   description: string;
   thumbnailUrl: string;
   duration: number;
-  videoId: string;
+  type: "MOVIE" | "SERIES";
   genres: string[];
   releaseDate: string;
   rating: number;
   trailerUrl: string;
   country: string;
   ageRating: string;
+  seasons: CreateSeasonDto[];
 }
 
 export interface User {

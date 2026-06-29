@@ -4,8 +4,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  url      = "postgresql://postgres:123@localhost:5432/novaflix?schema=public"
+  directUrl = "postgresql://postgres:123@localhost:5432/novaflix?schema=public"
 }
 
 enum Role {
@@ -28,6 +28,11 @@ enum UserStatus {
 enum UserSubscription {
   FREE
   PREMIUM
+}
+
+enum MovieType {
+  MOVIE
+  SERIES
 }
 
 model User {
@@ -53,7 +58,7 @@ model User {
   failedLoginCount Int @default(0)
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @updatedAt @default(now())
 
   watchHistories WatchHistory[]
   favorites      Favorite[]
@@ -70,6 +75,7 @@ model Movie {
   views        Int      @default(0)
   isPublished  Boolean  @default(true)
   status       MovieStatus @default(RELEASED)
+  type         MovieType @default(MOVIE)
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -79,7 +85,9 @@ model Movie {
   genres         MovieGenre[]
   watchHistories WatchHistory[]
   favorites      Favorite[]
-  episodes    Episode[]
+  
+  seasons Season[]
+
   actors      MovieActor[]
 
   @@index([title])
@@ -102,28 +110,63 @@ model MovieDetail {
 
   rating Decimal @default(0)
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+
   movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
 
   @@index([movieId])
 }
 
+model Season {
+  id          String @id @default(uuid())
+  movieId      String
+  title        String
+  seasonNo     Int
+  thumbnailUrl String?
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+
+  movie Movie @relation(fields:[movieId], references:[id], onDelete:Cascade)
+
+  episodes Episode[]
+
+  @@unique([movieId, seasonNo])
+}
+
 model Episode {
   id        String @id @default(uuid())
-  movieId   String
+  seasonId     String
+
   title     String
-  videoUrl  String
+  slug         String?
+  thumbnailUrl String?
+  videoId  String
   duration  Int
   episodeNo Int
+  description String
 
-  movie Movie @relation(fields: [movieId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
 
-  @@index([movieId])
+  season Season @relation(fields:[seasonId], references:[id], onDelete:Cascade)
+
+  watchHistories WatchHistory[]
+
+  @@unique([seasonId, episodeNo])
+  @@index([seasonId])
 }
 
 model Actor {
   id    String @id @default(uuid())
   name  String
   avatarUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+
   movies MovieActor[]
 }
 
@@ -131,6 +174,9 @@ model MovieActor {
   movieId String
   actorId String
   role    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
 
   movie Movie @relation(fields: [movieId], references: [id])
   actor Actor @relation(fields: [actorId], references: [id])
@@ -143,12 +189,18 @@ model Genre {
   id    String @id @default(uuid())
   name  String @unique
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+
   movies MovieGenre[]
 }
 
 model MovieGenre {
   movieId String
   genreId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
 
   movie Movie @relation(fields: [movieId], references: [id])
   genre Genre @relation(fields: [genreId], references: [id])
@@ -160,19 +212,27 @@ model WatchHistory {
   id        String   @id @default(uuid())
   userId    String
   movieId   String
+  episodeId  String
   progress  Int
-  updatedAt DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
 
   user  User  @relation(fields: [userId], references: [id])
   movie Movie @relation(fields: [movieId], references: [id])
+  episode Episode @relation(fields: [episodeId], references: [id])
 
-  @@unique([userId, movieId])
+  @@unique([userId, episodeId])
+  @@index([userId, updatedAt])
 }
 
 model Favorite {
   id      String @id @default(uuid())
   userId  String
   movieId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
 
   user  User  @relation(fields: [userId], references: [id])
   movie Movie @relation(fields: [movieId], references: [id])
@@ -191,7 +251,9 @@ model Notification {
   type      NotificationType
   content   String
   isRead    Boolean  @default(false)
+  
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
 
   user User @relation(fields: [userId], references: [id])
   @@index([userId, isRead])

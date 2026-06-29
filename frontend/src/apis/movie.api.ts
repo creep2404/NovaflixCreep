@@ -1,25 +1,42 @@
 import {
-  Movie,
   QueryMovie,
   Review,
-  MoviePlayback,
   CreateMovieDto,
+  Movie,
+  ContinueWatchingMovie,
+  SearchMovie,
 } from "@/src/shared/types";
 import { api } from "./axios";
 import { UploadUrlResponse } from "../features/admin/movie/types/upload";
 
-export const getMovies = (params: QueryMovie) =>
-  api.get<Movie[]>("/movies", { params });
+export const getMovies = (params: QueryMovie) => {
+  console.log("Params: ", params);
+  const res = api.get<SearchMovie>("/movies", { params });
+  console.log("MovieAPI: ", res);
+  return res;
+};
 
-export const getMovieById = (id: string) => api.get<Movie>(`/movies/${id}`);
+export const getMovieById = (id: string) => {
+  const res = api.get<Movie>(`/movies/${id}`);
+  console.log("MovieById: ", res);
+  return res;
+};
 
-export const getMoviePlaybackData = (id: string) =>
-  api.get<MoviePlayback>(`/movies/${id}/play`);
+export const getMovieBySlug = (slug: string) =>
+  api.get<Movie>(`/movies/slug/${slug}`);
 
-export const getTrendingMovies = () => api.get<Movie[]>("/movies/trending");
+export const getTrendingMovies = () => {
+  const res = api.get<Movie[]>("/movies/trending");
+  console.log("TrendingMovies: ", res);
+  return res;
+};
 
 export const getContinueWatching = () =>
-  api.get<Movie[]>("/users/me/continue-watching");
+{
+  const res = api.get<ContinueWatchingMovie[]>("/movies/me/continue-watching");
+  console.log("ContinueWatching: ", res);
+  return res;
+}
 
 export const createUploadUrl = (payload: {
   videoId: string;
@@ -28,8 +45,10 @@ export const createUploadUrl = (payload: {
   return api.post<UploadUrlResponse>("/movies/upload-url", payload);
 };
 
-export const createMovieApi = (payload: CreateMovieDto) =>
-  api.post<Movie>("/movies", payload);
+export const createMovieApi = (payload: CreateMovieDto) => {
+  console.log("Creating movie with payload:", payload);
+  return api.post("/movies", payload);
+};
 
 export const getSuggestMovies = (search: string) =>
   api.get<Movie[]>("/movies/suggest", {

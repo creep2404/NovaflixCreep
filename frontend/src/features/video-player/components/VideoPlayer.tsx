@@ -43,6 +43,7 @@ const VideoPlayer = forwardRef<HTMLVideoElement, Props>(
 
     return (
       <video
+        preload="metadata"
         ref={ref}
         className={className}
         onClick={() => {

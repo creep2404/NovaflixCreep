@@ -28,7 +28,12 @@ export function buildMovieWhere(
 
   const conditions: Prisma.MovieWhereInput[] = [];
 
-  // SEARCH
+  // only published
+  conditions.push({
+    isPublished: true,
+  });
+
+  // search
   if (query.search) {
     conditions.push({
       title: {
@@ -38,20 +43,34 @@ export function buildMovieWhere(
     });
   }
 
-  // GENRES
-  if (genres.length > 0) {
+  // status
+  if (query.status) {
+    conditions.push({
+      status: query.status,
+    });
+  }
+
+  // movie/series
+  if (query.type) {
+    conditions.push({
+      type: query.type,
+    });
+  }
+
+  // genres
+  if (genres.length) {
     conditions.push({
       genres: {
         some: {
           genre: {
-            name: { in: genres },
+            id: { in: genres },
           },
         },
       },
     });
   }
 
-  // RATING
+  // rating
   if (rating !== undefined) {
     conditions.push({
       detail: {
@@ -62,15 +81,11 @@ export function buildMovieWhere(
     });
   }
 
-  // DURATION
+  // duration
   if (durationWhere) {
     conditions.push({
       duration: durationWhere,
     });
-  }
-
-  if (conditions.length === 0) {
-    return {};
   }
 
   return {

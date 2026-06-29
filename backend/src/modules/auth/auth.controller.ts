@@ -24,6 +24,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
 });
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const isProd = env.NODE_ENV === "production";
+  console.log("isProd: ", isProd );
   
   const key = `login:${req.ip}`;
 
@@ -38,7 +39,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   res.cookie("refreshToken", data.refreshToken, {
     httpOnly: true,
     secure: isProd, 
-    sameSite: "none",
+    sameSite: isProd ? "none" : "lax",
     path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
@@ -84,7 +85,7 @@ export const refresh = asyncHandler(async (req: Request, res: Response) => {
   res.cookie("refreshToken", data.refreshToken, {
     httpOnly: true,
     secure: isProd, 
-    sameSite: "none",
+    sameSite: isProd ? "none" : "lax",
     path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });

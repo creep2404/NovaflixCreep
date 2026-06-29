@@ -43,9 +43,6 @@ export function GenreField({ value, onChange }: Props) {
 
   return (
     <div className="space-y-3">
-      <label className="block text-[10px] font-label font-bold uppercase tracking-[0.15em] text-on-surface-variant">
-        Genre
-      </label>
       <div className="flex flex-wrap gap-2">
         {allGenres.map((genre) => {
           const isActive = value.includes(genre.id);
@@ -55,11 +52,11 @@ export function GenreField({ value, onChange }: Props) {
               key={genre.id}
               type="button"
               onClick={() => toggleGenre(genre.id)}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200
                 ${
                   isActive
-                    ? "bg-primary-fixed text-on-primary-fixed border-primary-fixed"
-                    : "bg-surface-container-highest text-on-surface-variant border-outline-variant/20 hover:border-primary-fixed/40"
+                    ? "bg-primary-fixed text-on-primary-fixed border-primary-fixed shadow-[0_0_0_1px_rgba(255,209,101,0.35)] scale-[1.02]"
+                    : "bg-surface-container-highest text-on-surface-variant border-outline-variant hover:border-primary-fixed/60 hover:bg-surface-container-high"
                 }
               `}
             >

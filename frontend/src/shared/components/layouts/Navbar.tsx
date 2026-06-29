@@ -33,16 +33,25 @@ export const Navbar = () => {
             >
               Home
             </button>
-            <button className="text-on-surface-variant hover:text-white transition-colors">
+            <button
+              onClick={() => navigate("/search?type=series")}
+              className="text-on-surface-variant hover:text-white transition-colors"
+            >
               Series
             </button>
-            <button className="text-on-surface-variant hover:text-white transition-colors">
+            <button
+              onClick={() => navigate("/search?type=movie")}
+              className="text-on-surface-variant hover:text-white transition-colors"
+            >
               Movies
             </button>
             <button className="text-on-surface-variant hover:text-white transition-colors">
               New & Popular
             </button>
-            <button className="text-on-surface-variant hover:text-white transition-colors">
+            <button
+              onClick={() => navigate("/profile/favorites")}
+              className="text-on-surface-variant hover:text-white transition-colors"
+            >
               My List
             </button>
           </div>

@@ -1,14 +1,20 @@
 import { Router } from "express";
 import { getContinueWatching } from "@/modules/movie/movie.controller";
-import { authMiddleware } from "@/common/middleware/auth.middleware";
-import { getMe } from "./user.controller";
-import { validateRequestParams } from "@/common/validations/validate";
-import { paramIdSchema } from "@/common/dto/param.dto";
+import {
+  authMiddleware,
+  requireRole,
+} from "@/common/middleware/auth.middleware";
+import { getAllUsers, getMe } from "./user.controller";
+import { ROLE } from "@/common/types/role";
 
 const router = Router();
 
-router.get("/me/continue-watching", authMiddleware, getContinueWatching);
 router.get("/me", authMiddleware, getMe);
-
+router.get(
+  "/",
+  authMiddleware,
+  //requireRole(ROLE.ADMIN),
+  getAllUsers,
+);
 
 export default router;

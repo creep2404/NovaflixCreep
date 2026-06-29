@@ -4,10 +4,10 @@ import {
   createMovieService,
   getContinueWatchingService,
   getMovieByIdService,
+  getMovieBySlugService,
   getMoviesService,
   getSuggestMoviesService,
   getTrendingMoviesService,
-  getUrlPresignedByMovieId,
 } from "./movie.service";
 import { successResponse } from "@/common/utils/successResponse";
 import { getPresignedUploadUrl } from "@/common/infra/s3-upload.util";
@@ -73,21 +73,6 @@ export const getUploadUrl = asyncHandler(
   }),
 );
 
-// Get video
-// GET /movies/123/playback
-// Get thumbnail
-// GET /movies/123/playback?type=thumbnail
-export const getMoviePlayback = asyncHandler(
-  typedHandler<unknown, unknown , { id: string }>(async (req, res) => {
-    const { id } = req.validated.params;
-    const fileType = "video";
-
-    const data = await getUrlPresignedByMovieId(id, fileType);
-
-    return successResponse(res, data);
-  }),
-);
-
 export const getTrendingMovies = asyncHandler(
   async (req: Request, res: Response) => {
     const result = await getTrendingMoviesService();
@@ -113,5 +98,15 @@ export const getSuggestMovies = asyncHandler(
     const result = await getSuggestMoviesService(search);
 
     return successResponse(res, result, "Get suggest movies successfully");
+  }),
+);
+
+export const getMovieBySlug = asyncHandler(
+  typedHandler<unknown, unknown, { slug: string }>(async (req, res) => {
+    const { slug } = req.validated.params;
+
+    const result = await getMovieBySlugService(slug);
+
+    return successResponse(res, result, "Get movie by slug successfully");
   }),
 );

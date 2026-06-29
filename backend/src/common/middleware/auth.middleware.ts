@@ -2,11 +2,12 @@ import { env } from "@/config/env";
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { JwtPayload } from "../types/jwt.type";
+import { UserRole } from "../types/role";
 
 export interface AuthRequest extends Request {
   user?: {
     id: string;
-    role: "USER" | "ADMIN" | "PREMIUM";
+    role: UserRole;
   };
 }
 export const authMiddleware = (
@@ -42,7 +43,7 @@ export const authMiddleware = (
 };
 
 export const requireRole =
-  (role: "USER" | "ADMIN" | "PREMIUM") =>
+  (role: UserRole) =>
   (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
       return next({

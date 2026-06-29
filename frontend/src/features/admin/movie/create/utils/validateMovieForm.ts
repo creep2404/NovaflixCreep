@@ -14,6 +14,10 @@ export const validateMovieForm = ({
     return "Description is required";
   }
 
+  if(!form.duration || form.duration <= 0) {
+    return "Duration is required";
+  }
+
   if (!form.genres.length) return "Select at least one genre";
 
   if (!form.releaseDate) return "Release year is required";

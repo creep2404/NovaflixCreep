@@ -3,13 +3,14 @@ import { prisma } from "@/database/client";
 export const upsertWatchHistoryRepo = async (data: {
   userId: string;
   movieId: string;
+  episodeId: string;
   progress: number;
 }) => {
   return prisma.watchHistory.upsert({
     where: {
-      userId_movieId: {
+      userId_episodeId: {
         userId: data.userId,
-        movieId: data.movieId,
+        episodeId: data.episodeId,
       },
     },
     update: {
@@ -21,14 +22,24 @@ export const upsertWatchHistoryRepo = async (data: {
 
 export const getWatchHistoryByMovieRepo = async (
   userId: string,
-  movieId: string
+  movieId: string,
 ) => {
-  return prisma.watchHistory.findUnique({
+  return prisma.watchHistory.findFirst({
     where: {
-      userId_movieId: {
-        userId,
-        movieId,
+      userId,
+      movieId,
+    },
+
+    include: {
+      episode: {
+        include: {
+          season: true,
+        },
       },
+    },
+
+    orderBy: {
+      updatedAt: "desc",
     },
   });
 };

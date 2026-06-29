@@ -1,83 +1,121 @@
-import React from 'react';
-import { ScreenType } from '@/src/shared/types';
-import { ArrowLeft, Settings, Star, Lock, CreditCard, Sliders, HelpCircle, LogOut } from 'lucide-react';
+import React from "react";
+import { ScreenType } from "@/src/shared/types";
+import {
+  ArrowLeft,
+  Settings,
+  Star,
+  Lock,
+  CreditCard,
+  HelpCircle,
+  LogOut,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/hooks/useAuth";
 
-interface UserProfileProps {
-  onNavigate: (screen: ScreenType) => void;
-}
+interface UserProfileProps {}
+const DEFAULT_AVATAR =
+  "https://ui-avatars.com/api/?name=User&background=random&size=128";
+export const UserProfile = () => {
+  const navigate = useNavigate();
+  const { profile, isLoadingProfile, logout } = useAuth();
+  const user = profile?.user;
 
-export const UserProfile = ({ onNavigate }: UserProfileProps) => {
+  if (isLoadingProfile) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-surface-container-lowest text-on-surface antialiased pb-32">
       {/* TopAppBar */}
-      <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/60 backdrop-blur-xl flex justify-between items-center px-6 h-16 shadow-[0_32px_64px_rgba(6,15,22,0.04)]">
-        <div className="flex items-center gap-4">
-          <button onClick={() => onNavigate('browse')} className="text-primary hover:text-primary/80 transition-colors">
-            <ArrowLeft size={24} />
+      <header className="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-white/5">
+        <div className="max-w-[1600px] mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 rounded-full text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors"
+            >
+              <ArrowLeft size={20} />
+            </button>
+
+            <h1 className="text-xl font-headline font-bold tracking-tighter">
+              <span className="text-primary">Profile</span>
+            </h1>
+          </div>
+
+          <button className="p-2 rounded-full text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors">
+            <Settings size={20} />
           </button>
-          <h1 className="text-lg font-bold tracking-tighter text-primary">Profile</h1>
         </div>
-        <button className="text-primary hover:text-primary/80 transition-colors">
-          <Settings size={24} />
-        </button>
       </header>
 
-      <main className="pt-24 px-6 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-        {/* Profile Header Section */}
-        <section className="flex flex-col items-center text-center mb-12">
-          <div className="relative mb-6">
-            <div className="w-32 h-32 rounded-full p-1 bg-gradient-to-tr from-primary-container/20 to-primary/40">
-              <img 
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=3387&auto=format&fit=crop" 
-                alt="Alex Rivers" 
-                className="w-full h-full rounded-full object-cover border-4 border-surface" 
-              />
+      <main className="pt-32 max-w-[1600px] mx-auto px-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        {/* Profile Header */}
+        <section className="flex items-center gap-8 mb-16">
+          <div className="w-32 h-32 rounded-full overflow-hidden bg-surface-high border border-white/10 shrink-0">
+            <img
+              src={user?.avatarUrl ?? DEFAULT_AVATAR}
+              alt={user?.name ?? "User"}
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight mb-2">
+              {user?.name || "Anonymous User"}
+            </h1>
+
+            <p className="text-on-surface-variant text-lg">{user?.email}</p>
+
+            <div className="flex items-center gap-3 mt-4">
+              <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                {user?.role}
+              </span>
+
+              <span className="px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-sm font-medium">
+                {user?.status}
+              </span>
             </div>
           </div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-primary mb-1">Alex Rivers</h2>
-          <p className="text-on-surface-variant font-medium text-sm">alex.rivers@novaflix.com</p>
         </section>
 
-        {/* Active Plan Badge */}
-        <section className="w-full max-w-md mb-12">
-          <div className="bg-surface-container-low/40 backdrop-blur-2xl shadow-[0_0_20px_rgba(255,255,255,0.05)] border border-white/5 rounded-3xl p-6 flex items-center justify-between overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-on-surface-variant mb-1 font-bold">Active Plan</p>
-              <h3 className="text-xl font-bold text-primary">Premium 4K</h3>
-            </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-full text-xs font-black uppercase tracking-tight">
-              <Star size={14} className="fill-current" />
-              Ultra HD
-            </div>
+        {/* Account Info */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold mb-6">Account</h2>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <SettingItem icon={Lock} label="Account Security" />
+            <SettingItem icon={Star} label="Favorites" onClick={() => navigate("/profile/favorites")}/>
+            <SettingItem icon={CreditCard} label="Subscription" />
+            <SettingItem icon={HelpCircle} label="Help & Support" />
           </div>
         </section>
 
-        {/* Settings List */}
-        <section className="w-full max-w-md space-y-4">
-          <SettingItem icon={Lock} label="Account Security" />
-          <SettingItem icon={CreditCard} label="Payment Methods" />
-          <SettingItem icon={Sliders} label="App Settings" />
-          <SettingItem icon={HelpCircle} label="Help & Support" />
-        </section>
-
-        {/* Sign Out Button */}
-        <footer className="w-full max-w-md mt-16 mb-24 px-6">
-          <button 
-            onClick={() => onNavigate('login')}
-            className="w-full py-5 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 font-bold flex items-center justify-center gap-2 hover:bg-red-500/20 transition-all duration-300"
+        {/* Sign Out */}
+        <section className="border-t border-white/5 pt-8">
+          <button
+            onClick={logout}
+            className="flex items-center gap-3 text-red-400 hover:text-red-300 transition-colors font-medium"
           >
             <LogOut size={20} />
             Sign Out
           </button>
-        </footer>
+        </section>
       </main>
     </div>
   );
 };
 
-const SettingItem = ({ icon: Icon, label }: { icon: any, label: string }) => (
-  <div className="flex items-center justify-between p-5 bg-surface-container-low/40 backdrop-blur-xl rounded-2xl group hover:bg-surface-container-high transition-all duration-300 cursor-pointer">
+interface SettingItemProps {
+  icon: any;
+  label: string;
+  onClick?: () => void;
+}
+
+const SettingItem = ({ icon: Icon, label, onClick }: SettingItemProps) => (
+  <div
+    onClick={onClick}
+    className="flex items-center justify-between p-5 bg-surface-container-low/40 backdrop-blur-xl rounded-2xl group hover:bg-surface-container-high transition-all duration-300 cursor-pointer"
+  >
     <div className="flex items-center gap-4">
       <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-high text-primary">
         <Icon size={20} />

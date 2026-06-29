@@ -5,6 +5,9 @@ import { useGenres } from "@/src/features/movie/hooks/useGenres";
 import GenreFilter from "@/src/features/search/components/GenreFilter";
 
 interface Props {
+  type: string | null;
+  onChangeType: (type: string | null) => void;
+
   selectedGenres: string[];
   onChangeGenres: (genres: string[]) => void;
 
@@ -15,7 +18,17 @@ interface Props {
   onChangeDuration: (duration: string | null) => void;
 }
 
+const MOVIE_TYPE_FILTERS = [
+  { label: "All", value: null },
+  { label: "Movies", value: "movie" },
+  { label: "Series", value: "series" },
+];
+
+const DURATION_ARRAY = ["Under 1h", "1h - 2h", "Over 2h"];
+
 const FiltersSection = ({
+  type,
+  onChangeType,
   selectedGenres,
   onChangeGenres,
   rating,
@@ -39,7 +52,7 @@ const FiltersSection = ({
       });
     }
   }, [data]);
-  
+
   return (
     <div>
       {/* Sidebar Filters */}
@@ -50,6 +63,55 @@ const FiltersSection = ({
         </div>
 
         <div className="space-y-8">
+          {/* Type Filter */}
+          <div>
+            <h3 className="text-sm font-medium text-on-surface-variant mb-4 uppercase tracking-wider">
+              Movie Type
+            </h3>
+
+            <div className="space-y-3">
+              {MOVIE_TYPE_FILTERS.map((item) => {
+                const isSelected = type === item.value;
+
+                return (
+                  <label
+                    key={item.value}
+                    onClick={() => onChangeType(item.value)}
+                    className="flex items-center gap-3 cursor-pointer group"
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors
+            ${
+              isSelected
+                ? "border-primary"
+                : "border-white/20 group-hover:border-primary"
+            }`}
+                    >
+                      <div
+                        className={`w-3 h-3 rounded-full bg-primary transition-opacity
+              ${
+                isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-50"
+              }`}
+                      />
+                    </div>
+
+                    <span
+                      className={`text-sm transition-colors
+            ${
+              isSelected
+                ? "text-white"
+                : "text-on-surface-variant group-hover:text-white"
+            }`}
+                    >
+                      {item.label}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Genre Filter */}
           <GenreFilter
             selectedGenres={selectedGenres}
             onChangeGenres={onChangeGenres}
@@ -105,33 +167,6 @@ const FiltersSection = ({
                   </label>
                 );
               })}
-              {/* {[4, 3, 2, 1].map((stars) => (
-                <label
-                  key={stars}
-                  className="flex items-center gap-3 cursor-pointer group"
-                  
-                >
-                  <div className="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center group-hover:border-primary transition-colors">
-                    <div className="w-3 h-3 rounded-full bg-primary opacity-0 group-hover:opacity-50 transition-opacity" />
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        size={14}
-                        className={
-                          i < stars
-                            ? "text-yellow-500 fill-yellow-500"
-                            : "text-white/20"
-                        }
-                      />
-                    ))}
-                    <span className="text-xs text-on-surface-variant ml-1">
-                      & Up
-                    </span>
-                  </div>
-                </label>
-              ))} */}
             </div>
           </div>
 
@@ -141,7 +176,7 @@ const FiltersSection = ({
               Duration
             </h3>
             <div className="space-y-3">
-              {["Under 1h", "1h - 2h", "Over 2h"].map((dur) => {
+              {DURATION_ARRAY.map((dur) => {
                 const isSelected = duration === dur;
 
                 return (

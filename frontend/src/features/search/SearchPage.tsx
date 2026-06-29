@@ -19,6 +19,7 @@ import { Pagination } from "./components/Pagination";
 
 type Filters = {
   search: string;
+  type: string | null;
   genres: string[];
   rating: number | null;
   duration: string | null;
@@ -35,22 +36,24 @@ export const SearchPage = () => {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  const emptyFilters: Omit<Filters, "search"> = {
+  const emptyFilters: Filters = {
+    search: "",
+    type: null,
     genres: [],
     rating: null,
     duration: null,
   };
 
   const [draftFilters, setDraftFilters] = useState(emptyFilters);
-  const [appliedFilters, setAppliedFilters] = useState<Filters>({
-    search: "",
-    ...emptyFilters,
-  });
+  const [appliedFilters, setAppliedFilters] = useState<Filters>(emptyFilters);
 
   // ===============================
   // QUERY
   // ===============================
-  const filters = appliedFilters;
+  const filters = {
+    ...appliedFilters,
+    page,
+  };
 
   const { data, isLoading, isError, isFetching } = useMovies(filters);
   const movies = data?.items ?? [];
@@ -100,13 +103,14 @@ export const SearchPage = () => {
     if (search) paramsObj.search = search;
     if (page > 1) paramsObj.page = String(page);
 
+    if (appliedFilters.type) paramsObj.type = appliedFilters.type;
+
     if (appliedFilters.genres?.length > 0) {
       paramsObj.genres = appliedFilters.genres.join(",");
     }
 
-    if (appliedFilters.rating !== null) {
-      paramsObj.rating = appliedFilters.rating.toString();
-    }
+    if (appliedFilters.rating !== null)
+      paramsObj.rating = String(appliedFilters.rating);
 
     if (appliedFilters.duration) {
       paramsObj.duration = appliedFilters.duration;
@@ -123,8 +127,12 @@ export const SearchPage = () => {
     const urlGenres = params.get("genres");
     const urlRating = params.get("rating");
     const urlDuration = params.get("duration");
+    const urlType = params.get("type");
 
     const parsedFilters = {
+      search: urlSearch,
+      page: urlPage,
+      type: urlType || null,
       genres: urlGenres ? urlGenres.split(",") : [],
       rating: urlRating ? Number(urlRating) : null,
       duration: urlDuration || null,
@@ -138,7 +146,7 @@ export const SearchPage = () => {
 
     setIsInitialized(true);
   }, []);
-
+  
   return (
     <div className="min-h-screen bg-surface pt-24 pb-12 flex animate-in fade-in duration-500">
       {/* SIDEBAR */}
@@ -155,6 +163,8 @@ export const SearchPage = () => {
         onChangeDuration={(duration) =>
           setDraftFilters((prev) => ({ ...prev, duration }))
         }
+        type={draftFilters.type}
+        onChangeType={(type) => setDraftFilters((prev) => ({ ...prev, type }))}
       />
 
       {/* MAIN */}
@@ -171,8 +181,8 @@ export const SearchPage = () => {
           handleSelect={handleSelect}
           onSearch={() => {
             setAppliedFilters({
-              search,
               ...draftFilters,
+              search,
             });
 
             setPage(1);
@@ -181,6 +191,8 @@ export const SearchPage = () => {
           }}
           onReset={() => {
             const empty = {
+              search: "",
+              type: null,
               genres: [],
               rating: null,
               duration: null,
